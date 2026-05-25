@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Chat Exclusivo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e5ddd5;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .box {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 350px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #075e54;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background-color: #128c7e; }
+        
+        /* Área do Chat (Começa escondida) */
+        #tela-chat { display: none; }
+        
+        .historico-mensagens {
+            height: 250px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            padding: 10px;
+            overflow-y: auto;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .mensagem {
+            margin-bottom: 8px;
+            padding: 6px 10px;
+            border-radius: 5px;
+            background: #d9fdd3;
+            width: fit-content;
+            max-width: 80%;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="tela-login" class="box">
+        <h2>Quem é você?</h2>
+        <input type="text" id="usuario" placeholder="Digite seu nome ou apelido...">
+        <button onclick="salvarIdentificacao()">Entrar no Chat</button>
+    </div>
+
+    <div id="tela-chat" class="box">
+        <h2>Chat em Tempo Real</h2>
+        <div class="historico-mensagens" id="historico">
+            <div class="mensagem"><strong>Sistema:</strong> Bem-vindo ao chat!</div>
+        </div>
+        <input type="text" id="texto-mensagem" placeholder="Digite sua mensagem...">
+        <button onclick="enviarMensagem()">Enviar</button>
+    </div>
+
+    <script>
+        let usuarioAtual = "";
+
+        // Executa assim que a página carrega para verificar o "cache"
+        window.onload = function() {
+            const usuarioSalvo = localStorage.getItem('chat_apelido');
+            
+            if (usuarioSalvo) {
+                // Se já existir um nome salvo, entra direto no chat
+                iniciarChat(usuarioSalvo);
+            }
+        };
+
+        // Função para salvar o nome e avançar
+        function salvarIdentificacao() {
+            const nomeDigitado = document.getElementById('usuario').value.trim();
+
+            if (nomeDigitado !== "") {
+                // Guarda o nome no localStorage (cache do navegador)
+                localStorage.setItem('chat_apelido', nomeDigitado);
+                iniciarChat(nomeDigitado);
+            } else {
+                alert("Por favor, digite um nome ou apelido para continuar.");
+            }
+        }
+
+        // Exibe a tela de chat com o nome do usuário
+        function iniciarChat(nome) {
+            usuarioAtual = nome;
+            document.getElementById('tela-login').style.display = 'none';
+            document.getElementById('tela-chat').style.display = 'block';
+        }
+
+        function enviarMensagem() {
+            const campo = document.getElementById('texto-mensagem');
+            const texto = campo.value;
+            if (texto.trim() === "") return;
+
+            const historico = document.getElementById('historico');
+            
+            // Cria a mensagem na tela usando o nome salvo
+            const novaMensagem = document.createElement('div');
+            novaMensagem.className = 'mensagem';
+            novaMensagem.innerHTML = `<strong>${usuarioAtual}:</strong> ${texto}`;
+            historico.appendChild(novaMensagem);
+
+            // Limpa o campo e rola o chat para baixo
+            campo.value = "";
+            historico.scrollTop = historico.scrollHeight;
+        }
+    </script>
+
+</body>
+</html>
