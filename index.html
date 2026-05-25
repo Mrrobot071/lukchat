@@ -403,7 +403,7 @@ if(!usuario){
 mensagem.focus()
 
 // =====================================
-// CACHE ANTI DUPLICAÇÃO
+// ANTI DUPLICAÇÃO
 // =====================================
 
 const ids =
@@ -485,13 +485,15 @@ async function carregarHistorico(){
 
         console.error(error)
 
+        alert(
+            "Erro ao carregar histórico"
+        )
+
         return
 
     }
 
     chat.innerHTML = ""
-
-    ids.clear()
 
     data.forEach(renderMensagem)
 
@@ -516,6 +518,10 @@ async function enviarMensagem(){
 
     enviarBtn.innerText = "..."
 
+    enviarBtn.classList.add(
+        "loading"
+    )
+
     const resposta =
     await supabase
 
@@ -534,6 +540,12 @@ async function enviarMensagem(){
 
     enviarBtn.innerText =
     "Enviar"
+
+    enviarBtn.classList.remove(
+        "loading"
+    )
+
+    console.log(resposta)
 
     if(resposta.error){
 
@@ -650,70 +662,38 @@ await carregarHistorico()
 // REALTIME
 // =====================================
 
-const canal = supabase
+supabase
 
 .channel("chat-global")
 
 .on(
-    "postgres_changes",
-    {
-        event:"*",
-        schema:"public",
-        table:"mensagens"
-    },
 
-    payload => {
+"postgres_changes",
 
-        console.log(
-            "Realtime:",
-            payload
-        )
+{
+    event:"INSERT",
+    schema:"public",
+    table:"mensagens"
+},
 
-        // NOVA MSG
-        if(
-            payload.eventType ===
-            "INSERT"
-        ){
+payload => {
 
-            renderMensagem(
-                payload.new
-            )
+    renderMensagem(
+        payload.new
+    )
 
-        }
-
-        // DELETE
-        if(
-            payload.eventType ===
-            "DELETE"
-        ){
-
-            ids.clear()
-
-            carregarHistorico()
-
-        }
-
-    }
+}
 
 )
 
 .subscribe(status=>{
 
     console.log(
-        "STATUS REALTIME:",
+        "Realtime:",
         status
     )
 
 })
-
-// =====================================
-// RESSINCRONIZA AO VOLTAR
-// =====================================
-
-window.addEventListener(
-    "focus",
-    carregarHistorico
-)
 
 </script>
 
