@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Chat Exclusivo</title>
+    <title>Chat Privado 1:1</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,14 +12,17 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
         }
         .box {
             background: white;
             padding: 25px;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            width: 350px;
+            width: 100%;
+            max-width: 450px;
         }
         input[type="text"] {
             width: 100%;
@@ -41,94 +44,160 @@
         }
         button:hover { background-color: #128c7e; }
         
-        /* Área do Chat (Começa escondida) */
         #tela-chat { display: none; }
         
-        .historico-mensagens {
-            height: 250px;
+        .historico-tabela {
+            height: 300px;
             border: 1px solid #ddd;
             margin-bottom: 10px;
-            padding: 10px;
             overflow-y: auto;
             background: #f9f9f9;
             border-radius: 5px;
         }
-        .mensagem {
-            margin-bottom: 8px;
-            padding: 6px 10px;
-            border-radius: 5px;
-            background: #d9fdd3;
-            width: fit-content;
-            max-width: 80%;
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        tr {
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        td {
+            padding: 10px;
+            font-size: 14px;
+            vertical-align: top;
+        }
+        
+        .col-nome {
+            font-weight: bold;
+            color: #075e54;
+            width: 30%;
+            word-break: break-word;
+        }
+        
+        .col-mensagem {
+            color: #333;
+            width: 70%;
+            word-break: break-word;
         }
     </style>
 </head>
 <body>
 
     <div id="tela-login" class="box">
-        <h2>Quem é você?</h2>
-        <input type="text" id="usuario" placeholder="Digite seu nome ou apelido...">
-        <button onclick="salvarIdentificacao()">Entrar no Chat</button>
+        <h2>Entrar no Chat</h2>
+        <input type="text" id="usuario" placeholder="Seu nome ou apelido...">
+        <button onclick="salvarIdentificacao()">Entrar</button>
     </div>
 
     <div id="tela-chat" class="box">
-        <h2>Chat em Tempo Real</h2>
-        <div class="historico-mensagens" id="historico">
-            <div class="mensagem"><strong>Sistema:</strong> Bem-vindo ao chat!</div>
+        <h2>Conversa Direta</h2>
+        
+        <div class="historico-tabela" id="scroll-historico">
+            <table>
+                <tbody id="tabela-mensagens">
+                    </tbody>
+            </table>
         </div>
-        <input type="text" id="texto-mensagem" placeholder="Digite sua mensagem...">
+
+        <input type="text" id="texto-mensagem" placeholder="Digite uma mensagem...">
         <button onclick="enviarMensagem()">Enviar</button>
+        <p onclick="limparCache()" style="text-align:center; color:#d32f2f; cursor:pointer; font-size:12px; margin-top:15px;">Trocar de Usuário</p>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
     <script>
+        // --- COLE AS CONFIGURAÇÕES DO SEU FIREBASE AQUI ---
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://SEU_PROJECT_ID-default-rtdb.firebaseio.com",
+            projectId: "SEU_PROJECT_ID",
+            storageBucket: "SEU_PROJECT_ID.appspot.com",
+            messagingSenderId: "SEU_SENDER_ID",
+            appId: "SUA_APP_ID"
+        };
+        // --------------------------------------------------
+
+        // Inicializa o Firebase
+        firebase.initializeApp(firebaseConfig);
+        const bancoDados = firebase.database().ref("mensagens_chat");
+
         let usuarioAtual = "";
 
-        // Executa assim que a página carrega para verificar o "cache"
         window.onload = function() {
-            const usuarioSalvo = localStorage.getItem('chat_apelido');
-            
+            const usuarioSalvo = localStorage.getItem('chat_pessoal_nome');
             if (usuarioSalvo) {
-                // Se já existir um nome salvo, entra direto no chat
                 iniciarChat(usuarioSalvo);
             }
         };
 
-        // Função para salvar o nome e avançar
         function salvarIdentificacao() {
-            const nomeDigitado = document.getElementById('usuario').value.trim();
-
-            if (nomeDigitado !== "") {
-                // Guarda o nome no localStorage (cache do navegador)
-                localStorage.setItem('chat_apelido', nomeDigitado);
-                iniciarChat(nomeDigitado);
+            const nome = document.getElementById('usuario').value.trim();
+            if (nome !== "") {
+                localStorage.setItem('chat_pessoal_nome', nome);
+                iniciarChat(nome);
             } else {
-                alert("Por favor, digite um nome ou apelido para continuar.");
+                alert("Identifique-se para entrar.");
             }
         }
 
-        // Exibe a tela de chat com o nome do usuário
         function iniciarChat(nome) {
             usuarioAtual = nome;
             document.getElementById('tela-login').style.display = 'none';
             document.getElementById('tela-chat').style.display = 'block';
+            
+            // ESCUTA O BANCO DE DADOS EM TEMPO REAL
+            // Sempre que você ou a outra pessoa mandar mensagem, essa função roda sozinha na hora
+            bancoDados.on('child_added', function(snapshot) {
+                const dados = snapshot.val();
+                adicionarLinhaNaTabela(dados.nome, dados.mensagem);
+            });
         }
 
+        // Adiciona o elemento visual na tabela
+        function adicionarLinhaNaTabela(nome, mensagem) {
+            const tabela = document.getElementById('tabela-mensagens');
+            const novaLinha = document.createElement('tr');
+            
+            // Se a mensagem for sua, você pode estilizar diferente se quiser, mas aqui mantém o padrão tabela
+            novaLinha.innerHTML = `
+                <td class="col-nome">${nome}:</td>
+                <td class="col-mensagem">${mensagem}</td>
+            `;
+            
+            tabela.appendChild(novaLinha);
+            rolarChatAbaixo();
+        }
+
+        // ENVIA OS DADOS PARA O SERVIDOR EM TEMPO REAL
         function enviarMensagem() {
             const campo = document.getElementById('texto-mensagem');
-            const texto = campo.value;
-            if (texto.trim() === "") return;
+            const texto = campo.value.trim();
+            if (texto === "") return;
 
-            const historico = document.getElementById('historico');
-            
-            // Cria a mensagem na tela usando o nome salvo
-            const novaMensagem = document.createElement('div');
-            novaMensagem.className = 'mensagem';
-            novaMensagem.innerHTML = `<strong>${usuarioAtual}:</strong> ${texto}`;
-            historico.appendChild(novaMensagem);
+            // Salva diretamente no banco em nuvem.
+            bancoDados.push({
+                nome: usuarioAtual,
+                mensagem: texto,
+                timestamp: Date.now()
+            });
 
-            // Limpa o campo e rola o chat para baixo
             campo.value = "";
+        }
+
+        function rolarChatAbaixo() {
+            const historico = document.getElementById('scroll-historico');
             historico.scrollTop = historico.scrollHeight;
+        }
+
+        function limparCache() {
+            localStorage.removeItem('chat_pessoal_nome');
+            window.location.reload();
         }
     </script>
 
