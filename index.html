@@ -1,205 +1,349 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Privado 1:1</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #e5ddd5;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .box {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 450px;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #075e54;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        button:hover { background-color: #128c7e; }
-        
-        #tela-chat { display: none; }
-        
-        .historico-tabela {
-            height: 300px;
-            border: 1px solid #ddd;
-            margin-bottom: 10px;
-            overflow-y: auto;
-            background: #f9f9f9;
-            border-radius: 5px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        tr {
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        td {
-            padding: 10px;
-            font-size: 14px;
-            vertical-align: top;
-        }
-        
-        .col-nome {
-            font-weight: bold;
-            color: #075e54;
-            width: 30%;
-            word-break: break-word;
-        }
-        
-        .col-mensagem {
-            color: #333;
-            width: 70%;
-            word-break: break-word;
-        }
-    </style>
+
+<meta charset="UTF-8">
+
+<meta 
+    name="viewport" 
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Chat Realtime</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#0f172a;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
+}
+
+.chat-container{
+    width:100%;
+    max-width:500px;
+    height:90vh;
+    background:#1e293b;
+    border-radius:15px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    border:1px solid #334155;
+}
+
+.topo{
+    background:#111827;
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+}
+
+.topo h2{
+    font-size:18px;
+}
+
+.acoes{
+    display:flex;
+    gap:10px;
+}
+
+button{
+    border:none;
+    color:white;
+    padding:8px 14px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+#trocarBtn{
+    background:#ef4444;
+}
+
+#limparBtn{
+    background:#f59e0b;
+}
+
+#chat{
+    flex:1;
+    overflow-y:auto;
+    padding:15px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.msg{
+    padding:10px 14px;
+    border-radius:12px;
+    max-width:80%;
+    word-wrap:break-word;
+}
+
+.eu{
+    background:#2563eb;
+    align-self:flex-end;
+}
+
+.outro{
+    background:#374151;
+    align-self:flex-start;
+}
+
+.nome{
+    font-size:12px;
+    opacity:.7;
+    margin-bottom:5px;
+}
+
+.form{
+    display:flex;
+    gap:10px;
+    padding:10px;
+    background:#111827;
+}
+
+.form input{
+    flex:1;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    outline:none;
+}
+
+.form button{
+    background:#2563eb;
+}
+
+</style>
+
 </head>
 <body>
 
-    <div id="tela-login" class="box">
-        <h2>Entrar no Chat</h2>
-        <input type="text" id="usuario" placeholder="Seu nome ou apelido...">
-        <button onclick="salvarIdentificacao()">Entrar</button>
-    </div>
+<div class="chat-container">
 
-    <div id="tela-chat" class="box">
-        <h2>Conversa Direta</h2>
-        
-        <div class="historico-tabela" id="scroll-historico">
-            <table>
-                <tbody id="tabela-mensagens">
-                    </tbody>
-            </table>
+    <div class="topo">
+
+        <h2>Chat Online</h2>
+
+        <div class="acoes">
+
+            <button id="limparBtn">
+                Limpar
+            </button>
+
+            <button id="trocarBtn">
+                Trocar
+            </button>
+
         </div>
 
-        <input type="text" id="texto-mensagem" placeholder="Digite uma mensagem...">
-        <button onclick="enviarMensagem()">Enviar</button>
-        <p onclick="limparCache()" style="text-align:center; color:#d32f2f; cursor:pointer; font-size:12px; margin-top:15px;">Trocar de Usuário</p>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <div id="chat"></div>
 
-    <script>
-        // --- COLE AS CONFIGURAÇÕES DO SEU FIREBASE AQUI ---
-        const firebaseConfig = {
-            apiKey: "SUA_API_KEY",
-            authDomain: "SEU_PROJECT_ID.firebaseapp.com",
-            databaseURL: "https://SEU_PROJECT_ID-default-rtdb.firebaseio.com",
-            projectId: "SEU_PROJECT_ID",
-            storageBucket: "SEU_PROJECT_ID.appspot.com",
-            messagingSenderId: "SEU_SENDER_ID",
-            appId: "SUA_APP_ID"
-        };
-        // --------------------------------------------------
+    <div class="form">
 
-        // Inicializa o Firebase
-        firebase.initializeApp(firebaseConfig);
-        const bancoDados = firebase.database().ref("mensagens_chat");
+        <input
+            type="text"
+            id="mensagem"
+            placeholder="Digite uma mensagem..."
+        >
 
-        let usuarioAtual = "";
+        <button id="enviarBtn">
+            Enviar
+        </button>
 
-        window.onload = function() {
-            const usuarioSalvo = localStorage.getItem('chat_pessoal_nome');
-            if (usuarioSalvo) {
-                iniciarChat(usuarioSalvo);
+    </div>
+
+</div>
+
+<script type="module">
+
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+const supabase = createClient(
+    'https://xpfzqbjyizftllasvbll.supabase.co',
+    'sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU'
+)
+
+let usuario = localStorage.getItem("usuario")
+
+if(!usuario){
+
+    usuario = prompt("Digite seu nome")
+
+    localStorage.setItem(
+        "usuario",
+        usuario
+    )
+
+}
+
+const chat = document.getElementById("chat")
+const mensagem = document.getElementById("mensagem")
+const enviarBtn = document.getElementById("enviarBtn")
+const limparBtn = document.getElementById("limparBtn")
+
+// ======================================
+// RENDER
+// ======================================
+
+function renderMensagem(msg){
+
+    const div = document.createElement("div")
+
+    div.className =
+        msg.usuario === usuario
+        ? "msg eu"
+        : "msg outro"
+
+    div.innerHTML = `
+        <div class="nome">${msg.usuario}</div>
+        <div>${msg.texto}</div>
+    `
+
+    chat.appendChild(div)
+
+    chat.scrollTop = chat.scrollHeight
+
+}
+
+// ======================================
+// CARREGAR HISTÓRICO
+// ======================================
+
+async function carregar(){
+
+    const { data, error } = await supabase
+        .from("mensagens")
+        .select("*")
+        .order("id", { ascending: true })
+
+    if(error){
+
+        console.error(error)
+        return
+
+    }
+
+    chat.innerHTML = ""
+
+    data.forEach(renderMensagem)
+
+}
+
+carregar()
+
+// ======================================
+// ENVIAR
+// ======================================
+
+async function enviar(){
+
+    const texto = mensagem.value.trim()
+
+    if(!texto) return
+
+    const { error } = await supabase
+        .from("mensagens")
+        .insert([
+            {
+                usuario,
+                texto
             }
-        };
+        ])
 
-        function salvarIdentificacao() {
-            const nome = document.getElementById('usuario').value.trim();
-            if (nome !== "") {
-                localStorage.setItem('chat_pessoal_nome', nome);
-                iniciarChat(nome);
-            } else {
-                alert("Identifique-se para entrar.");
-            }
+    if(error){
+
+        console.error(error)
+        return
+
+    }
+
+    mensagem.value = ""
+
+}
+
+enviarBtn.addEventListener(
+    "click",
+    enviar
+)
+
+mensagem.addEventListener(
+    "keydown",
+    e => {
+
+        if(e.key === "Enter"){
+
+            enviar()
+
         }
 
-        function iniciarChat(nome) {
-            usuarioAtual = nome;
-            document.getElementById('tela-login').style.display = 'none';
-            document.getElementById('tela-chat').style.display = 'block';
-            
-            // ESCUTA O BANCO DE DADOS EM TEMPO REAL
-            // Sempre que você ou a outra pessoa mandar mensagem, essa função roda sozinha na hora
-            bancoDados.on('child_added', function(snapshot) {
-                const dados = snapshot.val();
-                adicionarLinhaNaTabela(dados.nome, dados.mensagem);
-            });
-        }
+    }
+)
 
-        // Adiciona o elemento visual na tabela
-        function adicionarLinhaNaTabela(nome, mensagem) {
-            const tabela = document.getElementById('tabela-mensagens');
-            const novaLinha = document.createElement('tr');
-            
-            // Se a mensagem for sua, você pode estilizar diferente se quiser, mas aqui mantém o padrão tabela
-            novaLinha.innerHTML = `
-                <td class="col-nome">${nome}:</td>
-                <td class="col-mensagem">${mensagem}</td>
-            `;
-            
-            tabela.appendChild(novaLinha);
-            rolarChatAbaixo();
-        }
+// ======================================
+// REALTIME
+// ======================================
 
-        // ENVIA OS DADOS PARA O SERVIDOR EM TEMPO REAL
-        function enviarMensagem() {
-            const campo = document.getElementById('texto-mensagem');
-            const texto = campo.value.trim();
-            if (texto === "") return;
+supabase
+.channel("sala-chat")
+.on(
+    "postgres_changes",
+    {
+        event: "INSERT",
+        schema: "public",
+        table: "mensagens"
+    },
+    payload => {
 
-            // Salva diretamente no banco em nuvem.
-            bancoDados.push({
-                nome: usuarioAtual,
-                mensagem: texto,
-                timestamp: Date.now()
-            });
+        renderMensagem(payload.new)
 
-            campo.value = "";
-        }
+    }
+)
+.subscribe((status) => {
 
-        function rolarChatAbaixo() {
-            const historico = document.getElementById('scroll-historico');
-            historico.scrollTop = historico.scrollHeight;
-        }
+    console.log("STATUS REALTIME:", status)
 
-        function limparCache() {
-            localStorage.removeItem('chat_pessoal_nome');
-            window.location.reload();
-        }
-    </script>
+})
+
+// ======================================
+// LIMPAR CHAT
+// ======================================
+
+limparBtn.addEventListener(
+    "click",
+    async () => {
+
+        const confirmar = confirm(
+            "Deseja limpar o chat?"
+        )
+
+        if(!confirmar) return
+
+        await supabase
+            .from("mensagens")
+            .delete()
+            .neq("id", 0)
+
+        chat.innerHTML = ""
+
+    }
+)
+
+</script>
 
 </body>
 </html>
