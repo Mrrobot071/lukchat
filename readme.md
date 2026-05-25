@@ -3,7 +3,7 @@ https://mrrobot071.github.io/lukchat/
 Chat Privado com Integração Formspree
 Este é um projeto simples de interface de chat em tempo real de via única, construído utilizando HTML5, CSS3 moderno e JavaScript puro (Vanilla JS). Ele foi projetado para capturar mensagens de usuários por meio de um formulário seguro e encaminhá-las diretamente para o painel ou e-mail do Formspree.
 
-🚀 Funcionalidades
+Funcionalidades
 Tela de Bloqueio por Senha: Proteção simples na camada do cliente (Front-end) para restringir o acesso inicial à interface do chat.
 
 Identificação de Usuário: Sistema integrado com localStorage para definir e salvar o nome do usuário localmente. O usuário pode alterar o nome a qualquer momento clicando no botão de perfil.
@@ -38,5 +38,5 @@ JavaScript
 // CONFIG
 const SENHA = "SuaSenhaAqui";
 const FORMSPREE_URL = "https://formspree.io/f/seu_id_aqui";
-📄 Licença
+Licença
 Este projeto é de uso livre para fins acadêmicos, pessoais ou profissionais. Modifique e distribua conforme necessário.
