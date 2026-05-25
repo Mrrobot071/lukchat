@@ -344,34 +344,49 @@ from
 "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
 
 // =====================================
-// SENHA DO SISTEMA
+// CONFIG
 // =====================================
 
+// SENHA LOGIN
 const SENHA = "123456"
+
+// LIMPAR CHAT AUTOMÁTICO
+const AUTO_DELETE = true
+
+// TEMPO EM MINUTOS
+const AUTO_DELETE_MINUTES = 5
+
+// ATUALIZAÇÃO AUTOMÁTICA
+const AUTO_REFRESH_SECONDS = 1
+
+// =====================================
+// SUPABASE
+// =====================================
+
+const supabase =
+createClient(
+
+"https://xpfzqbjyizftllasvbll.supabase.co",
+
+"sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU"
+
+)
 
 // =====================================
 // LOGIN
 // =====================================
 
 const loginBox =
-document.getElementById(
-"loginBox"
-)
+document.getElementById("loginBox")
 
 const chatContainer =
-document.getElementById(
-"chatContainer"
-)
+document.getElementById("chatContainer")
 
 const entrarBtn =
-document.getElementById(
-"entrarBtn"
-)
+document.getElementById("entrarBtn")
 
 const senhaInput =
-document.getElementById(
-"senha"
-)
+document.getElementById("senha")
 
 function entrar(){
 
@@ -396,38 +411,22 @@ function entrar(){
 
 }
 
-entrarBtn.addEventListener(
-    "click",
-    entrar
-)
+entrarBtn.onclick = entrar
 
 senhaInput.addEventListener(
-    "keydown",
+"keydown",
 
-    e=>{
+e=>{
 
-        if(e.key === "Enter"){
+    if(e.key === "Enter"){
 
-            e.preventDefault()
+        e.preventDefault()
 
-            entrar()
-
-        }
+        entrar()
 
     }
 
-)
-
-// =====================================
-// SUPABASE
-// =====================================
-
-const supabase =
-createClient(
-
-"https://xpfzqbjyizftllasvbll.supabase.co",
-
-"sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU"
+}
 
 )
 
@@ -445,6 +444,53 @@ document.getElementById("form")
 
 const mensagem =
 document.getElementById("mensagem")
+
+// =====================================
+// BOTÕES
+// =====================================
+
+const topo =
+document.querySelector(".topo")
+
+const botoes =
+document.createElement("div")
+
+botoes.style.display = "flex"
+botoes.style.gap = "10px"
+
+botoes.innerHTML = `
+
+<button id="trocarNomeBtn"
+style="
+background:#2563eb;
+border:none;
+padding:10px;
+border-radius:10px;
+color:white;
+cursor:pointer;
+">
+👤
+</button>
+
+<button id="limparBtn"
+style="
+background:#ef4444;
+border:none;
+padding:10px;
+border-radius:10px;
+color:white;
+cursor:pointer;
+">
+🗑
+</button>
+
+`
+
+topo.appendChild(botoes)
+
+// =====================================
+// USUARIO
+// =====================================
 
 let usuario =
 localStorage.getItem("usuario")
@@ -467,23 +513,111 @@ if(!usuario){
 
 }
 
-mensagem.focus()
+// =====================================
+// TROCAR NOME
+// =====================================
 
-const ids =
-new Set()
+document
+.getElementById("trocarNomeBtn")
+
+.onclick = ()=>{
+
+    const novo =
+    prompt("Novo nome")
+
+    if(!novo) return
+
+    usuario = novo
+
+    localStorage.setItem(
+        "usuario",
+        usuario
+    )
+
+}
+
+// =====================================
+// LIMPAR CHAT
+// =====================================
+
+document
+.getElementById("limparBtn")
+
+.onclick = async ()=>{
+
+    const ok =
+    confirm(
+        "Limpar chat?"
+    )
+
+    if(!ok) return
+
+    await supabase
+
+    .from("mensagens")
+
+    .delete()
+
+    .neq("id",0)
+
+    ids.clear()
+
+    chat.innerHTML = ""
+
+}
+
+// =====================================
+// AUTO DELETE
+// =====================================
+
+if(AUTO_DELETE){
+
+    setInterval(async ()=>{
+
+        const dataLimite =
+        new Date(
+            Date.now() -
+            AUTO_DELETE_MINUTES
+            * 60
+            * 1000
+        ).toISOString()
+
+        await supabase
+
+        .from("mensagens")
+
+        .delete()
+
+        .lt(
+            "created_at",
+            dataLimite
+        )
+
+    },
+
+    30000)
+
+}
 
 // =====================================
 // NOTIFICAÇÃO
 // =====================================
 
 if(
-    Notification.permission !==
-    "granted"
+Notification.permission !==
+"granted"
 ){
 
     Notification.requestPermission()
 
 }
+
+// =====================================
+// CACHE
+// =====================================
+
+const ids =
+new Set()
 
 // =====================================
 // RENDER
@@ -513,17 +647,17 @@ function renderMensagem(msg){
 
     div.innerHTML = `
 
-        <div class="nome">
-            ${msg.usuario}
-        </div>
+    <div class="nome">
+        ${msg.usuario}
+    </div>
 
-        <div>
-            ${msg.texto}
-        </div>
+    <div>
+        ${msg.texto}
+    </div>
 
-        <div class="hora">
-            ${hora}
-        </div>
+    <div class="hora">
+        ${hora}
+    </div>
 
     `
 
@@ -535,7 +669,7 @@ function renderMensagem(msg){
 }
 
 // =====================================
-// HISTÓRICO
+// HISTORICO
 // =====================================
 
 async function carregar(){
@@ -570,6 +704,18 @@ async function carregar(){
 }
 
 await carregar()
+
+// =====================================
+// AUTO REFRESH
+// =====================================
+
+setInterval(()=>{
+
+    carregar()
+
+},
+
+AUTO_REFRESH_SECONDS * 1000)
 
 // =====================================
 // ENVIAR
@@ -612,7 +758,7 @@ async function enviar(){
 }
 
 // =====================================
-// ENTER
+// FORM
 // =====================================
 
 form.addEventListener(
@@ -652,9 +798,7 @@ payload=>{
         payload.new
     )
 
-    // =====================================
     // NOTIFICAÇÃO
-    // =====================================
 
     if(
         payload.new.usuario !==
@@ -667,11 +811,14 @@ payload=>{
         ){
 
             new Notification(
+
                 payload.new.usuario,
+
                 {
                     body:
                     payload.new.texto
                 }
+
             )
 
         }
@@ -690,6 +837,17 @@ payload=>{
     )
 
 })
+
+// =====================================
+// RESSINCRONIZA
+// =====================================
+
+window.addEventListener(
+"focus",
+
+carregar
+
+)
 
 }
 
