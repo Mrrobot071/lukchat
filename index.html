@@ -9,7 +9,7 @@ name="viewport"
 content="width=device-width, initial-scale=1.0"
 />
 
-<title>Chat Realtime Supabase</title>
+<title>Chat Privado</title>
 
 <style>
 
@@ -21,6 +21,7 @@ content="width=device-width, initial-scale=1.0"
 }
 
 body{
+
     background:
     linear-gradient(
         135deg,
@@ -30,31 +31,103 @@ body{
     );
 
     height:100vh;
+
     display:flex;
     justify-content:center;
     align-items:center;
+
     color:white;
+
 }
+
+/* ===================================== */
+/* LOGIN */
+/* ===================================== */
+
+.login{
+
+    width:100%;
+    max-width:350px;
+
+    background:#111827;
+
+    border:1px solid #334155;
+
+    padding:30px;
+
+    border-radius:20px;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:15px;
+
+}
+
+.login h2{
+
+    text-align:center;
+
+}
+
+.login input{
+
+    padding:14px;
+
+    border:none;
+
+    border-radius:12px;
+
+    outline:none;
+
+    background:#0f172a;
+
+    color:white;
+
+    border:1px solid #334155;
+
+}
+
+.login button{
+
+    padding:14px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#2563eb;
+
+    color:white;
+
+    cursor:pointer;
+
+    font-weight:bold;
+
+}
+
+/* ===================================== */
+/* CHAT */
+/* ===================================== */
 
 .chat-container{
 
     width:100%;
     max-width:520px;
+
     height:95vh;
 
     background:#111827;
 
-    border-radius:18px;
+    border-radius:20px;
 
     overflow:hidden;
 
-    display:flex;
+    display:none;
+
     flex-direction:column;
 
     border:1px solid #334155;
-
-    box-shadow:
-    0 0 40px rgba(0,0,0,.4);
 
 }
 
@@ -68,19 +141,6 @@ body{
     justify-content:space-between;
     align-items:center;
 
-    border-bottom:
-    1px solid #334155;
-
-}
-
-.topo h2{
-    font-size:18px;
-}
-
-.online{
-    font-size:12px;
-    color:#22c55e;
-    margin-top:4px;
 }
 
 #chat{
@@ -94,28 +154,17 @@ body{
     display:flex;
     flex-direction:column;
 
-    gap:12px;
+    gap:10px;
 
-}
-
-#chat::-webkit-scrollbar{
-    width:6px;
-}
-
-#chat::-webkit-scrollbar-thumb{
-    background:#475569;
-    border-radius:10px;
 }
 
 .msg{
 
     max-width:80%;
 
-    padding:12px 15px;
+    padding:12px;
 
-    border-radius:16px;
-
-    animation:fade .2s ease;
+    border-radius:15px;
 
     word-wrap:break-word;
 
@@ -132,16 +181,25 @@ body{
 }
 
 .nome{
+
     font-size:12px;
+
     opacity:.7;
+
     margin-bottom:5px;
+
 }
 
 .hora{
+
     font-size:10px;
+
     opacity:.5;
-    margin-top:6px;
+
+    margin-top:5px;
+
     text-align:right;
+
 }
 
 .form{
@@ -153,9 +211,6 @@ body{
     padding:12px;
 
     background:#1e293b;
-
-    border-top:
-    1px solid #334155;
 
 }
 
@@ -175,15 +230,6 @@ body{
 
     color:white;
 
-    border:
-    1px solid #334155;
-
-}
-
-.form input:focus{
-
-    border-color:#2563eb;
-
 }
 
 .form button{
@@ -200,72 +246,6 @@ body{
 
     cursor:pointer;
 
-    transition:.2s;
-
-}
-
-.form button:hover{
-
-    background:#3b82f6;
-
-}
-
-.acoes{
-
-    display:flex;
-    gap:10px;
-
-}
-
-.acoes button{
-
-    border:none;
-
-    padding:10px 12px;
-
-    border-radius:10px;
-
-    cursor:pointer;
-
-    color:white;
-
-}
-
-#limpar{
-    background:#f59e0b;
-}
-
-#trocar{
-    background:#ef4444;
-}
-
-.loading{
-    opacity:.5;
-    pointer-events:none;
-}
-
-@keyframes fade{
-
-    from{
-        opacity:0;
-        transform:translateY(10px);
-    }
-
-    to{
-        opacity:1;
-        transform:translateY(0);
-    }
-
-}
-
-@media(max-width:600px){
-
-    .chat-container{
-        height:100vh;
-        max-width:100%;
-        border-radius:0;
-    }
-
 }
 
 </style>
@@ -273,33 +253,39 @@ body{
 </head>
 <body>
 
-<div class="chat-container">
+<!-- ===================================== -->
+<!-- LOGIN -->
+<!-- ===================================== -->
+
+<div class="login" id="loginBox">
+
+    <h2>
+        🔐 Área Privada
+    </h2>
+
+    <input
+    type="password"
+    id="senha"
+    placeholder="Digite a senha"
+    />
+
+    <button id="entrarBtn">
+        Entrar
+    </button>
+
+</div>
+
+<!-- ===================================== -->
+<!-- CHAT -->
+<!-- ===================================== -->
+
+<div class="chat-container" id="chatContainer">
 
     <div class="topo">
 
-        <div>
-
-            <h2>
-                💬 Chat Realtime
-            </h2>
-
-            <div class="online">
-                🟢 Online
-            </div>
-
-        </div>
-
-        <div class="acoes">
-
-            <button id="limpar">
-                🗑
-            </button>
-
-            <button id="trocar">
-                👤
-            </button>
-
-        </div>
+        <h2>
+            💬 Chat Privado
+        </h2>
 
     </div>
 
@@ -312,16 +298,12 @@ body{
         <input
         type="text"
         id="mensagem"
-        placeholder="Digite sua mensagem..."
+        placeholder="Digite..."
         autocomplete="off"
         />
 
-        <button
-        type="submit"
-        id="enviarBtn">
-
+        <button type="submit">
             Enviar
-
         </button>
 
     </form>
@@ -337,6 +319,74 @@ from
 "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
 
 // =====================================
+// SENHA DO SISTEMA
+// =====================================
+
+const SENHA =
+"123456"
+
+// =====================================
+// LOGIN
+// =====================================
+
+const loginBox =
+document.getElementById(
+"loginBox"
+)
+
+const chatContainer =
+document.getElementById(
+"chatContainer"
+)
+
+const entrarBtn =
+document.getElementById(
+"entrarBtn"
+)
+
+const senhaInput =
+document.getElementById(
+"senha"
+)
+
+entrarBtn.onclick = ()=>{
+
+    if(
+        senhaInput.value !== SENHA
+    ){
+
+        alert("Senha incorreta")
+
+        return
+
+    }
+
+    loginBox.style.display =
+    "none"
+
+    chatContainer.style.display =
+    "flex"
+
+    iniciarChat()
+
+}
+
+// ENTER LOGIN
+
+senhaInput.addEventListener(
+"keydown",
+
+e=>{
+
+    if(e.key === "Enter"){
+
+        entrarBtn.click()
+
+    }
+
+}
+
+// =====================================
 // SUPABASE
 // =====================================
 
@@ -350,8 +400,10 @@ createClient(
 )
 
 // =====================================
-// ELEMENTOS
+// CHAT
 // =====================================
+
+async function iniciarChat(){
 
 const chat =
 document.getElementById("chat")
@@ -362,32 +414,13 @@ document.getElementById("form")
 const mensagem =
 document.getElementById("mensagem")
 
-const enviarBtn =
-document.getElementById("enviarBtn")
-
-const limparBtn =
-document.getElementById("limpar")
-
-const trocarBtn =
-document.getElementById("trocar")
-
-// =====================================
-// USUARIO
-// =====================================
-
 let usuario =
 localStorage.getItem("usuario")
 
 if(!usuario){
 
     usuario =
-    prompt("Digite seu nome")
-
-    if(!usuario){
-
-        usuario = "Anônimo"
-
-    }
+    prompt("Seu nome")
 
     localStorage.setItem(
         "usuario",
@@ -396,18 +429,21 @@ if(!usuario){
 
 }
 
-// =====================================
-// AUTO FOCUS
-// =====================================
-
-mensagem.focus()
-
-// =====================================
-// CACHE ANTI DUPLICAÇÃO
-// =====================================
-
 const ids =
 new Set()
+
+// =====================================
+// NOTIFICAÇÃO
+// =====================================
+
+if(
+    Notification.permission !==
+    "granted"
+){
+
+    Notification.requestPermission()
+
+}
 
 // =====================================
 // RENDER
@@ -453,24 +489,19 @@ function renderMensagem(msg){
 
     chat.appendChild(div)
 
-    requestAnimationFrame(()=>{
-
-        chat.scrollTop =
-        chat.scrollHeight
-
-    })
+    chat.scrollTop =
+    chat.scrollHeight
 
 }
 
 // =====================================
-// CARREGAR HISTÓRICO
+// HISTORICO
 // =====================================
 
-async function carregarHistorico(){
+async function carregar(){
 
     const {
-        data,
-        error
+        data
     } = await supabase
 
     .from("mensagens")
@@ -481,14 +512,6 @@ async function carregarHistorico(){
         ascending:true
     })
 
-    if(error){
-
-        console.error(error)
-
-        return
-
-    }
-
     chat.innerHTML = ""
 
     ids.clear()
@@ -497,26 +520,19 @@ async function carregarHistorico(){
 
 }
 
+await carregar()
+
 // =====================================
 // ENVIAR
 // =====================================
 
-let enviando = false
-
-async function enviarMensagem(){
-
-    if(enviando) return
+async function enviar(){
 
     const texto =
     mensagem.value.trim()
 
     if(!texto) return
 
-    enviando = true
-
-    enviarBtn.innerText = "..."
-
-    const resposta =
     await supabase
 
     .from("mensagens")
@@ -528,192 +544,84 @@ async function enviarMensagem(){
         }
     ])
 
-    .select()
-
-    enviando = false
-
-    enviarBtn.innerText =
-    "Enviar"
-
-    if(resposta.error){
-
-        console.error(
-            resposta.error
-        )
-
-        alert(
-            resposta.error.message
-        )
-
-        return
-
-    }
-
     mensagem.value = ""
-
-    mensagem.focus()
 
 }
 
 // =====================================
-// ENTER FUNCIONANDO
+// FORM
 // =====================================
 
 form.addEventListener(
 "submit",
 
-async e => {
+async e=>{
 
     e.preventDefault()
 
-    await enviarMensagem()
+    await enviar()
 
 }
 
 )
-
-// =====================================
-// TROCAR USUARIO
-// =====================================
-
-trocarBtn.addEventListener(
-"click",
-
-()=>{
-
-    const novo =
-    prompt("Novo nome:")
-
-    if(!novo) return
-
-    usuario = novo
-
-    localStorage.setItem(
-        "usuario",
-        usuario
-    )
-
-}
-
-)
-
-// =====================================
-// LIMPAR CHAT
-// =====================================
-
-limparBtn.addEventListener(
-"click",
-
-async ()=>{
-
-    const ok =
-    confirm(
-        "Deseja limpar o chat?"
-    )
-
-    if(!ok) return
-
-    const resposta =
-    await supabase
-
-    .from("mensagens")
-
-    .delete()
-
-    .neq("id",0)
-
-    if(resposta.error){
-
-        alert(
-            resposta.error.message
-        )
-
-        return
-
-    }
-
-    ids.clear()
-
-    chat.innerHTML = ""
-
-}
-
-)
-
-// =====================================
-// INICIAR
-// =====================================
-
-await carregarHistorico()
 
 // =====================================
 // REALTIME
 // =====================================
 
-const canal = supabase
+supabase
 
 .channel("chat-global")
 
 .on(
-    "postgres_changes",
-    {
-        event:"*",
-        schema:"public",
-        table:"mensagens"
-    },
 
-    payload => {
+"postgres_changes",
 
-        console.log(
-            "Realtime:",
-            payload
-        )
+{
+    event:"INSERT",
+    schema:"public",
+    table:"mensagens"
+},
 
-        // NOVA MSG
+payload=>{
+
+    renderMensagem(
+        payload.new
+    )
+
+    // =====================================
+    // NOTIFICAÇÃO
+    // =====================================
+
+    if(
+        payload.new.usuario !==
+        usuario
+    ){
+
         if(
-            payload.eventType ===
-            "INSERT"
+            Notification.permission
+            === "granted"
         ){
 
-            renderMensagem(
-                payload.new
+            new Notification(
+                payload.new.usuario,
+                {
+                    body:
+                    payload.new.texto
+                }
             )
-
-        }
-
-        // DELETE
-        if(
-            payload.eventType ===
-            "DELETE"
-        ){
-
-            ids.clear()
-
-            carregarHistorico()
 
         }
 
     }
 
+}
+
 )
 
-.subscribe(status=>{
+.subscribe()
 
-    console.log(
-        "STATUS REALTIME:",
-        status
-    )
-
-})
-
-// =====================================
-// RESSINCRONIZA AO VOLTAR
-// =====================================
-
-window.addEventListener(
-    "focus",
-    carregarHistorico
-)
+}
 
 </script>
 
