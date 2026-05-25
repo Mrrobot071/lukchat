@@ -3,9 +3,13 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Chat Realtime PRO</title>
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+/>
+
+<title>Chat Realtime Supabase</title>
 
 <style>
 
@@ -30,82 +34,68 @@ body{
     justify-content:center;
     align-items:center;
     color:white;
-    overflow:hidden;
 }
 
-.chat{
+.chat-container{
+
     width:100%;
     max-width:520px;
     height:95vh;
+
     background:#111827;
+
     border-radius:18px;
+
     overflow:hidden;
+
     display:flex;
     flex-direction:column;
+
     border:1px solid #334155;
+
     box-shadow:
     0 0 40px rgba(0,0,0,.4);
+
 }
 
 .topo{
+
     background:#1e293b;
+
     padding:15px;
+
     display:flex;
     justify-content:space-between;
     align-items:center;
-    border-bottom:1px solid #334155;
-}
 
-.topo-esquerda{
-    display:flex;
-    flex-direction:column;
-    gap:5px;
+    border-bottom:
+    1px solid #334155;
+
 }
 
 .topo h2{
     font-size:18px;
 }
 
-.status{
+.online{
     font-size:12px;
     color:#22c55e;
-}
-
-.acoes{
-    display:flex;
-    gap:10px;
-}
-
-button{
-    border:none;
-    border-radius:10px;
-    padding:10px 14px;
-    cursor:pointer;
-    color:white;
-    transition:.2s;
-    font-weight:bold;
-}
-
-button:hover{
-    transform:scale(1.05);
-}
-
-#limpar{
-    background:#f59e0b;
-}
-
-#trocar{
-    background:#ef4444;
+    margin-top:4px;
 }
 
 #chat{
+
     flex:1;
+
     overflow-y:auto;
+
     padding:15px;
+
     display:flex;
     flex-direction:column;
+
     gap:12px;
-    scroll-behavior:smooth;
+
 }
 
 #chat::-webkit-scrollbar{
@@ -118,11 +108,17 @@ button:hover{
 }
 
 .msg{
-    padding:12px 15px;
-    border-radius:16px;
+
     max-width:80%;
-    word-wrap:break-word;
+
+    padding:12px 15px;
+
+    border-radius:16px;
+
     animation:fade .2s ease;
+
+    word-wrap:break-word;
+
 }
 
 .eu{
@@ -141,10 +137,6 @@ button:hover{
     margin-bottom:5px;
 }
 
-.texto{
-    line-height:1.4;
-}
-
 .hora{
     font-size:10px;
     opacity:.5;
@@ -153,49 +145,103 @@ button:hover{
 }
 
 .form{
+
     display:flex;
+
     gap:10px;
+
     padding:12px;
+
     background:#1e293b;
-    border-top:1px solid #334155;
+
+    border-top:
+    1px solid #334155;
+
 }
 
 .form input{
+
     flex:1;
+
     padding:14px;
+
     border:none;
+
     border-radius:12px;
+
     outline:none;
+
     background:#0f172a;
+
     color:white;
-    border:1px solid #334155;
-    transition:.2s;
+
+    border:
+    1px solid #334155;
+
 }
 
 .form input:focus{
+
     border-color:#2563eb;
-    box-shadow:
-    0 0 0 3px rgba(37,99,235,.2);
+
 }
 
 .form button{
+
+    border:none;
+
+    padding:14px 18px;
+
+    border-radius:12px;
+
     background:#2563eb;
+
+    color:white;
+
+    cursor:pointer;
+
+    transition:.2s;
+
 }
 
 .form button:hover{
+
     background:#3b82f6;
+
+}
+
+.acoes{
+
+    display:flex;
+    gap:10px;
+
+}
+
+.acoes button{
+
+    border:none;
+
+    padding:10px 12px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    color:white;
+
+}
+
+#limpar{
+    background:#f59e0b;
+}
+
+#trocar{
+    background:#ef4444;
 }
 
 .loading{
-    opacity:.6;
+    opacity:.5;
     pointer-events:none;
-}
-
-.typing{
-    padding:0 15px 10px;
-    font-size:12px;
-    color:#94a3b8;
-    height:20px;
 }
 
 @keyframes fade{
@@ -214,7 +260,7 @@ button:hover{
 
 @media(max-width:600px){
 
-    .chat{
+    .chat-container{
         height:100vh;
         max-width:100%;
         border-radius:0;
@@ -227,15 +273,17 @@ button:hover{
 </head>
 <body>
 
-<div class="chat">
+<div class="chat-container">
 
     <div class="topo">
 
-        <div class="topo-esquerda">
+        <div>
 
-            <h2>💬 Chat Realtime</h2>
+            <h2>
+                💬 Chat Realtime
+            </h2>
 
-            <div class="status">
+            <div class="online">
                 🟢 Online
             </div>
 
@@ -257,19 +305,23 @@ button:hover{
 
     <div id="chat"></div>
 
-    <div class="typing" id="typing"></div>
-
-    <form class="form" id="form">
+    <form
+    class="form"
+    id="form">
 
         <input
-            type="text"
-            id="mensagem"
-            placeholder="Digite uma mensagem..."
-            autocomplete="off"
-        >
+        type="text"
+        id="mensagem"
+        placeholder="Digite sua mensagem..."
+        autocomplete="off"
+        />
 
-        <button type="submit" id="enviar">
+        <button
+        type="submit"
+        id="enviarBtn">
+
             Enviar
+
         </button>
 
     </form>
@@ -279,33 +331,39 @@ button:hover{
 <script type="module">
 
 import {
-    createClient
-} from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
+createClient
+}
+from
+"https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
 
-// ========================================
+// =====================================
 // SUPABASE
-// ========================================
+// =====================================
 
-const supabase = createClient(
-    "https://xpfzqbjyizftllasvbll.supabase.co",
-    "sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU"
+const supabase =
+createClient(
+
+"https://xpfzqbjyizftllasvbll.supabase.co",
+
+"sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU"
+
 )
 
-// ========================================
+// =====================================
 // ELEMENTOS
-// ========================================
-
-const form =
-document.getElementById("form")
+// =====================================
 
 const chat =
 document.getElementById("chat")
+
+const form =
+document.getElementById("form")
 
 const mensagem =
 document.getElementById("mensagem")
 
 const enviarBtn =
-document.getElementById("enviar")
+document.getElementById("enviarBtn")
 
 const limparBtn =
 document.getElementById("limpar")
@@ -313,12 +371,9 @@ document.getElementById("limpar")
 const trocarBtn =
 document.getElementById("trocar")
 
-const typing =
-document.getElementById("typing")
-
-// ========================================
+// =====================================
 // USUARIO
-// ========================================
+// =====================================
 
 let usuario =
 localStorage.getItem("usuario")
@@ -341,22 +396,22 @@ if(!usuario){
 
 }
 
-// ========================================
+// =====================================
 // AUTO FOCUS
-// ========================================
+// =====================================
 
 mensagem.focus()
 
-// ========================================
-// CACHE ANTI DUPLICAÇÃO
-// ========================================
+// =====================================
+// ANTI DUPLICAÇÃO
+// =====================================
 
 const ids =
 new Set()
 
-// ========================================
+// =====================================
 // RENDER
-// ========================================
+// =====================================
 
 function renderMensagem(msg){
 
@@ -381,17 +436,19 @@ function renderMensagem(msg){
     })
 
     div.innerHTML = `
+
         <div class="nome">
             ${msg.usuario}
         </div>
 
-        <div class="texto">
+        <div>
             ${msg.texto}
         </div>
 
         <div class="hora">
             ${hora}
         </div>
+
     `
 
     chat.appendChild(div)
@@ -405,9 +462,9 @@ function renderMensagem(msg){
 
 }
 
-// ========================================
-// HISTÓRICO
-// ========================================
+// =====================================
+// CARREGAR HISTÓRICO
+// =====================================
 
 async function carregarHistorico(){
 
@@ -415,8 +472,11 @@ async function carregarHistorico(){
         data,
         error
     } = await supabase
+
     .from("mensagens")
+
     .select("*")
+
     .order("id",{
         ascending:true
     })
@@ -424,6 +484,11 @@ async function carregarHistorico(){
     if(error){
 
         console.error(error)
+
+        alert(
+            "Erro ao carregar histórico"
+        )
+
         return
 
     }
@@ -434,9 +499,9 @@ async function carregarHistorico(){
 
 }
 
-// ========================================
+// =====================================
 // ENVIAR
-// ========================================
+// =====================================
 
 let enviando = false
 
@@ -457,16 +522,19 @@ async function enviarMensagem(){
         "loading"
     )
 
-    const {
-        error
-    } = await supabase
+    const resposta =
+    await supabase
+
     .from("mensagens")
+
     .insert([
         {
             usuario,
             texto
         }
     ])
+
+    .select()
 
     enviando = false
 
@@ -477,12 +545,16 @@ async function enviarMensagem(){
         "loading"
     )
 
-    if(error){
+    console.log(resposta)
 
-        console.error(error)
+    if(resposta.error){
+
+        console.error(
+            resposta.error
+        )
 
         alert(
-            "Erro ao enviar"
+            resposta.error.message
         )
 
         return
@@ -495,167 +567,122 @@ async function enviarMensagem(){
 
 }
 
-// ========================================
+// =====================================
 // ENTER FUNCIONANDO
-// ========================================
+// =====================================
 
 form.addEventListener(
-    "submit",
+"submit",
 
-    async e => {
+async e => {
 
-        e.preventDefault()
+    e.preventDefault()
 
-        await enviarMensagem()
+    await enviarMensagem()
 
-    }
-
-)
-
-// ========================================
-// ESC LIMPA INPUT
-// ========================================
-
-mensagem.addEventListener(
-    "keydown",
-
-    e => {
-
-        if(e.key === "Escape"){
-
-            mensagem.value = ""
-
-        }
-
-    }
+}
 
 )
 
-// ========================================
-// TYPING
-// ========================================
-
-let timeoutTyping
-
-mensagem.addEventListener(
-    "input",
-
-    ()=>{
-
-        typing.innerHTML =
-        `${usuario} está digitando...`
-
-        clearTimeout(
-            timeoutTyping
-        )
-
-        timeoutTyping =
-        setTimeout(()=>{
-
-            typing.innerHTML = ""
-
-        },1000)
-
-    }
-
-)
-
-// ========================================
+// =====================================
 // TROCAR USUARIO
-// ========================================
+// =====================================
 
 trocarBtn.addEventListener(
-    "click",
+"click",
 
-    ()=>{
+()=>{
 
-        const novo =
-        prompt("Novo nome:")
+    const novo =
+    prompt("Novo nome:")
 
-        if(!novo) return
+    if(!novo) return
 
-        usuario = novo
+    usuario = novo
 
-        localStorage.setItem(
-            "usuario",
-            usuario
-        )
+    localStorage.setItem(
+        "usuario",
+        usuario
+    )
 
-        alert(
-            "Usuário alterado!"
-        )
-
-    }
+}
 
 )
 
-// ========================================
+// =====================================
 // LIMPAR CHAT
-// ========================================
+// =====================================
 
 limparBtn.addEventListener(
-    "click",
+"click",
 
-    async ()=>{
+async ()=>{
 
-        const confirmar =
-        confirm(
-            "Deseja limpar o chat?"
+    const ok =
+    confirm(
+        "Deseja limpar o chat?"
+    )
+
+    if(!ok) return
+
+    const resposta =
+    await supabase
+
+    .from("mensagens")
+
+    .delete()
+
+    .neq("id",0)
+
+    if(resposta.error){
+
+        alert(
+            resposta.error.message
         )
 
-        if(!confirmar) return
-
-        const {
-            error
-        } = await supabase
-        .from("mensagens")
-        .delete()
-        .neq("id",0)
-
-        if(error){
-
-            console.error(error)
-            return
-
-        }
-
-        ids.clear()
-
-        chat.innerHTML = ""
+        return
 
     }
 
+    ids.clear()
+
+    chat.innerHTML = ""
+
+}
+
 )
 
-// ========================================
+// =====================================
 // INICIAR
-// ========================================
+// =====================================
 
 await carregarHistorico()
 
-// ========================================
+// =====================================
 // REALTIME
-// ========================================
+// =====================================
 
 supabase
 
 .channel("chat-global")
 
 .on(
-    "postgres_changes",
-    {
-        event:"INSERT",
-        schema:"public",
-        table:"mensagens"
-    },
 
-    payload => {
+"postgres_changes",
 
-        renderMensagem(
-            payload.new
-        )
+{
+    event:"INSERT",
+    schema:"public",
+    table:"mensagens"
+},
 
-    }
+payload => {
+
+    renderMensagem(
+        payload.new
+    )
+
+}
 
 )
 
