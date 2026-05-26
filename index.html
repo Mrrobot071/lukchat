@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>LChat</title>
+<title>Chat Realtime Supabase</title>
 
 <style>
 
@@ -904,6 +904,13 @@ async function iniciarChat(){
     );
 }
 
+// Detecta o Enter tanto no teclado do PC quanto no botão "Ir/Enviar" do teclado do celular
+mensagemInput.addEventListener("keydown", function(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault(); // Evita quebra de linha padrão
+        form.requestSubmit(); // Dispara o envio oficial do formulário (executa a função enviar)
+    }
+});
 </script>
 
 </body>
