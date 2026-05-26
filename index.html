@@ -586,6 +586,14 @@ async function iniciarChat(){
     );
 }
 
+
+// LIMPEZA AUTOMÁTICA (A cada 2 minutos)
+setInterval(() => {
+    const chatElemento = document.getElementById("chat");
+    if (chatElemento) chatElemento.innerHTML = "";
+}, 2 * 60 * 1000);
+
+
 </script>
 
 </body>
