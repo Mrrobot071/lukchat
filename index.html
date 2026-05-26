@@ -6,7 +6,6 @@
 <title>Chat Realtime Supabase</title>
 
 <style>
-
 *{
     margin:0;
     padding:0;
@@ -17,16 +16,15 @@
 body{
     background:linear-gradient(135deg,#0f172a,#111827,#1e293b);
     height: 100vh;
-    height: 100dvh; /* Usa a altura dinâmica para evitar problemas com teclados mobile */
+    height: 100dvh;
     display:flex;
     justify-content:center;
     align-items:center;
     color:white;
-    padding: 10px; /* Evita que os elementos encostem nas bordas da tela */
+    padding: 10px;
 }
 
 /* LOGIN */
-
 .login{
     width:100%;
     max-width:350px;
@@ -52,7 +50,7 @@ body{
     color:white;
     outline:none;
     border:1px solid #334155;
-    font-size: 16px; /* SOLUÇÃO PARA O ZOOM: No mínimo 16px impede o zoom automático no iOS/Android */
+    font-size: 16px;
 }
 
 .login button{
@@ -67,12 +65,11 @@ body{
 }
 
 /* CHAT */
-
 .chat-container{
     width:100%;
     max-width:520px;
     height:95vh;
-    height: 95dvh; /* Altura dinâmica */
+    height: 95dvh;
     background:#111827;
     border-radius:20px;
     overflow:hidden;
@@ -82,7 +79,6 @@ body{
     box-shadow:0 0 40px rgba(0,0,0,.4);
 }
 
-/* Se a tela for muito pequena (mobile), o chat ocupa o espaço total disponível */
 @media (max-width: 480px) {
     body {
         padding: 0;
@@ -123,7 +119,7 @@ body{
 }
 
 .msg{
-    max-width:85%; /* Aumentado levemente para telas menores lerem melhor */
+    max-width:85%;
     padding:12px;
     border-radius:15px;
     word-wrap:break-word;
@@ -167,7 +163,7 @@ body{
     background:#0f172a;
     color:white;
     outline:none;
-    font-size: 16px; /* SOLUÇÃO PARA O ZOOM: Impede o zoom ao digitar */
+    font-size: 16px;
 }
 
 .form button{
@@ -192,61 +188,59 @@ body{
     padding:10px;
     border-radius:10px;
     cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-width:48px;
 }
 
+/* botão do timer com texto pequeno */
+#timerMinutos{
+    font-size: 11px;
+    font-weight: bold;
+    color: #38bdf8;
+    margin-top: 2px;
+}
 </style>
 </head>
 <body>
 
 <div class="login" id="loginBox">
-
     <h2>🔐 Área Privada</h2>
-
     <input
         type="password"
         id="senha"
         placeholder="Digite a senha"
     />
-
-    <button id="entrarBtn">
-        Entrar
-    </button>
-
+    <button id="entrarBtn">Entrar</button>
 </div>
 
 <div class="chat-container" id="chatContainer">
-
     <div class="topo">
-
         <div>
             <h2>💬 Chat Realtime</h2>
-            <div class="online">
-                🟢 Online
-            </div>
+            <div class="online">🟢 Online</div>
         </div>
 
         <div class="botoes">
-
             <button id="timerBtn" title="Configurar Temporizador">
-                ⏱️ <span id="timerMinutos" style="font-size: 11px; font-weight: bold; color: #38bdf8;">Off</span>
+                ⏱️ <span id="timerMinutos">Off</span>
             </button>
 
-            <button id="trocarNomeBtn">
+            <button id="trocarNomeBtn" title="Trocar nome">
                 👤
             </button>
 
-            <button id="limparBtn">
+            <button id="limparBtn" title="Limpar chat">
                 🗑️
             </button>
-
         </div>
-
     </div>
 
     <div id="chat"></div>
 
     <form class="form" id="form">
-
         <input
             type="text"
             id="mensagem"
@@ -254,130 +248,112 @@ body{
             autocomplete="off"
             required
         />
-
-        <button type="submit">
-            ➤
-        </button>
-
+        <button type="submit">➤</button>
     </form>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-
 // CONFIG
-
 const SENHA = "a1234";
 
-const SUPABASE_URL =
-"https://xpfzqbjyizftllasvbll.supabase.co";
+const SUPABASE_URL = "https://xpfzqbjyizftllasvbll.supabase.co";
+const SUPABASE_KEY = "sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU";
 
-const SUPABASE_KEY =
-"sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU";
-
-const supabaseClient =
-window.supabase.createClient(
+const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
 );
 
 // ELEMENTOS
-
-const loginBox =
-document.getElementById("loginBox");
-
-const chatContainer =
-document.getElementById("chatContainer");
-
-const entrarBtn =
-document.getElementById("entrarBtn");
-
-const chat =
-document.getElementById("chat");
-
-const form =
-document.getElementById("form");
-
-const mensagemInput =
-document.getElementById("mensagem");
+const loginBox = document.getElementById("loginBox");
+const chatContainer = document.getElementById("chatContainer");
+const entrarBtn = document.getElementById("entrarBtn");
+const chat = document.getElementById("chat");
+const form = document.getElementById("form");
+const mensagemInput = document.getElementById("mensagem");
+const timerBtn = document.getElementById("timerBtn");
+const timerMinutos = document.getElementById("timerMinutos");
+const trocarNomeBtn = document.getElementById("trocarNomeBtn");
+const limparBtn = document.getElementById("limparBtn");
 
 // CONTROLE
-
 let ultimaMensagemId = 0;
-
 let usuario = "";
-
-// --- SISTEMA DE TEMPORIZADOR EDITÁVEL PELO CHAT ---
 let intervaloLimpeza = null;
+let chatIniciado = false;
 
 // LOGIN
-
 entrarBtn.onclick = entrar;
 
 function entrar(){
-
-    const senha =
-    document.getElementById("senha").value;
+    const senha = document.getElementById("senha").value;
 
     if(senha !== SENHA){
-
         alert("Senha incorreta");
-
         return;
     }
 
     loginBox.style.display = "none";
-
     chatContainer.style.display = "flex";
-
     iniciarChat();
 }
 
 // CHAT
-
 async function iniciarChat(){
+    if(chatIniciado) return;
+    chatIniciado = true;
 
-    usuario =
-    localStorage.getItem("usuario");
+    usuario = localStorage.getItem("usuario");
 
     if(!usuario){
-
-        usuario =
-        prompt("Seu nome?");
+        usuario = prompt("Seu nome?");
 
         if(!usuario){
-
             usuario = "Anônimo";
         }
 
-        localStorage.setItem(
-            "usuario",
-            usuario
-        );
+        localStorage.setItem("usuario", usuario);
     }
 
-    // CONFIGURAÇÃO DO BOTÃO DO TEMPORIZADOR
-    document.getElementById("timerBtn").onclick = () => {
-        const inputTempo = prompt("Defina o tempo para limpeza automática (em minutos) ou digite 0 para desligar:");
-        const minutos = parseInt(inputTempo);
-        const indicador = document.getElementById("timerMinutos");
+    // TROCAR NOME
+    trocarNomeBtn.onclick = () => {
+        const novo = prompt("Novo nome:");
 
-        // Cancela o temporizador anterior se houver um ativo
+        if(novo){
+            usuario = novo;
+            localStorage.setItem("usuario", usuario);
+        }
+    };
+
+    // LIMPAR CHAT VISUAL
+    limparBtn.onclick = () => {
+        chat.innerHTML = "";
+    };
+
+    // TEMPORIZADOR EDITÁVEL PELO CHAT
+    timerBtn.onclick = () => {
+        const inputTempo = prompt(
+            "Defina o tempo para limpeza automática (em minutos) ou digite 0 para desligar:"
+        );
+
+        if (inputTempo === null) {
+            return;
+        }
+
+        const minutos = parseInt(inputTempo);
+        const chatElemento = document.getElementById("chat");
+
         if (intervaloLimpeza) {
             clearInterval(intervaloLimpeza);
             intervaloLimpeza = null;
         }
 
-        // Valida se o usuário digitou um número válido maior que zero
         if (!isNaN(minutos) && minutos > 0) {
-            // Atualiza o texto ao lado do relógio na tela
-            if (indicador) indicador.innerText = minutos + "m";
+            timerMinutos.innerText = minutos + "m";
 
-            // Inicia o novo ciclo de limpeza com o tempo escolhido
             intervaloLimpeza = setInterval(() => {
-                const chatElemento = document.getElementById("chat");
                 if (chatElemento) {
                     chatElemento.innerHTML = "";
                     console.log(`Chat limpo automaticamente (Ciclo de ${minutos} min).`);
@@ -386,247 +362,133 @@ async function iniciarChat(){
 
             alert(`Temporizador ativado! O chat será limpo a cada ${minutos} minuto(s).`);
         } else {
-            // Se digitar 0 ou cancelar, o timer é desligado
-            if (indicador) indicador.innerText = "Off";
+            timerMinutos.innerText = "Off";
             alert("Temporizador desligado.");
         }
     };
 
-    // TROCAR NOME
-
-    document
-    .getElementById("trocarNomeBtn")
-    .onclick = () => {
-
-        const novo =
-        prompt("Novo nome:");
-
-        if(novo){
-
-            usuario = novo;
-
-            localStorage.setItem(
-                "usuario",
-                usuario
-            );
-        }
-    };
-
-    // LIMPAR CHAT VISUAL
-
-    document
-    .getElementById("limparBtn")
-    .onclick = () => {
-
-        chat.innerHTML = "";
-    };
-
     // RENDER
-
     function renderMensagem(msg){
-
-        // EVITAR DUPLICAÇÃO
-
-        if(
-            document.getElementById(
-                "msg-" + msg.id
-            )
-        ):{
+        if (document.getElementById("msg-" + msg.id)) {
             return;
         }
 
-        const div =
-        document.createElement("div");
+        const div = document.createElement("div");
+        div.id = "msg-" + msg.id;
 
-        div.id =
-        "msg-" + msg.id;
+        const eu = msg.usuario === usuario;
+        div.className = "msg " + (eu ? "eu" : "outro");
 
-        const eu =
-        msg.usuario === usuario;
-
-        div.className =
-        "msg " + (eu ? "eu" : "outro");
-
-        const hora =
-        new Date(msg.criado_em)
-        .toLocaleTimeString([],{
+        const hora = new Date(msg.criado_em).toLocaleTimeString([],{
             hour:"2-digit",
             minute:"2-digit"
         });
 
         div.innerHTML = `
-            <div class="nome">
-                ${msg.usuario}
-            </div>
-
-            <div>
-                ${msg.texto}
-            </div>
-
-            <div class="hora">
-                ${hora}
-            </div>
+            <div class="nome">${msg.usuario}</div>
+            <div>${msg.texto}</div>
+            <div class="hora">${hora}</div>
         `;
 
         chat.appendChild(div);
-
-        chat.scrollTop =
-        chat.scrollHeight;
+        chat.scrollTop = chat.scrollHeight;
     }
 
     // CARREGAR TODAS
-
     async function carregarMensagens(){
-
-        const { data, error } =
-        await supabaseClient
-        .from("mensagens")
-        .select("*")
-        .order("id",{
-            ascending:true
-        });
+        const { data, error } = await supabaseClient
+            .from("mensagens")
+            .select("*")
+            .order("id",{ ascending:true });
 
         if(error){
-
             console.log(error);
-
             return;
         }
 
         chat.innerHTML = "";
 
         data.forEach(msg => {
-
             renderMensagem(msg);
 
             if(msg.id > ultimaMensagemId){
-
                 ultimaMensagemId = msg.id;
             }
-
         });
     }
 
     // BUSCAR NOVAS
-
     async function buscarNovasMensagens(){
-
-        const { data, error } =
-        await supabaseClient
-        .from("mensagens")
-        .select("*")
-        .gt("id", ultimaMensagemId)
-        .order("id",{
-            ascending:true
-        });
+        const { data, error } = await supabaseClient
+            .from("mensagens")
+            .select("*")
+            .gt("id", ultimaMensagemId)
+            .order("id",{ ascending:true });
 
         if(error){
-
             console.log(error);
-
             return;
         }
 
         data.forEach(msg => {
-
             renderMensagem(msg);
-
-            ultimaMensagemId =
-            msg.id;
-
+            ultimaMensagemId = msg.id;
         });
     }
 
     // HISTÓRICO
-
     await carregarMensagens();
 
     // REALTIME
-
     supabaseClient
-    .channel("chat-global")
-    .on(
-        "postgres_changes",
-        {
-            event:"INSERT",
-            schema:"public",
-            table:"mensagens"
-        },
-
-        payload => {
-
-            if(
-                payload.new.id >
-                ultimaMensagemId
-            ){
-
-                renderMensagem(
-                    payload.new
-                );
-
-                ultimaMensagemId =
-                payload.new.id;
+        .channel("chat-global")
+        .on(
+            "postgres_changes",
+            {
+                event:"INSERT",
+                schema:"public",
+                table:"mensagens"
+            },
+            payload => {
+                if(payload.new.id > ultimaMensagemId){
+                    renderMensagem(payload.new);
+                    ultimaMensagemId = payload.new.id;
+                }
             }
-
-        }
-    )
-    .subscribe(status => {
-
-        console.log(
-            "Realtime:",
-            status
-        );
-
-    });
+        )
+        .subscribe(status => {
+            console.log("Realtime:", status);
+        });
 
     // ATUALIZAÇÃO A CADA 1 SEGUNDO
-
     setInterval(() => {
-
         buscarNovasMensagens();
-
     },1000);
 
     // ENVIAR
+    form.addEventListener("submit", async e => {
+        e.preventDefault();
 
-    form.addEventListener(
-        "submit",
+        const texto = mensagemInput.value.trim();
+        if(!texto) return;
 
-        async e => {
-
-            e.preventDefault();
-
-            const texto =
-            mensagemInput.value.trim();
-
-            if(!texto) return;
-
-            const { error } =
-            await supabaseClient
+        const { error } = await supabaseClient
             .from("mensagens")
             .insert([{
                 usuario,
                 texto
             }]);
 
-            if(error){
-
-                console.log(error);
-
-                alert(
-                    "Erro ao enviar"
-                );
-
-                return;
-            }
-
-            mensagemInput.value = "";
-
-            mensagemInput.focus();
+        if(error){
+            console.log(error);
+            alert("Erro ao enviar");
+            return;
         }
-    );
-}
 
+        mensagemInput.value = "";
+        mensagemInput.focus();
+    });
+}
 </script>
 
 </body>
