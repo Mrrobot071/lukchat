@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
@@ -227,6 +227,10 @@ body{
 
         <div class="botoes">
 
+            <button id="timerBtn" title="Configurar Temporizador">
+                ⏱️ <span id="timerMinutos" style="font-size: 11px; font-weight: bold; color: #38bdf8;">Off</span>
+            </button>
+
             <button id="trocarNomeBtn">
                 👤
             </button>
@@ -305,6 +309,9 @@ let ultimaMensagemId = 0;
 
 let usuario = "";
 
+// --- SISTEMA DE TEMPORIZADOR EDITÁVEL PELO CHAT ---
+let intervaloLimpeza = null;
+
 // LOGIN
 
 entrarBtn.onclick = entrar;
@@ -351,6 +358,40 @@ async function iniciarChat(){
         );
     }
 
+    // CONFIGURAÇÃO DO BOTÃO DO TEMPORIZADOR
+    document.getElementById("timerBtn").onclick = () => {
+        const inputTempo = prompt("Defina o tempo para limpeza automática (em minutos) ou digite 0 para desligar:");
+        const minutos = parseInt(inputTempo);
+        const indicador = document.getElementById("timerMinutos");
+
+        // Cancela o temporizador anterior se houver um ativo
+        if (intervaloLimpeza) {
+            clearInterval(intervaloLimpeza);
+            intervaloLimpeza = null;
+        }
+
+        // Valida se o usuário digitou um número válido maior que zero
+        if (!isNaN(minutos) && minutos > 0) {
+            // Atualiza o texto ao lado do relógio na tela
+            if (indicador) indicador.innerText = minutos + "m";
+
+            // Inicia o novo ciclo de limpeza com o tempo escolhido
+            intervaloLimpeza = setInterval(() => {
+                const chatElemento = document.getElementById("chat");
+                if (chatElemento) {
+                    chatElemento.innerHTML = "";
+                    console.log(`Chat limpo automaticamente (Ciclo de ${minutos} min).`);
+                }
+            }, minutos * 60 * 1000);
+
+            alert(`Temporizador ativado! O chat será limpo a cada ${minutos} minuto(s).`);
+        } else {
+            // Se digitar 0 ou cancelar, o timer é desligado
+            if (indicador) indicador.innerText = "Off";
+            alert("Temporizador desligado.");
+        }
+    };
+
     // TROCAR NOME
 
     document
@@ -390,7 +431,7 @@ async function iniciarChat(){
             document.getElementById(
                 "msg-" + msg.id
             )
-        ){
+        ):{
             return;
         }
 
