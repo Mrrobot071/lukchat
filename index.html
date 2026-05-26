@@ -1,47 +1,57 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Chat Privado (Formspree)</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Chat Realtime Supabase</title>
+
 <style>
+
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
     font-family:Arial,sans-serif;
 }
+
 body{
-    background: linear-gradient(135deg, #0f172a, #111827, #1e293b);
+    background:linear-gradient(135deg,#0f172a,#111827,#1e293b);
     height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
     color:white;
 }
+
 /* LOGIN */
+
 .login{
     width:100%;
     max-width:350px;
     background:#111827;
-    border:1px solid #334155;
     padding:30px;
     border-radius:20px;
+    border:1px solid #334155;
     display:flex;
     flex-direction:column;
     gap:15px;
-    box-shadow: 0 0 40px rgba(0,0,0,.4);
+    box-shadow:0 0 40px rgba(0,0,0,.4);
 }
-.login h2{ text-align:center; }
+
+.login h2{
+    text-align:center;
+}
+
 .login input{
     padding:14px;
     border:none;
     border-radius:12px;
-    outline:none;
     background:#0f172a;
     color:white;
+    outline:none;
     border:1px solid #334155;
 }
+
 .login button{
     padding:14px;
     border:none;
@@ -51,7 +61,9 @@ body{
     cursor:pointer;
     font-weight:bold;
 }
+
 /* CHAT */
+
 .chat-container{
     width:100%;
     max-width:520px;
@@ -62,8 +74,9 @@ body{
     display:none;
     flex-direction:column;
     border:1px solid #334155;
-    box-shadow: 0 0 40px rgba(0,0,0,.4);
+    box-shadow:0 0 40px rgba(0,0,0,.4);
 }
+
 .topo{
     background:#1e293b;
     padding:15px;
@@ -71,12 +84,17 @@ body{
     justify-content:space-between;
     align-items:center;
 }
-.topo h2{ font-size:18px; }
+
+.topo h2{
+    font-size:18px;
+}
+
 .online{
     font-size:12px;
     color:#22c55e;
-    margin-top:4px;
+    margin-top:5px;
 }
+
 #chat{
     flex:1;
     overflow-y:auto;
@@ -85,31 +103,54 @@ body{
     flex-direction:column;
     gap:10px;
 }
+
 .msg{
     max-width:80%;
     padding:12px;
     border-radius:15px;
     word-wrap:break-word;
 }
-.eu{ background:#2563eb; align-self:flex-end; }
-.outro{ background:#374151; align-self:flex-start; }
-.nome{ font-size:12px; opacity:.7; margin-bottom:5px; }
-.hora{ font-size:10px; opacity:.5; margin-top:5px; text-align:right; }
+
+.eu{
+    background:#2563eb;
+    align-self:flex-end;
+}
+
+.outro{
+    background:#374151;
+    align-self:flex-start;
+}
+
+.nome{
+    font-size:12px;
+    opacity:.7;
+    margin-bottom:5px;
+}
+
+.hora{
+    font-size:10px;
+    opacity:.5;
+    margin-top:5px;
+    text-align:right;
+}
+
 .form{
     display:flex;
     gap:10px;
     padding:12px;
     background:#1e293b;
 }
+
 .form input{
     flex:1;
     padding:14px;
     border:none;
     border-radius:12px;
-    outline:none;
     background:#0f172a;
     color:white;
+    outline:none;
 }
+
 .form button{
     border:none;
     padding:14px 18px;
@@ -118,155 +159,305 @@ body{
     color:white;
     cursor:pointer;
 }
+
+.botoes{
+    display:flex;
+    gap:10px;
+}
+
+.botoes button{
+    border:none;
+    background:#334155;
+    color:white;
+    padding:10px;
+    border-radius:10px;
+    cursor:pointer;
+}
+
 </style>
 </head>
 <body>
 
+<!-- LOGIN -->
+
 <div class="login" id="loginBox">
+
     <h2>🔐 Área Privada</h2>
-    <input type="password" id="senha" placeholder="Digite a senha" />
-    <button id="entrarBtn">Entrar</button>
+
+    <input
+        type="password"
+        id="senha"
+        placeholder="Digite a senha"
+    />
+
+    <button id="entrarBtn">
+        Entrar
+    </button>
+
 </div>
 
+<!-- CHAT -->
+
 <div class="chat-container" id="chatContainer">
+
     <div class="topo">
+
         <div>
-            <h2>💬 Formspree Chat</h2>
-            <div class="online">🟢 Conectado ao Formulário</div>
+            <h2>💬 Chat Realtime</h2>
+            <div class="online">
+                🟢 Online
+            </div>
         </div>
+
+        <div class="botoes">
+
+            <button id="trocarNomeBtn">
+                👤
+            </button>
+
+            <button id="limparBtn">
+                🗑️
+            </button>
+
+        </div>
+
     </div>
 
     <div id="chat"></div>
 
     <form class="form" id="form">
-        <input type="text" id="mensagem" name="mensagem" placeholder="Digite sua mensagem..." autocomplete="off" required />
-        <button type="submit">Enviar</button>
+
+        <input
+            type="text"
+            id="mensagem"
+            placeholder="Digite..."
+            autocomplete="off"
+            required
+        />
+
+        <button type="submit">
+            ➤
+        </button>
+
     </form>
+
 </div>
 
-<script>
-// CONFIG
-const SENHA = "a1234";
-const FORMSPREE_URL = "https://formspree.io/f/mpwdggza";
+<!-- SUPABASE -->
 
-// LOGIN LOGIC
-const loginBox = document.getElementById("loginBox");
-const chatContainer = document.getElementById("chatContainer");
-const entrarBtn = document.getElementById("entrarBtn");
-const senhaInput = document.getElementById("senha");
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+// CONFIG
+
+const SENHA = "a1234";
+
+const SUPABASE_URL =
+"https://xpfzqbjyizftllasvbll.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU";
+
+const supabaseClient =
+window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+// ELEMENTOS
+
+const loginBox =
+document.getElementById("loginBox");
+
+const chatContainer =
+document.getElementById("chatContainer");
+
+const entrarBtn =
+document.getElementById("entrarBtn");
+
+const chat =
+document.getElementById("chat");
+
+const form =
+document.getElementById("form");
+
+const mensagemInput =
+document.getElementById("mensagem");
+
+// LOGIN
+
+entrarBtn.onclick = entrar;
 
 function entrar(){
-    const senha = senhaInput.value.trim();
+
+    const senha =
+    document.getElementById("senha").value;
+
     if(senha !== SENHA){
+
         alert("Senha incorreta");
+
         return;
     }
+
     loginBox.style.display = "none";
+
     chatContainer.style.display = "flex";
+
     iniciarChat();
 }
 
-entrarBtn.onclick = entrar;
-senhaInput.addEventListener("keydown", e => {
-    if(e.key === "Enter"){
-        e.preventDefault();
-        entrar();
-    }
-});
+// CHAT
 
-// CHAT LOGIC
-function iniciarChat(){
-    const chat = document.getElementById("chat");
-    const form = document.getElementById("form");
-    const mensagemInput = document.getElementById("mensagem");
+async function iniciarChat(){
 
-    // Adiciona botão de trocar nome no topo
-    const topo = document.querySelector(".topo");
-    const botoes = document.createElement("div");
-    botoes.style.display = "flex";
-    botoes.style.gap = "10px";
-    botoes.innerHTML = `<button id="trocarNomeBtn" style="background:#2563eb; border:none; padding:10px; border-radius:10px; color:white; cursor:pointer;">👤 Nome</button>`;
-    topo.appendChild(botoes);
+    let usuario =
+    localStorage.getItem("usuario");
 
-    // USUARIO LOCALSTORAGE
-    let usuario = localStorage.getItem("usuario") || "Anônimo";
-    if(usuario === "Anônimo") {
-        const novoNome = prompt("Seu nome:");
-        if(novoNome) {
-            usuario = novoNome;
-            localStorage.setItem("usuario", usuario);
-        }
+    if(!usuario){
+
+        usuario =
+        prompt("Seu nome?");
+
+        localStorage.setItem(
+            "usuario",
+            usuario
+        );
     }
 
-    document.getElementById("trocarNomeBtn").onclick = () => {
-        const novo = prompt("Novo nome:");
-        if(novo) {
+    // TROCAR NOME
+
+    document
+    .getElementById("trocarNomeBtn")
+    .onclick = () => {
+
+        const novo =
+        prompt("Novo nome:");
+
+        if(novo){
+
             usuario = novo;
-            localStorage.setItem("usuario", usuario);
+
+            localStorage.setItem(
+                "usuario",
+                usuario
+            );
         }
     };
 
-    // RENDERIZAR MENSAGEM LOCALMENTE (Para dar feedback visual instantâneo)
-    function renderMensagemLocal(nomeUsuario, textoMensagem) {
-        const div = document.createElement("div");
-        div.className = "msg eu"; // Como você está enviando, assume o estilo "eu"
-        
-        const hora = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    // LIMPAR CHAT VISUAL
+
+    document
+    .getElementById("limparBtn")
+    .onclick = () => {
+
+        chat.innerHTML = "";
+    };
+
+    // RENDER
+
+    function renderMensagem(msg){
+
+        const div =
+        document.createElement("div");
+
+        const eu =
+        msg.usuario === usuario;
+
+        div.className =
+        "msg " + (eu ? "eu" : "outro");
+
+        const hora =
+        new Date(msg.criado_em)
+        .toLocaleTimeString([],{
+            hour:"2-digit",
+            minute:"2-digit"
+        });
 
         div.innerHTML = `
-            <div class="nome">${nomeUsuario}</div>
-            <div>${textoMensagem}</div>
-            <div class="hora">${hora}</div>
+            <div class="nome">
+                ${msg.usuario}
+            </div>
+
+            <div>
+                ${msg.texto}
+            </div>
+
+            <div class="hora">
+                ${hora}
+            </div>
         `;
+
         chat.appendChild(div);
-        chat.scrollTop = chat.scrollHeight;
+
+        chat.scrollTop =
+        chat.scrollHeight;
     }
 
-    // ENVIAR PARA O FORMSPREE
-    async function enviar(e) {
-        e.preventDefault();
-        
-        const texto = mensagemInput.value.trim();
-        if(!texto) return;
+    // HISTÓRICO
 
-        // Dados estruturados que o Formspree vai receber por e-mail/painel
-        const dadosFormulario = {
-            usuario: usuario,
-            mensagem: texto,
-            enviado_em: new Date().toLocaleString("pt-BR")
-        };
+    const { data } =
+    await supabaseClient
+    .from("mensagens")
+    .select("*")
+    .order("id",{
+        ascending:true
+    });
 
-        // Desativar input provisoriamente durante o envio
-        mensagemInput.disabled = true;
+    data.forEach(renderMensagem);
 
-        try {
-            const resposta = await fetch(FORMSPREE_URL, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                },
-                body: JSON.stringify(dadosFormulario)
-            });
+    // REALTIME
 
-            if (resposta.ok) {
-                // Renderiza na tela para o usuário ver o histórico dele
-                renderMensagemLocal(usuario, texto);
-                mensagemInput.value = "";
-            } else {
-                alert("Erro ao enviar a mensagem para o Formspree.");
-            }
-        } catch (erro) {
-            console.error("Erro na requisição:", erro);
-            alert("Erro de rede ao tentar contactar o Formspree.");
-        } finally {
-            mensagemInput.disabled = false;
+    supabaseClient
+    .channel("chat-global")
+    .on(
+        "postgres_changes",
+        {
+            event:"INSERT",
+            schema:"public",
+            table:"mensagens"
+        },
+
+        payload => {
+
+            renderMensagem(
+                payload.new
+            );
+
+        }
+    )
+    .subscribe();
+
+    // ENVIAR
+
+    form.addEventListener(
+        "submit",
+
+        async e => {
+
+            e.preventDefault();
+
+            const texto =
+            mensagemInput.value.trim();
+
+            if(!texto) return;
+
+            await supabaseClient
+            .from("mensagens")
+            .insert([{
+                usuario,
+                texto
+            }]);
+
+            mensagemInput.value = "";
+
             mensagemInput.focus();
         }
-    }
-
-    form.addEventListener("submit", enviar);
+    );
 }
+
 </script>
+
 </body>
 </html>
