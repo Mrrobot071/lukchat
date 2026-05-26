@@ -204,7 +204,6 @@ body{
 
         <div>
             <h2>💬 Chat Realtime</h2>
-
             <div class="online">
                 🟢 Online
             </div>
@@ -259,6 +258,11 @@ const SUPABASE_URL =
 
 const SUPABASE_KEY =
 "sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU";
+
+// TEMPO PARA LIMPAR AUTOMÁTICO
+// 5 minutos = 300000
+
+const AUTO_DELETE_TEMPO = 300000;
 
 const supabaseClient =
 window.supabase.createClient(
@@ -358,13 +362,39 @@ async function iniciarChat(){
         }
     };
 
-    // LIMPAR CHAT VISUAL
+    // LIXEIRA
 
     document
     .getElementById("limparBtn")
-    .onclick = () => {
+    .onclick = async () => {
+
+        const confirmar =
+        confirm(
+            "Deseja apagar TODAS as mensagens?"
+        );
+
+        if(!confirmar) return;
+
+        const { error } =
+        await supabaseClient
+        .from("mensagens")
+        .delete()
+        .gt("id",0);
+
+        if(error){
+
+            console.log(error);
+
+            alert(
+                "Erro ao limpar"
+            );
+
+            return;
+        }
 
         chat.innerHTML = "";
+
+        ultimaMensagemId = 0;
     };
 
     // RENDER
@@ -420,7 +450,7 @@ async function iniciarChat(){
         chat.scrollHeight;
     }
 
-    // CARREGAR HISTÓRICO
+    // CARREGAR
 
     async function carregarMensagens(){
 
@@ -439,6 +469,8 @@ async function iniciarChat(){
             return;
         }
 
+        chat.innerHTML = "";
+
         data.forEach(msg => {
 
             renderMensagem(msg);
@@ -451,7 +483,67 @@ async function iniciarChat(){
         });
     }
 
-    // PRIMEIRO LOAD
+    // NOVAS
+
+    async function buscarNovasMensagens(){
+
+        const { data, error } =
+        await supabaseClient
+        .from("mensagens")
+        .select("*")
+        .gt("id", ultimaMensagemId)
+        .order("id",{
+            ascending:true
+        });
+
+        if(error){
+
+            console.log(error);
+
+            return;
+        }
+
+        data.forEach(msg => {
+
+            renderMensagem(msg);
+
+            ultimaMensagemId =
+            msg.id;
+
+        });
+    }
+
+    // LIMPEZA AUTOMÁTICA
+
+    async function limparMensagensAntigas(){
+
+        const tempoLimite =
+        new Date(
+            Date.now() -
+            AUTO_DELETE_TEMPO
+        ).toISOString();
+
+        const { error } =
+        await supabaseClient
+        .from("mensagens")
+        .delete()
+        .lt(
+            "criado_em",
+            tempoLimite
+        );
+
+        if(error){
+
+            console.log(
+                "Erro auto limpeza:",
+                error
+            );
+        }
+
+        await carregarMensagens();
+    }
+
+    // HISTÓRICO
 
     await carregarMensagens();
 
@@ -469,14 +561,14 @@ async function iniciarChat(){
 
         payload => {
 
-            renderMensagem(
-                payload.new
-            );
-
             if(
                 payload.new.id >
                 ultimaMensagemId
             ){
+
+                renderMensagem(
+                    payload.new
+                );
 
                 ultimaMensagemId =
                 payload.new.id;
@@ -493,16 +585,23 @@ async function iniciarChat(){
 
     });
 
-    // ATUALIZAÇÃO AUTOMÁTICA
-    // HISTÓRICO A CADA 1 SEGUNDO
+    // ATUALIZAÇÃO 1 SEGUNDO
 
     setInterval(() => {
 
-        carregarMensagens();
+        buscarNovasMensagens();
 
     },1000);
 
-    // ENVIAR MENSAGEM
+    // AUTO DELETE
+
+    setInterval(() => {
+
+        limparMensagensAntigas();
+
+    },10000);
+
+    // ENVIAR
 
     form.addEventListener(
         "submit",
