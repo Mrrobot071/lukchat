@@ -2,8 +2,9 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Chat Privado (Formspree)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Chat Privado Realtime</title>
+
 <style>
 *{
     margin:0;
@@ -11,15 +12,16 @@
     box-sizing:border-box;
     font-family:Arial,sans-serif;
 }
+
 body{
-    background: linear-gradient(135deg, #0f172a, #111827, #1e293b);
+    background:linear-gradient(135deg,#0f172a,#111827,#1e293b);
     height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
     color:white;
 }
-/* LOGIN */
+
 .login{
     width:100%;
     max-width:350px;
@@ -30,10 +32,10 @@ body{
     display:flex;
     flex-direction:column;
     gap:15px;
-    box-shadow: 0 0 40px rgba(0,0,0,.4);
 }
-.login h2{ text-align:center; }
-.login input{
+
+.login input,
+.form input{
     padding:14px;
     border:none;
     border-radius:12px;
@@ -42,7 +44,10 @@ body{
     color:white;
     border:1px solid #334155;
 }
-.login button{
+
+.login button,
+.form button,
+.topo button{
     padding:14px;
     border:none;
     border-radius:12px;
@@ -51,7 +56,7 @@ body{
     cursor:pointer;
     font-weight:bold;
 }
-/* CHAT */
+
 .chat-container{
     width:100%;
     max-width:520px;
@@ -62,8 +67,8 @@ body{
     display:none;
     flex-direction:column;
     border:1px solid #334155;
-    box-shadow: 0 0 40px rgba(0,0,0,.4);
 }
+
 .topo{
     background:#1e293b;
     padding:15px;
@@ -71,12 +76,13 @@ body{
     justify-content:space-between;
     align-items:center;
 }
-.topo h2{ font-size:18px; }
+
 .online{
     font-size:12px;
     color:#22c55e;
-    margin-top:4px;
+    margin-top:5px;
 }
+
 #chat{
     flex:1;
     overflow-y:auto;
@@ -85,38 +91,46 @@ body{
     flex-direction:column;
     gap:10px;
 }
+
 .msg{
     max-width:80%;
     padding:12px;
     border-radius:15px;
     word-wrap:break-word;
 }
-.eu{ background:#2563eb; align-self:flex-end; }
-.outro{ background:#374151; align-self:flex-start; }
-.nome{ font-size:12px; opacity:.7; margin-bottom:5px; }
-.hora{ font-size:10px; opacity:.5; margin-top:5px; text-align:right; }
+
+.eu{
+    background:#2563eb;
+    align-self:flex-end;
+}
+
+.outro{
+    background:#374151;
+    align-self:flex-start;
+}
+
+.nome{
+    font-size:12px;
+    opacity:.7;
+    margin-bottom:5px;
+}
+
+.hora{
+    font-size:10px;
+    opacity:.5;
+    margin-top:5px;
+    text-align:right;
+}
+
 .form{
     display:flex;
     gap:10px;
     padding:12px;
     background:#1e293b;
 }
+
 .form input{
     flex:1;
-    padding:14px;
-    border:none;
-    border-radius:12px;
-    outline:none;
-    background:#0f172a;
-    color:white;
-}
-.form button{
-    border:none;
-    padding:14px 18px;
-    border-radius:12px;
-    background:#2563eb;
-    color:white;
-    cursor:pointer;
 }
 </style>
 </head>
@@ -124,149 +138,247 @@ body{
 
 <div class="login" id="loginBox">
     <h2>🔐 Área Privada</h2>
-    <input type="password" id="senha" placeholder="Digite a senha" />
+    <input type="password" id="senha" placeholder="Digite a senha">
     <button id="entrarBtn">Entrar</button>
 </div>
 
 <div class="chat-container" id="chatContainer">
+
     <div class="topo">
+
         <div>
-            <h2>💬 Formspree Chat</h2>
-            <div class="online">🟢 Conectado ao Formulário</div>
+            <h2>💬 Chat Realtime</h2>
+            <div class="online" id="statusConexao">
+                🟢 Conectado
+            </div>
         </div>
+
+        <div style="display:flex; gap:10px;">
+            <button id="trocarNomeBtn">👤 Nome</button>
+            <button id="limparBtn">🗑️</button>
+        </div>
+
     </div>
 
     <div id="chat"></div>
 
     <form class="form" id="form">
-        <input type="text" id="mensagem" name="mensagem" placeholder="Digite sua mensagem..." autocomplete="off" required />
-        <button type="submit">Enviar</button>
+
+        <input
+            type="text"
+            id="mensagem"
+            placeholder="Digite sua mensagem..."
+            autocomplete="off"
+            required
+        >
+
+        <button type="submit">
+            Enviar
+        </button>
+
     </form>
+
 </div>
 
 <script>
-// CONFIG
 const SENHA = "1libidgel";
-const FORMSPREE_URL = "https://formspree.io/f/mpwdggza";
 
-// LOGIN LOGIC
+const ROOM_ID = "chat_privado_1libidgel";
+
+const WEBSOCKET_URL =
+`wss://demo.piesocket.com/v3/${ROOM_ID}?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3wIoc75gB65g4&notify_self=1`;
+
+let socket = null;
+
 const loginBox = document.getElementById("loginBox");
 const chatContainer = document.getElementById("chatContainer");
 const entrarBtn = document.getElementById("entrarBtn");
 const senhaInput = document.getElementById("senha");
 
+const form = document.getElementById("form");
+const mensagemInput = document.getElementById("mensagem");
+const chat = document.getElementById("chat");
+
+let usuario = localStorage.getItem("usuario");
+
+if(!usuario){
+    usuario = "User_" + Math.floor(Math.random()*9999);
+    localStorage.setItem("usuario", usuario);
+}
+
+document.getElementById("trocarNomeBtn").onclick = () => {
+
+    const novo = prompt("Novo nome:");
+
+    if(novo && novo.trim()){
+        usuario = novo.trim();
+        localStorage.setItem("usuario", usuario);
+    }
+
+};
+
+document.getElementById("limparBtn").onclick = () => {
+    chat.innerHTML = "";
+};
+
+function atualizarStatus(texto, cor){
+
+    const status = document.getElementById("statusConexao");
+
+    status.innerHTML = texto;
+    status.style.color = cor;
+
+}
+
 function entrar(){
+
     const senha = senhaInput.value.trim();
+
     if(senha !== SENHA){
         alert("Senha incorreta");
         return;
     }
+
     loginBox.style.display = "none";
     chatContainer.style.display = "flex";
-    iniciarChat();
+
+    conectarSocket();
+
 }
 
 entrarBtn.onclick = entrar;
+
 senhaInput.addEventListener("keydown", e => {
+
     if(e.key === "Enter"){
-        e.preventDefault();
         entrar();
     }
+
 });
 
-// CHAT LOGIC
-function iniciarChat(){
-    const chat = document.getElementById("chat");
-    const form = document.getElementById("form");
-    const mensagemInput = document.getElementById("mensagem");
+function conectarSocket(){
 
-    // Adiciona botão de trocar nome no topo
-    const topo = document.querySelector(".topo");
-    const botoes = document.createElement("div");
-    botoes.style.display = "flex";
-    botoes.style.gap = "10px";
-    botoes.innerHTML = `<button id="trocarNomeBtn" style="background:#2563eb; border:none; padding:10px; border-radius:10px; color:white; cursor:pointer;">👤 Nome</button>`;
-    topo.appendChild(botoes);
-
-    // USUARIO LOCALSTORAGE
-    let usuario = localStorage.getItem("usuario") || "Anônimo";
-    if(usuario === "Anônimo") {
-        const novoNome = prompt("Seu nome:");
-        if(novoNome) {
-            usuario = novoNome;
-            localStorage.setItem("usuario", usuario);
-        }
+    if(socket){
+        socket.close();
     }
 
-    document.getElementById("trocarNomeBtn").onclick = () => {
-        const novo = prompt("Novo nome:");
-        if(novo) {
-            usuario = novo;
-            localStorage.setItem("usuario", usuario);
-        }
+    socket = new WebSocket(WEBSOCKET_URL);
+
+    socket.onopen = () => {
+
+        atualizarStatus(
+            "🟢 Conectado em tempo real",
+            "#22c55e"
+        );
+
     };
 
-    // RENDERIZAR MENSAGEM LOCALMENTE (Para dar feedback visual instantâneo)
-    function renderMensagemLocal(nomeUsuario, textoMensagem) {
-        const div = document.createElement("div");
-        div.className = "msg eu"; // Como você está enviando, assume o estilo "eu"
-        
-        const hora = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    socket.onmessage = (event) => {
 
-        div.innerHTML = `
-            <div class="nome">${nomeUsuario}</div>
-            <div>${textoMensagem}</div>
-            <div class="hora">${hora}</div>
-        `;
-        chat.appendChild(div);
-        chat.scrollTop = chat.scrollHeight;
-    }
+        try{
 
-    // ENVIAR PARA O FORMSPREE
-    async function enviar(e) {
-        e.preventDefault();
-        
-        const texto = mensagemInput.value.trim();
-        if(!texto) return;
+            const dados = JSON.parse(event.data);
 
-        // Dados estruturados que o Formspree vai receber por e-mail/painel
-        const dadosFormulario = {
-            usuario: usuario,
-            mensagem: texto,
-            enviado_em: new Date().toLocaleString("pt-BR")
-        };
+            if(
+                !dados.usuario ||
+                !dados.mensagem
+            ) return;
 
-        // Desativar input provisoriamente durante o envio
-        mensagemInput.disabled = true;
+            renderizarMensagem(
+                dados.usuario,
+                dados.mensagem,
+                dados.hora
+            );
 
-        try {
-            const resposta = await fetch(FORMSPREE_URL, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                },
-                body: JSON.stringify(dadosFormulario)
-            });
+        }catch(err){
 
-            if (resposta.ok) {
-                // Renderiza na tela para o usuário ver o histórico dele
-                renderMensagemLocal(usuario, texto);
-                mensagemInput.value = "";
-            } else {
-                alert("Erro ao enviar a mensagem para o Formspree.");
-            }
-        } catch (erro) {
-            console.error("Erro na requisição:", erro);
-            alert("Erro de rede ao tentar contactar o Formspree.");
-        } finally {
-            mensagemInput.disabled = false;
-            mensagemInput.focus();
+            console.log("Mensagem ignorada");
+
         }
+
+    };
+
+    socket.onerror = () => {
+
+        atualizarStatus(
+            "🔴 Erro conexão",
+            "#ef4444"
+        );
+
+    };
+
+    socket.onclose = () => {
+
+        atualizarStatus(
+            "🟠 Reconectando...",
+            "#f59e0b"
+        );
+
+        setTimeout(() => {
+
+            conectarSocket();
+
+        }, 3000);
+
+    };
+
+}
+
+function renderizarMensagem(nome, mensagem, hora){
+
+    const div = document.createElement("div");
+
+    div.className =
+        nome === usuario
+        ? "msg eu"
+        : "msg outro";
+
+    div.innerHTML = `
+        <div class="nome">${nome}</div>
+        <div>${mensagem}</div>
+        <div class="hora">${hora}</div>
+    `;
+
+    chat.appendChild(div);
+
+    chat.scrollTop = chat.scrollHeight;
+
+}
+
+form.addEventListener("submit", (e) => {
+
+    e.preventDefault();
+
+    const texto = mensagemInput.value.trim();
+
+    if(!texto) return;
+
+    if(socket.readyState !== WebSocket.OPEN){
+
+        alert("Sem conexão realtime");
+        return;
+
     }
 
-    form.addEventListener("submit", enviar);
-}
+    const dados = {
+
+        usuario: usuario,
+        mensagem: texto,
+        hora: new Date().toLocaleTimeString([], {
+            hour:"2-digit",
+            minute:"2-digit"
+        })
+
+    };
+
+    socket.send(JSON.stringify(dados));
+
+    mensagemInput.value = "";
+
+    mensagemInput.focus();
+
+});
 </script>
+
 </body>
 </html>
