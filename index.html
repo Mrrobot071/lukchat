@@ -285,6 +285,12 @@ document.getElementById("form");
 const mensagemInput =
 document.getElementById("mensagem");
 
+// CONTROLE
+
+let ultimaMensagemId = 0;
+
+let usuario = "";
+
 // LOGIN
 
 entrarBtn.onclick = entrar;
@@ -312,13 +318,18 @@ function entrar(){
 
 async function iniciarChat(){
 
-    let usuario =
+    usuario =
     localStorage.getItem("usuario");
 
     if(!usuario){
 
         usuario =
         prompt("Seu nome?");
+
+        if(!usuario){
+
+            usuario = "Anônimo";
+        }
 
         localStorage.setItem(
             "usuario",
@@ -359,8 +370,21 @@ async function iniciarChat(){
 
     function renderMensagem(msg){
 
+        // EVITAR DUPLICAÇÃO
+
+        if(
+            document.getElementById(
+                "msg-" + msg.id
+            )
+        ){
+            return;
+        }
+
         const div =
         document.createElement("div");
+
+        div.id =
+        "msg-" + msg.id;
 
         const eu =
         msg.usuario === usuario;
@@ -395,17 +419,72 @@ async function iniciarChat(){
         chat.scrollHeight;
     }
 
+    // CARREGAR TODAS
+
+    async function carregarMensagens(){
+
+        const { data, error } =
+        await supabaseClient
+        .from("mensagens")
+        .select("*")
+        .order("id",{
+            ascending:true
+        });
+
+        if(error){
+
+            console.log(error);
+
+            return;
+        }
+
+        chat.innerHTML = "";
+
+        data.forEach(msg => {
+
+            renderMensagem(msg);
+
+            if(msg.id > ultimaMensagemId){
+
+                ultimaMensagemId = msg.id;
+            }
+
+        });
+    }
+
+    // BUSCAR NOVAS
+
+    async function buscarNovasMensagens(){
+
+        const { data, error } =
+        await supabaseClient
+        .from("mensagens")
+        .select("*")
+        .gt("id", ultimaMensagemId)
+        .order("id",{
+            ascending:true
+        });
+
+        if(error){
+
+            console.log(error);
+
+            return;
+        }
+
+        data.forEach(msg => {
+
+            renderMensagem(msg);
+
+            ultimaMensagemId =
+            msg.id;
+
+        });
+    }
+
     // HISTÓRICO
 
-    const { data } =
-    await supabaseClient
-    .from("mensagens")
-    .select("*")
-    .order("id",{
-        ascending:true
-    });
-
-    data.forEach(renderMensagem);
+    await carregarMensagens();
 
     // REALTIME
 
@@ -421,13 +500,37 @@ async function iniciarChat(){
 
         payload => {
 
-            renderMensagem(
-                payload.new
-            );
+            if(
+                payload.new.id >
+                ultimaMensagemId
+            ){
+
+                renderMensagem(
+                    payload.new
+                );
+
+                ultimaMensagemId =
+                payload.new.id;
+            }
 
         }
     )
-    .subscribe();
+    .subscribe(status => {
+
+        console.log(
+            "Realtime:",
+            status
+        );
+
+    });
+
+    // ATUALIZAÇÃO A CADA 1 SEGUNDO
+
+    setInterval(() => {
+
+        buscarNovasMensagens();
+
+    },1000);
 
     // ENVIAR
 
@@ -443,12 +546,24 @@ async function iniciarChat(){
 
             if(!texto) return;
 
+            const { error } =
             await supabaseClient
             .from("mensagens")
             .insert([{
                 usuario,
                 texto
             }]);
+
+            if(error){
+
+                console.log(error);
+
+                alert(
+                    "Erro ao enviar"
+                );
+
+                return;
+            }
 
             mensagemInput.value = "";
 
