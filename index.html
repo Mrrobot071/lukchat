@@ -255,240 +255,563 @@ body{
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+
+// ======================================
 // CONFIG
+// ======================================
+
 const SENHA = "a1234";
 
-const SUPABASE_URL = "https://xpfzqbjyizftllasvbll.supabase.co";
-const SUPABASE_KEY = "sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU";
+const TEMPO_LOGIN =
+6 * 60 * 60 * 1000;
+// 6 horas
 
-const supabaseClient = window.supabase.createClient(
+const SUPABASE_URL =
+"https://xpfzqbjyizftllasvbll.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU";
+
+// ======================================
+// SUPABASE
+// ======================================
+
+const supabaseClient =
+window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
 );
 
+// ======================================
 // ELEMENTOS
-const loginBox = document.getElementById("loginBox");
-const chatContainer = document.getElementById("chatContainer");
-const entrarBtn = document.getElementById("entrarBtn");
-const chat = document.getElementById("chat");
-const form = document.getElementById("form");
-const mensagemInput = document.getElementById("mensagem");
-const timerBtn = document.getElementById("timerBtn");
-const timerMinutos = document.getElementById("timerMinutos");
-const trocarNomeBtn = document.getElementById("trocarNomeBtn");
-const limparBtn = document.getElementById("limparBtn");
+// ======================================
 
+const loginBox =
+document.getElementById("loginBox");
+
+const chatContainer =
+document.getElementById("chatContainer");
+
+const entrarBtn =
+document.getElementById("entrarBtn");
+
+const senhaInput =
+document.getElementById("senha");
+
+const form =
+document.getElementById("form");
+
+const mensagemInput =
+document.getElementById("mensagem");
+
+const chat =
+document.getElementById("chat");
+
+const limparBtn =
+document.getElementById("limparBtn");
+
+const trocarNomeBtn =
+document.getElementById("trocarNomeBtn");
+
+const timerBtn =
+document.getElementById("timerBtn");
+
+const timerMinutos =
+document.getElementById("timerMinutos");
+
+// ======================================
 // CONTROLE
-let ultimaMensagemId = 0;
+// ======================================
+
 let usuario = "";
+
 let intervaloLimpeza = null;
+
 let chatIniciado = false;
 
-// LOGIN
-entrarBtn.onclick = entrar;
+// ======================================
+// VERIFICAR LOGIN CACHE
+// ======================================
 
-function entrar(){
-    const senha = document.getElementById("senha").value;
+verificarLoginCache();
 
-    if(senha !== SENHA){
-        alert("Senha incorreta");
+// ======================================
+// EVENTOS LOGIN
+// ======================================
+
+entrarBtn.addEventListener(
+    "click",
+    entrar
+);
+
+senhaInput.addEventListener(
+    "keydown",
+    e => {
+
+        if(e.key === "Enter"){
+
+            entrar();
+        }
+    }
+);
+
+// ======================================
+// VERIFICAR CACHE
+// ======================================
+
+function verificarLoginCache(){
+
+    const loginSalvo =
+    localStorage.getItem(
+        "chat_login"
+    );
+
+    const timestamp =
+    localStorage.getItem(
+        "chat_login_time"
+    );
+
+    if(
+        !loginSalvo
+        ||
+        !timestamp
+    ){
         return;
     }
 
-    loginBox.style.display = "none";
-    chatContainer.style.display = "flex";
+    const agora =
+    Date.now();
+
+    const diferenca =
+    agora - Number(timestamp);
+
+    if(
+        diferenca <
+        TEMPO_LOGIN
+    ){
+
+        liberarChat();
+
+    }else{
+
+        localStorage.removeItem(
+            "chat_login"
+        );
+
+        localStorage.removeItem(
+            "chat_login_time"
+        );
+    }
+}
+
+// ======================================
+// LOGIN
+// ======================================
+
+function entrar(){
+
+    const senha =
+    senhaInput.value.trim();
+
+    if(senha !== SENHA){
+
+        alert(
+            "Senha incorreta"
+        );
+
+        return;
+    }
+
+    localStorage.setItem(
+        "chat_login",
+        "true"
+    );
+
+    localStorage.setItem(
+        "chat_login_time",
+        Date.now()
+    );
+
+    liberarChat();
+}
+
+// ======================================
+// LIBERAR CHAT
+// ======================================
+
+function liberarChat(){
+
+    loginBox.style.display =
+    "none";
+
+    chatContainer.style.display =
+    "flex";
+
     iniciarChat();
 }
 
-// CHAT
+// ======================================
+// LOGOUT
+// ======================================
+
+function logout(){
+
+    localStorage.removeItem(
+        "chat_login"
+    );
+
+    localStorage.removeItem(
+        "chat_login_time"
+    );
+
+    location.reload();
+}
+
+// ======================================
+// INICIAR CHAT
+// ======================================
+
 async function iniciarChat(){
+
     if(chatIniciado) return;
+
     chatIniciado = true;
 
-    usuario = localStorage.getItem("usuario");
+    usuario =
+    localStorage.getItem(
+        "usuario"
+    );
 
     if(!usuario){
-        usuario = prompt("Seu nome?");
+
+        usuario =
+        prompt("Seu nome?");
 
         if(!usuario){
-            usuario = "Anônimo";
+
+            usuario =
+            "Anônimo";
         }
 
-        localStorage.setItem("usuario", usuario);
+        localStorage.setItem(
+            "usuario",
+            usuario
+        );
     }
 
+    // ======================================
     // TROCAR NOME
-    trocarNomeBtn.onclick = () => {
-        const novo = prompt("Novo nome:");
+    // ======================================
 
-        if(novo){
-            usuario = novo;
-            localStorage.setItem("usuario", usuario);
-        }
+    trocarNomeBtn.onclick =
+    () => {
+
+        const novo =
+        prompt("Novo nome:");
+
+        if(!novo) return;
+
+        usuario = novo;
+
+        localStorage.setItem(
+            "usuario",
+            usuario
+        );
     };
 
-    // LIMPAR CHAT VISUAL
-    limparBtn.onclick = () => {
-        chat.innerHTML = "";
-    };
+    // ======================================
+    // LIMPAR CHAT
+    // ======================================
 
-    // TEMPORIZADOR EDITÁVEL PELO CHAT
-    timerBtn.onclick = () => {
-        const inputTempo = prompt(
-            "Defina o tempo para limpeza automática (em minutos) ou digite 0 para desligar:"
+    limparBtn.onclick =
+    async () => {
+
+        const ok =
+        confirm(
+            "Apagar todas mensagens?"
         );
 
-        if (inputTempo === null) {
+        if(!ok) return;
+
+        const { error } =
+        await supabaseClient
+
+        .from("mensagens")
+
+        .delete()
+
+        .not(
+            "id",
+            "is",
+            null
+        );
+
+        if(error){
+
+            console.log(error);
+
+            alert(
+                "Erro ao limpar"
+            );
+
             return;
         }
 
-        const minutos = parseInt(inputTempo);
-        const chatElemento = document.getElementById("chat");
-
-        if (intervaloLimpeza) {
-            clearInterval(intervaloLimpeza);
-            intervaloLimpeza = null;
-        }
-
-        if (!isNaN(minutos) && minutos > 0) {
-            timerMinutos.innerText = minutos + "m";
-
-            intervaloLimpeza = setInterval(() => {
-                if (chatElemento) {
-                    chatElemento.innerHTML = "";
-                    console.log(`Chat limpo automaticamente (Ciclo de ${minutos} min).`);
-                }
-            }, minutos * 60 * 1000);
-
-            alert(`Temporizador ativado! O chat será limpo a cada ${minutos} minuto(s).`);
-        } else {
-            timerMinutos.innerText = "Off";
-            alert("Temporizador desligado.");
-        }
+        await carregarMensagens();
     };
 
-    // RENDER
-    function renderMensagem(msg){
-        if (document.getElementById("msg-" + msg.id)) {
+    // ======================================
+    // TIMER
+    // ======================================
+
+    timerBtn.onclick =
+    () => {
+
+        const valor =
+        prompt(
+            "Tempo em minutos:"
+        );
+
+        if(valor === null)
+        return;
+
+        const minutos =
+        parseInt(valor);
+
+        clearInterval(
+            intervaloLimpeza
+        );
+
+        intervaloLimpeza =
+        null;
+
+        if(
+            isNaN(minutos)
+            ||
+            minutos <= 0
+        ){
+
+            timerMinutos.innerText =
+            "Off";
+
+            alert(
+                "Temporizador desligado"
+            );
+
             return;
         }
 
-        const div = document.createElement("div");
-        div.id = "msg-" + msg.id;
+        timerMinutos.innerText =
+        minutos + "m";
 
-        const eu = msg.usuario === usuario;
-        div.className = "msg " + (eu ? "eu" : "outro");
+        intervaloLimpeza =
+        setInterval(
+        async () => {
 
-        const hora = new Date(msg.criado_em).toLocaleTimeString([],{
-            hour:"2-digit",
-            minute:"2-digit"
-        });
+            const { error } =
+            await supabaseClient
+
+            .from("mensagens")
+
+            .delete()
+
+            .not(
+                "id",
+                "is",
+                null
+            );
+
+            if(error){
+
+                console.log(error);
+
+                return;
+            }
+
+            await carregarMensagens();
+
+        }, minutos * 60000);
+
+        alert(
+            `Limpeza automática: ${minutos} min`
+        );
+    };
+
+    // ======================================
+    // LOAD INICIAL
+    // ======================================
+
+    await carregarMensagens();
+
+    // ======================================
+    // REALTIME
+    // ======================================
+
+    supabaseClient
+
+    .channel("chat-global")
+
+    .on(
+        "postgres_changes",
+
+        {
+            event:"*",
+            schema:"public",
+            table:"mensagens"
+        },
+
+        async payload => {
+
+            console.log(payload);
+
+            await carregarMensagens();
+        }
+    )
+
+    .subscribe(status => {
+
+        console.log(
+            "Realtime:",
+            status
+        );
+    });
+}
+
+// ======================================
+// CARREGAR MSG
+// ======================================
+
+async function carregarMensagens(){
+
+    const { data, error } =
+
+    await supabaseClient
+
+    .from("mensagens")
+
+    .select("*")
+
+    .order(
+        "criado_em",
+        {
+            ascending:true
+        }
+    );
+
+    if(error){
+
+        console.log(error);
+
+        return;
+    }
+
+    chat.innerHTML = "";
+
+    data.forEach(msg => {
+
+        const div =
+        document.createElement("div");
+
+        div.className =
+        "msg " +
+
+        (
+            msg.usuario === usuario
+            ? "eu"
+            : "outro"
+        );
+
+        const hora =
+        new Date(
+            msg.criado_em
+        )
+
+        .toLocaleTimeString(
+            [],
+            {
+                hour:"2-digit",
+                minute:"2-digit"
+            }
+        );
 
         div.innerHTML = `
-            <div class="nome">${msg.usuario}</div>
-            <div>${msg.texto}</div>
-            <div class="hora">${hora}</div>
+
+            <div class="nome">
+                ${msg.usuario}
+            </div>
+
+            <div>
+                ${msg.texto}
+            </div>
+
+            <div class="hora">
+                ${hora}
+            </div>
+
         `;
 
         chat.appendChild(div);
-        chat.scrollTop = chat.scrollHeight;
-    }
+    });
 
-    // CARREGAR TODAS
-    async function carregarMensagens(){
-        const { data, error } = await supabaseClient
-            .from("mensagens")
-            .select("*")
-            .order("id",{ ascending:true });
+    chat.scrollTop =
+    chat.scrollHeight;
+}
 
-        if(error){
-            console.log(error);
-            return;
-        }
+// ======================================
+// ENVIAR MSG
+// ======================================
 
-        chat.innerHTML = "";
+form.addEventListener(
 
-        data.forEach(msg => {
-            renderMensagem(msg);
+    "submit",
 
-            if(msg.id > ultimaMensagemId){
-                ultimaMensagemId = msg.id;
-            }
-        });
-    }
+    async e => {
 
-    // BUSCAR NOVAS
-    async function buscarNovasMensagens(){
-        const { data, error } = await supabaseClient
-            .from("mensagens")
-            .select("*")
-            .gt("id", ultimaMensagemId)
-            .order("id",{ ascending:true });
-
-        if(error){
-            console.log(error);
-            return;
-        }
-
-        data.forEach(msg => {
-            renderMensagem(msg);
-            ultimaMensagemId = msg.id;
-        });
-    }
-
-    // HISTÓRICO
-    await carregarMensagens();
-
-    // REALTIME
-    supabaseClient
-        .channel("chat-global")
-        .on(
-            "postgres_changes",
-            {
-                event:"INSERT",
-                schema:"public",
-                table:"mensagens"
-            },
-            payload => {
-                if(payload.new.id > ultimaMensagemId){
-                    renderMensagem(payload.new);
-                    ultimaMensagemId = payload.new.id;
-                }
-            }
-        )
-        .subscribe(status => {
-            console.log("Realtime:", status);
-        });
-
-    // ATUALIZAÇÃO A CADA 1 SEGUNDO
-    setInterval(() => {
-        buscarNovasMensagens();
-    },1000);
-
-    // ENVIAR
-    form.addEventListener("submit", async e => {
         e.preventDefault();
 
-        const texto = mensagemInput.value.trim();
+        const texto =
+        mensagemInput.value.trim();
+
         if(!texto) return;
 
-        const { error } = await supabaseClient
-            .from("mensagens")
-            .insert([{
+        mensagemInput.disabled =
+        true;
+
+        const { error } =
+
+        await supabaseClient
+
+        .from("mensagens")
+
+        .insert([
+            {
                 usuario,
                 texto
-            }]);
+            }
+        ]);
+
+        mensagemInput.disabled =
+        false;
 
         if(error){
+
             console.log(error);
-            alert("Erro ao enviar");
+
+            alert(
+                "Erro ao enviar"
+            );
+
             return;
         }
 
         mensagemInput.value = "";
+
         mensagemInput.focus();
-    });
-}
+
+        await carregarMensagens();
+    }
+);
+
 </script>
 
 </body>
