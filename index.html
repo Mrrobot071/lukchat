@@ -1361,6 +1361,12 @@
       const SUPABASE_KEY = "sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU";
       const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       let realtimeChannel = null;
+      let salasHasDescricao = true;
+
+      function isMissingDescricaoError(error) {
+        return /descricao/i.test(String(error?.message || "")) &&
+          /schema cache|column|could not find/i.test(String(error?.message || ""));
+      }
 
       function normalizeSupabaseRoom(row) {
         return {
@@ -1392,14 +1398,23 @@
         if (roomsError) throw roomsError;
 
         if (!roomsData.length) {
-          const { error: seedError } = await supabaseClient
+          let seedPayload = {
+            id: "geral",
+            nome: "Geral",
+            descricao: "Conversa principal",
+            senha: "a1234",
+          };
+          let { error: seedError } = await supabaseClient
             .from("salas")
-            .insert([{
-              id: "geral",
-              nome: "Geral",
-              descricao: "Conversa principal",
-              senha: "a1234",
-            }]);
+            .insert([seedPayload]);
+          if (seedError && isMissingDescricaoError(seedError)) {
+            salasHasDescricao = false;
+            delete seedPayload.descricao;
+            const retry = await supabaseClient
+              .from("salas")
+              .insert([seedPayload]);
+            seedError = retry.error;
+          }
           if (seedError) throw seedError;
           return loadSupabaseData();
         }
@@ -1436,28 +1451,47 @@
       }
 
       async function createSupabaseRoom(room) {
-        const { error } = await supabaseClient
+        const payload = {
+          id: room.id,
+          nome: room.name,
+          senha: room.password,
+        };
+        if (salasHasDescricao) payload.descricao = room.description || null;
+
+        let { error } = await supabaseClient
           .from("salas")
-          .insert([{
-            id: room.id,
-            nome: room.name,
-            descricao: room.description || null,
-            senha: room.password,
-          }]);
+          .insert([payload]);
+        if (error && isMissingDescricaoError(error)) {
+          salasHasDescricao = false;
+          delete payload.descricao;
+          const retry = await supabaseClient
+            .from("salas")
+            .insert([payload]);
+          error = retry.error;
+        }
         if (error) throw error;
       }
 
       async function updateSupabaseRoom(room, password) {
         const changes = {
           nome: room.name,
-          descricao: room.description || null,
         };
+        if (salasHasDescricao) changes.descricao = room.description || null;
         if (password) changes.senha = password;
 
-        const { error } = await supabaseClient
+        let { error } = await supabaseClient
           .from("salas")
           .update(changes)
           .eq("id", room.id);
+        if (error && isMissingDescricaoError(error)) {
+          salasHasDescricao = false;
+          delete changes.descricao;
+          const retry = await supabaseClient
+            .from("salas")
+            .update(changes)
+            .eq("id", room.id);
+          error = retry.error;
+        }
         if (error) throw error;
       }
 
@@ -1800,6 +1834,210 @@
       }
 
       initSupabaseMode();
+    </script>
+    <script>
+      (() => {
+        "use strict";
+
+        const SUPABASE_URL = "https://xpfzqbjyizftllasvbll.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU";
+        const USER_KEY = "hc_user_v3";
+        const UNLOCK_KEY = "hc_unlocked_v3";
+        const LOGIN_KEY = "hc_login_v3";
+        const TTL = 6 * 60 * 60 * 1000;
+
+        document.body.innerHTML = `
+          <div class="xapp" id="xapp">
+            <aside class="xside">
+              <header class="xtop"><div class="xbrand">🔥 <strong>Hot Chat</strong></div><button id="newRoom" class="xicon" type="button">+</button></header>
+              <div class="xprofile"><div id="meAvatar" class="xavatar">?</div><div><strong id="meName">Visitante</strong><span id="status">Carregando Supabase...</span></div><button id="logout" class="xlink" hidden>Sair</button></div>
+              <input id="search" class="xsearch" placeholder="Pesquisar salas" autocomplete="off">
+              <div id="count" class="xcount">0 salas</div>
+              <div id="rooms" class="xrooms"></div>
+            </aside>
+            <main class="xmain">
+              <section id="empty" class="xempty"><div class="xemptyIcon">💬</div><h1>Suas conversas</h1><p>Crie ou escolha uma sala. Tudo fica salvo no Supabase.</p><button id="emptyNewRoom" class="xprimary" type="button">Criar sala</button></section>
+              <section id="chatView" class="xchat" hidden>
+                <header class="xchatHead"><button id="back" class="xicon xback" type="button">‹</button><div id="roomAvatar" class="xavatar">?</div><div class="xtitle"><strong id="roomTitle">Sala</strong><span>Sala liberada</span></div><button id="editRoom" class="xicon" type="button">⚙</button></header>
+                <div id="messages" class="xmessages"></div>
+                <form id="msgForm" class="xcomposer"><textarea id="msgInput" rows="1" maxlength="2000" placeholder="Mensagem..."></textarea><button type="submit">➤</button></form>
+              </section>
+            </main>
+          </div>
+          <div id="modalBg" class="xmodalBg" hidden>
+            <section id="unlockModal" class="xmodal" hidden>
+              <button data-close class="xclose" type="button">×</button><h2 id="unlockTitle">Entrar na sala</h2><p>Digite seu nome e a senha da sala.</p>
+              <form id="unlockForm"><label>Seu nome<input id="nameInput" minlength="2" maxlength="32" required></label><label>Senha da sala<input id="passInput" type="password" required></label><div id="unlockError" class="xerror"></div><button class="xprimary" type="submit">Entrar</button></form>
+            </section>
+            <section id="roomModal" class="xmodal" hidden>
+              <button data-close class="xclose" type="button">×</button><h2 id="roomModalTitle">Criar sala</h2><p>Descrição é opcional. Ao editar, deixe a senha vazia para manter.</p>
+              <form id="roomForm"><label>Nome da sala<input id="roomName" minlength="2" maxlength="40" required></label><label>Descrição opcional<input id="roomDesc" maxlength="90" placeholder="Pode deixar em branco"></label><label>Senha da sala<input id="roomPass" type="password" minlength="3" maxlength="128"></label><div id="roomError" class="xerror"></div><div class="xactions"><button id="clearMessages" class="xdanger" type="button">Limpar mensagens</button><button id="deleteRoom" class="xdanger solid" type="button">Apagar sala</button><button class="xprimary" type="submit">Salvar</button></div></form>
+            </section>
+          </div>
+          <div id="toast" class="xtoast" hidden></div>
+        `;
+
+        const css = document.createElement("style");
+        css.textContent = `
+          body{margin:0;overflow:hidden;background:#000;color:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}button,input,textarea{font:inherit;color:inherit;box-sizing:border-box}button{cursor:pointer}.xapp{width:100vw;height:100dvh;display:grid;grid-template-columns:390px 1fr;overflow:hidden;background:#000}.xside{display:flex;min-width:0;min-height:0;flex-direction:column;border-right:1px solid #262626}.xtop,.xchatHead{min-height:72px;display:flex;align-items:center;gap:12px;padding:0 18px;border-bottom:1px solid #262626}.xtop{justify-content:space-between}.xbrand{display:flex;gap:10px;align-items:center;font-size:22px}.xicon{width:42px;height:42px;display:grid;place-items:center;flex:0 0 auto;border-radius:50%;border:1px solid #3a3a3a;background:transparent}.xprofile{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:12px;align-items:center;margin:16px;padding:12px;border:1px solid #262626;border-radius:8px;background:#101010}.xprofile strong,.xtitle strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.xprofile span,.xtitle span{display:block;margin-top:3px;color:#8e8e93;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.xavatar{width:48px;height:48px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(135deg,#ff3040,#fd1d6b 55%,#ff8a35);font-weight:800}.xprofile .xavatar{width:42px;height:42px}.xlink{border:0;background:transparent;color:#ff6a8a;font-size:12px;font-weight:700}.xsearch{height:42px;margin:0 16px 14px;padding:0 14px;border:1px solid transparent;border-radius:8px;outline:0;background:#181818}.xsearch:focus{border-color:#3a3a3a}.xcount{padding:0 20px 8px;color:#8e8e93;font-size:13px;text-align:right}.xrooms{flex:1;min-height:0;overflow:auto;padding:0 10px 12px}.xroom{width:100%;display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border:0;border-radius:8px;background:transparent;text-align:left}.xroom:hover,.xroom.active{background:#181818}.xroomName{display:block;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.xroomPreview{display:block;margin-top:4px;color:#8e8e93;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.xlock{color:#ff6a8a;font-size:14px}.xmain{min-width:0;min-height:0;overflow:hidden}.xempty,.xchat{height:100%;min-height:0}.xempty{display:grid;place-items:center;padding:28px;text-align:center}.xempty h1{margin:12px 0 8px}.xempty p{max-width:340px;color:#8e8e93;line-height:1.45}.xemptyIcon{width:92px;height:92px;display:grid;place-items:center;margin:auto;border:2px solid #3a3a3a;border-radius:50%;font-size:38px}.xprimary{min-height:42px;padding:0 16px;border:0;border-radius:8px;background:#3797f0;color:#fff;font-weight:750}.xdanger{min-height:42px;padding:0 14px;border-radius:8px;border:1px solid rgba(255,91,101,.35);background:rgba(255,91,101,.08);color:#ff7b85;font-weight:750}.xdanger.solid{background:#c92f3d;border-color:#c92f3d;color:#fff}.xchat{display:flex;flex-direction:column;overflow:hidden}.xchat[hidden],.xempty[hidden]{display:none}.xback{display:none;font-size:28px}.xtitle{min-width:0;flex:1}.xmessages{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px;overflow:auto;padding:22px clamp(14px,5vw,72px) 14px}.xwelcome{margin:auto;color:#8e8e93;text-align:center}.xmsgRow{display:flex;width:100%}.xmsgRow.mine{justify-content:flex-end}.xbubble{max-width:min(68%,560px);padding:9px 13px;border:1px solid #3a3a3a;border-radius:18px;background:#181818;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.42}.mine .xbubble{background:#3797f0;border-color:#3797f0}.xmeta{display:block;margin-top:5px;color:rgba(255,255,255,.62);font-size:10px}.xcomposer{display:flex;flex-direction:row;align-items:center;gap:8px;min-height:54px;margin:0 clamp(10px,3vw,24px) calc(12px + env(safe-area-inset-bottom));padding:7px 8px;border:1px solid #3a3a3a;border-radius:999px}.xcomposer textarea{flex:1;min-width:0;height:40px;max-height:116px;resize:none;padding:10px 2px 8px;border:0;outline:0;background:transparent;line-height:20px}.xcomposer button{width:40px;height:40px;flex:0 0 40px;border:0;border-radius:50%;background:transparent;color:#3797f0;font-size:20px}.xmodalBg{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:20px;background:rgba(0,0,0,.74)}.xmodalBg[hidden],.xmodal[hidden]{display:none}.xmodal{position:relative;width:min(430px,100%);padding:28px;border:1px solid #3a3a3a;border-radius:8px;background:#161616}.xmodal p{color:#8e8e93;font-size:13px;line-height:1.45}.xclose{position:absolute;right:12px;top:12px;width:34px;height:34px;border-radius:50%;border:1px solid #3a3a3a;background:transparent;font-size:22px}.xmodal form{display:flex;flex-direction:column;gap:14px}.xmodal label{display:flex;flex-direction:column;gap:7px;color:#cfcfcf;font-size:12px;font-weight:700}.xmodal input{height:44px;padding:0 13px;border:1px solid #3a3a3a;border-radius:6px;outline:0;background:#181818}.xerror{color:#ff7b85;font-size:12px}.xerror:empty{display:none}.xactions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}.xtoast{position:fixed;z-index:30;right:18px;bottom:18px;max-width:min(360px,calc(100vw - 32px));padding:12px 16px;border:1px solid #3a3a3a;border-radius:8px;background:#262626;font-size:13px}.xtoast[hidden]{display:none}@media(max-width:760px){.xapp{position:relative;display:block}.xside,.xmain{position:absolute;inset:0;width:100%;height:100%;transition:transform .22s cubic-bezier(.22,.7,.3,1)}.xmain{z-index:2;transform:translateX(100%);background:#000}.xapp.open .xside{transform:translateX(-18%)}.xapp.open .xmain{transform:translateX(0)}.xtop,.xchatHead{min-height:66px;padding:0 16px}.xback{display:grid}.xempty{display:none}.xmessages{padding:18px 12px 12px}.xbubble{max-width:82%}.xcomposer{margin:0 8px calc(8px + env(safe-area-inset-bottom));gap:4px;padding:6px}.xactions{grid-template-columns:1fr}.xmodalBg{padding:0;place-items:end center}.xmodal{max-height:94dvh;overflow:auto;border-right:0;border-bottom:0;border-left:0;border-radius:12px 12px 0 0}}`;
+        document.head.append(css);
+
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const $ = (id) => document.getElementById(id);
+        const e = {
+          app:$("xapp"), rooms:$("rooms"), count:$("count"), search:$("search"), status:$("status"),
+          meName:$("meName"), meAvatar:$("meAvatar"), logout:$("logout"), empty:$("empty"), chat:$("chatView"),
+          roomTitle:$("roomTitle"), roomAvatar:$("roomAvatar"), messages:$("messages"), msgForm:$("msgForm"), msgInput:$("msgInput"),
+          modalBg:$("modalBg"), unlockModal:$("unlockModal"), unlockTitle:$("unlockTitle"), unlockForm:$("unlockForm"), nameInput:$("nameInput"), passInput:$("passInput"), unlockError:$("unlockError"),
+          roomModal:$("roomModal"), roomModalTitle:$("roomModalTitle"), roomForm:$("roomForm"), roomName:$("roomName"), roomDesc:$("roomDesc"), roomPass:$("roomPass"), roomError:$("roomError"),
+          clearMessages:$("clearMessages"), deleteRoom:$("deleteRoom"), toast:$("toast")
+        };
+
+        let salas = [], mensagens = [], currentRoomId = null, roomToUnlock = null, editingRoomId = null, salasHasDescricao = true, toastTimer = null;
+
+        const initials = (v) => {
+          const p = String(v || "?").trim().split(/\s+/).filter(Boolean);
+          return (p.length > 1 ? p[0][0] + p[1][0] : (p[0] || "?").slice(0,2)).toUpperCase();
+        };
+        const slug = (v) => {
+          const base = String(v || "sala").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "sala";
+          let id = base, n = 2;
+          while (salas.some(s => s.id === id)) id = `${base}-${n++}`;
+          return id;
+        };
+        const toast = (txt) => { clearTimeout(toastTimer); e.toast.textContent = txt; e.toast.hidden = false; toastTimer = setTimeout(() => e.toast.hidden = true, 3500); };
+        const missingColumn = (err, col) => new RegExp(col, "i").test(String(err?.message || "")) && /schema cache|column|could not find/i.test(String(err?.message || ""));
+        const getUser = () => localStorage.getItem(USER_KEY) || "";
+        const setUser = (name) => { localStorage.setItem(USER_KEY, name); e.meName.textContent = name || "Visitante"; e.meAvatar.textContent = initials(name || "Visitante"); e.logout.hidden = !name; };
+        const unlocked = () => { try { return JSON.parse(localStorage.getItem(UNLOCK_KEY)) || []; } catch { return []; } };
+        const setUnlocked = (list) => localStorage.setItem(UNLOCK_KEY, JSON.stringify(list));
+        const isUnlocked = (id) => unlocked().includes(id);
+        const unlockRoom = (id) => { const list = unlocked(); if (!list.includes(id)) list.push(id); setUnlocked(list); };
+        const lockRoom = (id) => setUnlocked(unlocked().filter(x => x !== id));
+        const roomById = (id) => salas.find(s => s.id === id);
+        const roomMessages = (id) => mensagens.filter(m => m.sala_id === id);
+
+        function normalizeSala(row) { return { id: row.id, nome: row.nome || row.name || "Sala", descricao: row.descricao || row.description || "", senha: row.senha || row.password || "" }; }
+        function normalizeMsg(row) { return { id: row.id, sala_id: row.sala_id || row.room_id || "geral", usuario: row.usuario || row.author || "Visitante", texto: row.texto || row.text || "", criado_em: row.criado_em || row.created_at || new Date().toISOString() }; }
+
+        function renderRooms() {
+          const q = e.search.value.trim().toLowerCase();
+          const list = salas.filter(s => `${s.nome} ${s.descricao}`.toLowerCase().includes(q));
+          e.count.textContent = `${salas.length} ${salas.length === 1 ? "sala" : "salas"}`;
+          e.rooms.replaceChildren();
+          if (!list.length) { e.rooms.innerHTML = `<div style="padding:32px 14px;text-align:center;color:#8e8e93">Nenhuma sala encontrada.</div>`; return; }
+          for (const sala of list) {
+            const msgs = roomMessages(sala.id), last = msgs[msgs.length - 1], ok = isUnlocked(sala.id);
+            const btn = document.createElement("button");
+            btn.className = `xroom${currentRoomId === sala.id ? " active" : ""}`;
+            btn.type = "button";
+            btn.innerHTML = `<span class="xavatar">${initials(sala.nome)}</span><span><span class="xroomName"></span><span class="xroomPreview"></span></span><span class="xlock">${ok ? "🔓" : "🔒"}</span>`;
+            btn.querySelector(".xroomName").textContent = sala.nome;
+            btn.querySelector(".xroomPreview").textContent = ok ? (last ? `${last.usuario}: ${last.texto}` : "Nenhuma mensagem ainda") : (sala.descricao || "Toque para informar a senha");
+            btn.addEventListener("click", () => selectRoom(sala.id));
+            e.rooms.append(btn);
+          }
+        }
+
+        function renderMessages() {
+          const sala = roomById(currentRoomId);
+          e.messages.replaceChildren();
+          if (!sala) return;
+          const msgs = roomMessages(sala.id), user = getUser();
+          if (!msgs.length) { e.messages.innerHTML = `<div class="xwelcome"><div class="xavatar" style="width:76px;height:76px;margin:0 auto 12px">${initials(sala.nome)}</div><strong>${sala.nome}</strong><p>${sala.descricao || "Envie a primeira mensagem."}</p></div>`; return; }
+          for (const msg of msgs) {
+            const row = document.createElement("div");
+            row.className = `xmsgRow${msg.usuario === user ? " mine" : ""}`;
+            const bubble = document.createElement("div");
+            bubble.className = "xbubble";
+            bubble.textContent = msg.texto;
+            const meta = document.createElement("span");
+            meta.className = "xmeta";
+            meta.textContent = `${msg.usuario} · ${new Date(msg.criado_em).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}`;
+            bubble.append(meta); row.append(bubble); e.messages.append(row);
+          }
+          e.messages.scrollTop = e.messages.scrollHeight;
+        }
+
+        async function insertSala(sala) {
+          const payload = { id:sala.id, nome:sala.nome, senha:sala.senha };
+          if (salasHasDescricao) payload.descricao = sala.descricao || null;
+          let r = await supabaseClient.from("salas").insert([payload]);
+          if (r.error && missingColumn(r.error, "descricao")) { salasHasDescricao = false; delete payload.descricao; r = await supabaseClient.from("salas").insert([payload]); }
+          if (r.error) throw r.error;
+        }
+        async function updateSala(sala, senha) {
+          const payload = { nome:sala.nome };
+          if (senha) payload.senha = senha;
+          if (salasHasDescricao) payload.descricao = sala.descricao || null;
+          let r = await supabaseClient.from("salas").update(payload).eq("id", sala.id);
+          if (r.error && missingColumn(r.error, "descricao")) { salasHasDescricao = false; delete payload.descricao; r = await supabaseClient.from("salas").update(payload).eq("id", sala.id); }
+          if (r.error) throw r.error;
+        }
+        async function loadData() {
+          e.status.textContent = "Carregando Supabase...";
+          const sr = await supabaseClient.from("salas").select("*");
+          if (sr.error) throw sr.error;
+          if (!sr.data.length) { await insertSala({id:"geral",nome:"Geral",descricao:"Conversa principal",senha:"a1234"}); return loadData(); }
+          const mr = await supabaseClient.from("mensagens").select("*");
+          if (mr.error) throw mr.error;
+          salas = sr.data.map(normalizeSala);
+          mensagens = (mr.data || []).map(normalizeMsg).filter(m => salas.some(s => s.id === m.sala_id)).sort((a,b) => String(a.criado_em).localeCompare(String(b.criado_em)));
+          e.status.textContent = "Conectado ao Supabase";
+          renderRooms();
+          if (currentRoomId && roomById(currentRoomId)) renderMessages();
+          if (currentRoomId && !roomById(currentRoomId)) closeChat();
+        }
+
+        const openModal = (modal) => { e.modalBg.hidden = false; e.unlockModal.hidden = modal !== e.unlockModal; e.roomModal.hidden = modal !== e.roomModal; };
+        const closeModal = () => { e.modalBg.hidden = true; e.unlockModal.hidden = true; e.roomModal.hidden = true; };
+        function selectRoom(id) {
+          const sala = roomById(id); if (!sala) return;
+          if (!isUnlocked(id)) { roomToUnlock = sala; e.unlockTitle.textContent = `Entrar em ${sala.nome}`; e.nameInput.value = getUser(); e.passInput.value = ""; e.unlockError.textContent = ""; openModal(e.unlockModal); setTimeout(() => (e.nameInput.value ? e.passInput : e.nameInput).focus(), 30); return; }
+          currentRoomId = id; e.empty.hidden = true; e.chat.hidden = false; e.app.classList.add("open"); e.roomTitle.textContent = sala.nome; e.roomAvatar.textContent = initials(sala.nome); renderRooms(); renderMessages(); setTimeout(() => e.msgInput.focus(), 30);
+        }
+        function closeChat() { currentRoomId = null; e.chat.hidden = true; e.empty.hidden = false; e.app.classList.remove("open"); renderRooms(); }
+        function openRoomModal(id=null) {
+          editingRoomId = id; const sala = roomById(id);
+          e.roomModalTitle.textContent = sala ? "Editar sala" : "Criar sala"; e.roomName.value = sala?.nome || ""; e.roomDesc.value = sala?.descricao || ""; e.roomPass.value = ""; e.roomPass.required = !sala; e.roomPass.placeholder = sala ? "Deixe em branco para manter" : "Senha para entrar na sala"; e.clearMessages.hidden = !sala; e.deleteRoom.hidden = !sala; e.roomError.textContent = ""; openModal(e.roomModal); setTimeout(() => e.roomName.focus(), 30);
+        }
+        function resizeInput() { e.msgInput.style.height = "auto"; e.msgInput.style.height = Math.min(e.msgInput.scrollHeight, 116) + "px"; }
+
+        $("newRoom").onclick = () => openRoomModal();
+        $("emptyNewRoom").onclick = () => openRoomModal();
+        $("back").onclick = closeChat;
+        $("editRoom").onclick = () => currentRoomId && openRoomModal(currentRoomId);
+        e.search.oninput = renderRooms;
+        e.modalBg.onclick = (ev) => { if (ev.target === e.modalBg || ev.target.closest("[data-close]")) closeModal(); };
+        document.addEventListener("keydown", ev => { if (ev.key === "Escape") closeModal(); });
+        e.logout.onclick = () => { localStorage.removeItem(LOGIN_KEY); localStorage.removeItem(USER_KEY); localStorage.removeItem(UNLOCK_KEY); setUser(""); closeChat(); toast("Sessão encerrada."); };
+        e.unlockForm.onsubmit = (ev) => { ev.preventDefault(); if (!roomToUnlock) return; if (e.passInput.value !== roomToUnlock.senha) { e.unlockError.textContent = "Senha da sala incorreta."; e.passInput.select(); return; } setUser(e.nameInput.value.trim()); localStorage.setItem(LOGIN_KEY, String(Date.now())); unlockRoom(roomToUnlock.id); const id = roomToUnlock.id; roomToUnlock = null; closeModal(); selectRoom(id); };
+        e.roomForm.onsubmit = async (ev) => {
+          ev.preventDefault(); const nome = e.roomName.value.trim(), descricao = e.roomDesc.value.trim(), senha = e.roomPass.value; if (!nome) return; e.roomError.textContent = "";
+          try {
+            if (editingRoomId) { const sala = roomById(editingRoomId); await updateSala({...sala,nome,descricao}, senha); if (senha) lockRoom(sala.id); closeModal(); await loadData(); if (senha && currentRoomId === sala.id) closeChat(); toast("Sala atualizada."); return; }
+            if (senha.length < 3) { e.roomError.textContent = "Informe uma senha com pelo menos 3 caracteres."; return; }
+            const id = slug(nome); await insertSala({id,nome,descricao,senha}); closeModal(); await loadData(); toast("Sala criada."); selectRoom(id);
+          } catch (err) { console.error(err); e.roomError.textContent = err.message || "Erro ao salvar."; }
+        };
+        e.clearMessages.onclick = async () => { const sala = roomById(editingRoomId); if (!sala || !confirm("Apagar todas as mensagens desta sala?")) return; try { const r = await supabaseClient.from("mensagens").delete().eq("sala_id", sala.id); if (r.error) throw r.error; closeModal(); await loadData(); toast("Mensagens apagadas."); } catch (err) { console.error(err); e.roomError.textContent = err.message || "Erro ao limpar."; } };
+        e.deleteRoom.onclick = async () => { const sala = roomById(editingRoomId); if (!sala || !confirm(`Apagar a sala "${sala.nome}" e todas as mensagens?`)) return; try { let r = await supabaseClient.from("mensagens").delete().eq("sala_id", sala.id); if (r.error) throw r.error; r = await supabaseClient.from("salas").delete().eq("id", sala.id); if (r.error) throw r.error; lockRoom(sala.id); closeModal(); if (currentRoomId === sala.id) closeChat(); await loadData(); toast("Sala apagada."); } catch (err) { console.error(err); e.roomError.textContent = err.message || "Erro ao apagar."; } };
+        e.msgForm.onsubmit = async (ev) => { ev.preventDefault(); const text = e.msgInput.value.trim(); if (!currentRoomId || !text) return; e.msgInput.disabled = true; try { const r = await supabaseClient.from("mensagens").insert([{sala_id:currentRoomId,usuario:getUser() || "Visitante",texto:text}]); if (r.error) throw r.error; e.msgInput.value = ""; resizeInput(); await loadData(); e.msgInput.focus(); } catch (err) { console.error(err); toast(err.message || "Erro ao enviar."); } finally { e.msgInput.disabled = false; } };
+        e.msgInput.oninput = resizeInput;
+        e.msgInput.onkeydown = (ev) => { if (ev.key === "Enter" && !ev.shiftKey && !ev.isComposing) { ev.preventDefault(); e.msgForm.requestSubmit(); } };
+
+        async function start() {
+          setUser(getUser());
+          if (Date.now() - Number(localStorage.getItem(LOGIN_KEY) || 0) > TTL) localStorage.removeItem(UNLOCK_KEY);
+          try {
+            await loadData();
+            supabaseClient.channel("hot-chat-v3").on("postgres_changes", {event:"*", schema:"public", table:"salas"}, loadData).on("postgres_changes", {event:"*", schema:"public", table:"mensagens"}, loadData).subscribe();
+          } catch (err) {
+            console.error(err); e.status.textContent = "Erro no Supabase"; e.rooms.innerHTML = `<div style="padding:32px 14px;text-align:center;color:#ff7b85;line-height:1.45">Erro no Supabase: ${err.message || err}. Confira se existem as tabelas salas e mensagens com as colunas certas.</div>`; toast(err.message || "Erro no Supabase.");
+          }
+        }
+        start();
+      })();
     </script>
   </body>
 </html>
