@@ -1,2043 +1,1215 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#000000" />
-    <title>Hot Chat</title>
-    <style>
-      :root {
-        --bg: #000;
-        --line: #262626;
-        --line-2: #3a3a3a;
-        --panel: #101010;
-        --panel-2: #181818;
-        --text: #f5f5f5;
-        --soft: #a8a8a8;
-        --muted: #737373;
-        --blue: #3797f0;
-        --red: #ff3040;
-        --pink: #fd1d6b;
-        --orange: #ff8a35;
-        --green: #39d078;
-        --grad: linear-gradient(135deg, var(--red), var(--pink) 52%, var(--orange));
-        --side: 390px;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Hot Chat</title>
+  <style>
+    :root {
+      --bg: #000;
+      --line: #262626;
+      --line2: #3a3a3a;
+      --card: #101010;
+      --card2: #181818;
+      --txt: #f5f5f5;
+      --mut: #8e8e93;
+      --blue: #3797f0;
+      --red: #ff3040;
+      --pink: #fd1d6b;
+      --orange: #ff8a35;
+      --grad: linear-gradient(135deg, var(--red), var(--pink) 55%, var(--orange));
+      --side: 390px;
+    }
 
-      * { box-sizing: border-box; }
+    * { box-sizing: border-box; }
 
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      min-width: 320px;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--txt);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button,
+    input,
+    textarea {
+      color: inherit;
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app {
+      display: grid;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      grid-template-columns: var(--side) minmax(0, 1fr);
+      overflow: hidden;
+      background: #000;
+    }
+
+    .side {
+      display: flex;
+      min-width: 0;
+      min-height: 0;
+      flex-direction: column;
+      border-right: 1px solid var(--line);
+    }
+
+    .top,
+    .head {
+      display: flex;
+      min-height: 72px;
+      flex: 0 0 auto;
+      align-items: center;
+      gap: 12px;
+      padding: 0 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .top { justify-content: space-between; }
+
+    .brand {
+      min-width: 0;
+      overflow: hidden;
+      font-size: 22px;
+      font-weight: 800;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .icon {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      flex: 0 0 42px;
+      place-items: center;
+      border: 1px solid var(--line2);
+      border-radius: 50%;
+      background: transparent;
+      line-height: 1;
+    }
+
+    .profile {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      margin: 16px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--card);
+    }
+
+    .avatar {
+      display: grid;
+      width: 48px;
+      height: 48px;
+      flex: 0 0 auto;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--grad);
+      color: #fff;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .profile .avatar {
+      width: 42px;
+      height: 42px;
+    }
+
+    .profile strong,
+    .title strong,
+    .roomName {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .profile span,
+    .title span,
+    .roomPrev {
+      display: block;
+      margin-top: 3px;
+      overflow: hidden;
+      color: var(--mut);
+      font-size: 12px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .link {
+      border: 0;
+      background: transparent;
+      color: #ff6a8a;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .search {
+      width: auto;
+      height: 42px;
+      margin: 0 16px 14px;
+      padding: 0 14px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      outline: 0;
+      background: var(--card2);
+    }
+
+    .search:focus { border-color: var(--line2); }
+
+    .count {
+      padding: 0 20px 8px;
+      color: var(--mut);
+      font-size: 13px;
+      text-align: right;
+    }
+
+    .rooms {
+      min-height: 0;
+      flex: 1;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 0 10px 12px;
+    }
+
+    .room {
+      display: grid;
+      width: 100%;
+      grid-template-columns: 56px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 12px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      text-align: left;
+    }
+
+    .room:hover,
+    .room.active { background: var(--card2); }
+
+    .roomName { font-weight: 750; }
+    .roomPrev { font-size: 13px; }
+    .lock { color: #ff6a8a; font-size: 14px; }
+
+    .main {
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .empty,
+    .chat {
+      height: 100%;
+      min-height: 0;
+    }
+
+    .empty {
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      text-align: center;
+    }
+
+    .emptyIcon {
+      display: grid;
+      width: 92px;
+      height: 92px;
+      margin: auto;
+      place-items: center;
+      border: 2px solid var(--line2);
+      border-radius: 50%;
+      font-size: 38px;
+    }
+
+    .empty p {
+      max-width: 340px;
+      color: var(--mut);
+      line-height: 1.45;
+    }
+
+    .primary {
+      min-height: 42px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--blue);
+      color: #fff;
+      font-weight: 750;
+    }
+
+    .danger {
+      min-height: 42px;
+      padding: 0 14px;
+      border: 1px solid rgba(255, 91, 101, .35);
+      border-radius: 8px;
+      background: rgba(255, 91, 101, .08);
+      color: #ff7b85;
+      font-weight: 750;
+    }
+
+    .danger.solid {
+      border-color: #c92f3d;
+      background: #c92f3d;
+      color: #fff;
+    }
+
+    .chat {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat[hidden],
+    .empty[hidden],
+    .modalBg[hidden],
+    .modal[hidden],
+    .toast[hidden] { display: none; }
+
+    .back {
+      display: none;
+      font-size: 28px;
+    }
+
+    .title {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .messages {
+      display: flex;
+      min-height: 0;
+      flex: 1 1 auto;
+      flex-direction: column;
+      gap: 6px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 22px clamp(14px, 5vw, 72px) 14px;
+      overscroll-behavior: contain;
+    }
+
+    .welcome {
+      margin: auto;
+      color: var(--mut);
+      text-align: center;
+    }
+
+    .row {
+      display: flex;
+      width: 100%;
+    }
+
+    .row.mine { justify-content: flex-end; }
+
+    .bubble {
+      max-width: min(68%, 560px);
+      padding: 9px 13px;
+      border: 1px solid var(--line2);
+      border-radius: 18px;
+      background: var(--card2);
+      line-height: 1.42;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+
+    .mine .bubble {
+      border-color: var(--blue);
+      background: var(--blue);
+    }
+
+    .meta {
+      display: block;
+      margin-top: 5px;
+      color: rgba(255, 255, 255, .62);
+      font-size: 10px;
+    }
+
+    .composer {
+      display: flex;
+      width: calc(100% - clamp(20px, 6vw, 48px));
+      max-width: 980px;
+      min-height: 54px;
+      flex: 0 0 auto;
+      align-items: flex-end;
+      gap: 8px;
+      margin: 0 auto calc(12px + env(safe-area-inset-bottom));
+      padding: 7px 8px;
+      border: 1px solid var(--line2);
+      border-radius: 28px;
+      background: #000;
+    }
+
+    .composer textarea {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      height: 40px;
+      min-height: 40px;
+      max-height: 116px;
+      flex: 1 1 auto;
+      resize: none;
+      overflow-y: hidden;
+      padding: 10px 8px;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      line-height: 20px;
+      scrollbar-width: thin;
+    }
+
+    .composer textarea:focus { outline: 0; }
+
+    .composer button {
+      display: grid;
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
+      place-items: center;
+      align-self: flex-end;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--blue);
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .modalBg {
+      position: fixed;
+      z-index: 20;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, .74);
+    }
+
+    .modal {
+      position: relative;
+      width: min(430px, 100%);
+      padding: 28px;
+      border: 1px solid var(--line2);
+      border-radius: 8px;
+      background: #161616;
+    }
+
+    .modal p {
+      color: var(--mut);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line2);
+      border-radius: 50%;
+      background: transparent;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .modal form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal label {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      color: #cfcfcf;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .modal input {
+      height: 44px;
+      padding: 0 13px;
+      border: 1px solid var(--line2);
+      border-radius: 6px;
+      outline: 0;
+      background: var(--card2);
+    }
+
+    .error {
+      color: #ff7b85;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .error:empty { display: none; }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 9px;
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 30;
+      right: 18px;
+      bottom: 18px;
+      max-width: min(480px, calc(100vw - 32px));
+      padding: 12px 16px;
+      border: 1px solid var(--line2);
+      border-radius: 8px;
+      background: #262626;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 900px) {
+      :root { --side: 340px; }
+      .bubble { max-width: 76%; }
+    }
+
+    @media (max-width: 760px) {
       html,
       body {
-        width: 100%;
-        height: 100%;
-        min-width: 320px;
-        margin: 0;
-      }
-
-      body {
-        overflow: hidden;
-        background: var(--bg);
-        color: var(--text);
-        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-        -webkit-font-smoothing: antialiased;
-      }
-
-      button,
-      input,
-      textarea {
-        color: inherit;
-        font: inherit;
-      }
-
-      button {
-        -webkit-tap-highlight-color: transparent;
-      }
-
-      svg {
-        display: block;
-        fill: none;
-        stroke: currentColor;
-        stroke-linecap: round;
-        stroke-linejoin: round;
+        position: fixed;
+        inset: 0;
       }
 
       .app {
-        display: grid;
-        grid-template-columns: var(--side) 1fr;
-        width: 100vw;
+        position: relative;
+        display: block;
+        height: 100svh;
         height: 100dvh;
-        overflow: hidden;
+      }
+
+      .side,
+      .main {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        transition: transform .22s cubic-bezier(.22, .7, .3, 1);
+      }
+
+      .main {
+        z-index: 2;
+        transform: translateX(100%);
         background: #000;
       }
 
-      .sidebar {
-        display: flex;
-        min-width: 0;
-        min-height: 0;
-        flex-direction: column;
-        border-right: 1px solid var(--line);
-      }
+      .app.open .side { transform: translateX(-18%); }
+      .app.open .main { transform: translateX(0); }
 
-      .topbar,
-      .chat-head {
-        display: flex;
-        min-height: 74px;
-        align-items: center;
-        padding: 0 20px;
-        border-bottom: 1px solid var(--line);
-      }
-
-      .topbar {
-        justify-content: space-between;
+      .top,
+      .head {
+        min-height: 58px;
+        padding: 0 10px;
       }
 
       .brand {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        font-size: 22px;
-        font-weight: 800;
-      }
-
-      .brand-mark {
-        display: grid;
-        width: 38px;
-        height: 38px;
-        place-items: center;
-        background: var(--grad);
-        border-radius: 11px;
-      }
-
-      .brand-mark svg {
-        width: 20px;
-        fill: #fff;
-        stroke: 0;
-      }
-
-      .icon-btn {
-        display: grid;
-        width: 42px;
-        height: 42px;
-        flex: 0 0 auto;
-        place-items: center;
-        background: transparent;
-        border: 1px solid var(--line-2);
-        border-radius: 50%;
-        cursor: pointer;
-      }
-
-      .icon-btn:hover {
-        background: var(--panel-2);
-      }
-
-      .icon-btn svg {
-        width: 21px;
-        stroke-width: 2;
-      }
-
-      .profile {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        margin: 16px 16px 12px;
-        padding: 12px;
-        background: var(--panel);
-        border: 1px solid var(--line);
-        border-radius: 8px;
-      }
-
-      .avatar {
-        display: grid;
-        width: 48px;
-        height: 48px;
-        flex: 0 0 auto;
-        place-items: center;
-        background: var(--grad);
-        border: 2px solid #333;
-        border-radius: 50%;
-        color: #fff;
-        font-size: 15px;
-        font-weight: 850;
-        text-transform: uppercase;
-      }
-
-      .avatar.small {
-        width: 40px;
-        height: 40px;
-      }
-
-      .profile-info,
-      .room-text,
-      .head-text {
-        min-width: 0;
-        flex: 1;
-      }
-
-      .profile-info strong,
-      .room-name,
-      .head-text strong {
-        display: block;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .profile-info strong,
-      .room-name {
-        font-size: 14px;
-        font-weight: 750;
-      }
-
-      .profile-info span,
-      .room-preview,
-      .head-text span {
-        display: block;
-        margin-top: 3px;
-        overflow: hidden;
-        color: var(--muted);
-        font-size: 12px;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .text-btn {
-        padding: 6px 4px;
-        color: #ff6a8a;
-        background: transparent;
-        border: 0;
-        cursor: pointer;
-        font-size: 12px;
-        font-weight: 750;
-      }
-
-      .search {
-        display: flex;
-        flex-direction: row;
-        gap: 10px;
-        align-items: center;
-        margin: 0 16px 18px;
-        padding: 0 14px;
-        color: var(--muted);
-        background: var(--panel-2);
-        border: 1px solid transparent;
-        border-radius: 8px;
-      }
-
-      .search:focus-within {
-        border-color: var(--line-2);
-      }
-
-      .search svg {
-        width: 18px;
-        stroke-width: 2;
-      }
-
-      .search input {
-        width: 100%;
-        height: 42px;
-        min-width: 0;
-        background: transparent;
-        border: 0;
-        outline: 0;
-        font-size: 14px;
-      }
-
-      .section-title {
-        display: flex;
-        justify-content: space-between;
-        padding: 0 20px 8px;
-        font-size: 13px;
-      }
-
-      .section-title span {
-        color: var(--muted);
-      }
-
-      .rooms {
-        min-height: 0;
-        flex: 1;
-        overflow-y: auto;
-        padding: 0 10px 12px;
-      }
-
-      .room {
-        display: grid;
-        grid-template-columns: 58px minmax(0, 1fr) auto;
-        gap: 12px;
-        width: 100%;
-        align-items: center;
-        padding: 10px 12px;
-        text-align: left;
-        background: transparent;
-        border: 0;
-        border-radius: 8px;
-        cursor: pointer;
-      }
-
-      .room:hover,
-      .room.active {
-        background: var(--panel-2);
-      }
-
-      .room .avatar {
-        width: 56px;
-        height: 56px;
-      }
-
-      .room-time {
-        color: var(--muted);
-        font-size: 11px;
-      }
-
-      .lock {
-        display: grid;
-        width: 22px;
-        height: 22px;
-        place-items: center;
-        color: #fff;
-        background: #242424;
-        border-radius: 50%;
-      }
-
-      .lock.open {
-        background: var(--grad);
-      }
-
-      .lock svg {
-        width: 12px;
-        stroke-width: 2.2;
-      }
-
-      .side-foot {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        padding: 13px 20px calc(13px + env(safe-area-inset-bottom));
-        color: var(--muted);
-        border-top: 1px solid var(--line);
-        font-size: 11px;
-      }
-
-      .dot {
-        width: 7px;
-        height: 7px;
-        background: var(--green);
-        border-radius: 50%;
-      }
-
-      .conversation {
-        position: relative;
-        min-width: 0;
-        min-height: 0;
-        overflow: hidden;
-        background: #000;
-      }
-
-      .empty,
-      .chat {
-        height: 100%;
-        min-height: 0;
-      }
-
-      .empty {
-        display: grid;
-        place-items: center;
-        padding: 30px;
-        text-align: center;
-      }
-
-      .empty-card {
-        max-width: 360px;
-      }
-
-      .empty-icon {
-        display: grid;
-        width: 96px;
-        height: 96px;
-        margin: 0 auto 22px;
-        place-items: center;
-        border: 2px solid var(--line-2);
-        border-radius: 50%;
-      }
-
-      .empty-icon svg {
-        width: 52px;
-        stroke-width: 1.45;
-      }
-
-      h1 {
-        margin: 0;
-        font-size: 24px;
-      }
-
-      .empty p {
-        margin: 10px 0 22px;
-        color: var(--muted);
-        font-size: 14px;
-        line-height: 1.5;
-      }
-
-      .primary {
-        min-height: 42px;
-        padding: 0 17px;
-        color: #fff;
-        background: var(--blue);
-        border: 0;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 13px;
-        font-weight: 760;
-      }
-
-      .danger {
-        min-height: 42px;
-        padding: 0 17px;
-        color: #ff7b85;
-        background: rgba(255, 91, 101, 0.08);
-        border: 1px solid rgba(255, 91, 101, 0.32);
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 13px;
-        font-weight: 760;
-      }
-
-      .danger.solid {
-        color: #fff;
-        background: #c92f3d;
-        border-color: #c92f3d;
-      }
-
-      .chat {
-        display: flex;
-        min-height: 0;
-        flex-direction: column;
-        overflow: hidden;
-      }
-
-      .chat[hidden],
-      .empty[hidden] {
-        display: none;
-      }
-
-      .back {
-        display: none;
-        margin-right: 10px;
-      }
-
-      .head-text strong {
-        font-size: 15px;
-      }
-
-      .head-text span {
-        display: flex;
-        gap: 6px;
-        align-items: center;
-      }
-
-      .messages {
-        display: flex;
-        min-height: 0;
-        flex: 1;
-        flex-direction: column;
-        gap: 6px;
-        overflow-y: auto;
-        padding: 24px clamp(16px, 5vw, 76px) 16px;
-      }
-
-      .welcome {
-        margin: auto;
-        color: var(--muted);
-        text-align: center;
-      }
-
-      .welcome .avatar {
-        width: 76px;
-        height: 76px;
-        margin: 0 auto 14px;
-        font-size: 22px;
-      }
-
-      .welcome strong {
-        display: block;
-        color: var(--text);
-        margin-bottom: 6px;
-      }
-
-      .row {
-        display: flex;
-        width: 100%;
-      }
-
-      .row.mine {
-        justify-content: flex-end;
-      }
-
-      .bubble {
-        max-width: min(68%, 560px);
-        padding: 9px 13px;
-        overflow-wrap: anywhere;
-        white-space: pre-wrap;
-        background: var(--panel-2);
-        border: 1px solid var(--line-2);
-        border-radius: 18px;
-        font-size: 14px;
-        line-height: 1.42;
-      }
-
-      .row.mine .bubble {
-        background: var(--blue);
-        border-color: var(--blue);
-      }
-
-      .meta {
-        display: block;
-        margin-top: 5px;
-        color: var(--muted);
-        font-size: 10px;
-      }
-
-      .composer {
-        display: flex;
-        flex-direction: row;
-        gap: 8px;
-        align-items: center;
-        width: auto;
-        min-height: 54px;
-        margin: 0 clamp(10px, 3vw, 24px) calc(12px + env(safe-area-inset-bottom));
-        padding: 7px 8px;
-        border: 1px solid var(--line-2);
-        border-radius: 999px;
-      }
-
-      .emoji,
-      .send {
-        display: grid;
-        width: 40px;
-        height: 40px;
-        min-width: 40px;
-        flex: 0 0 40px;
-        place-items: center;
-        background: transparent;
-        border: 0;
-        border-radius: 50%;
-        cursor: pointer;
-      }
-
-      .emoji svg,
-      .send svg {
-        width: 22px;
-        stroke-width: 1.8;
-      }
-
-      .send {
-        color: var(--blue);
-      }
-
-      textarea {
-        min-width: 0;
-        max-height: 116px;
-        min-height: 40px;
-        height: 40px;
-        flex: 1;
-        resize: none;
-        padding: 10px 2px 8px;
-        overflow-y: auto;
-        background: transparent;
-        border: 0;
-        outline: 0;
-        font-size: 14px;
-        line-height: 20px;
-      }
-
-      .modal-bg {
-        position: fixed;
-        z-index: 20;
-        inset: 0;
-        display: grid;
-        padding: 20px;
-        place-items: center;
-        background: rgba(0, 0, 0, 0.74);
-      }
-
-      .modal-bg[hidden],
-      .modal[hidden] {
-        display: none;
-      }
-
-      .modal {
-        position: relative;
-        width: min(430px, 100%);
-        padding: 28px;
-        background: #161616;
-        border: 1px solid var(--line-2);
-        border-radius: 8px;
-        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.58);
-      }
-
-      .close {
-        position: absolute;
-        top: 14px;
-        right: 14px;
-      }
-
-      .modal h2 {
-        margin: 0;
         font-size: 21px;
       }
 
-      .modal p {
-        margin: 7px 0 20px;
-        color: var(--muted);
-        font-size: 13px;
-        line-height: 1.5;
+      .profile {
+        margin: 10px 12px;
+        padding: 10px;
       }
 
-      .modal form {
-        display: flex;
-        gap: 14px;
-        flex-direction: column;
+      .search {
+        height: 40px;
+        margin: 0 12px 10px;
       }
 
-      label {
-        display: flex;
-        gap: 7px;
-        flex-direction: column;
-        color: var(--soft);
-        font-size: 12px;
-        font-weight: 700;
+      .count {
+        padding: 0 16px 6px;
       }
 
-      input {
-        width: 100%;
-        height: 44px;
-        padding: 0 13px;
-        background: var(--panel-2);
-        border: 1px solid var(--line-2);
-        border-radius: 6px;
-        outline: 0;
+      .head .avatar {
+        width: 38px;
+        height: 38px;
+      }
+
+      .back { display: grid; }
+      .empty { display: none; }
+
+      .messages {
+        gap: 5px;
+        padding: 12px 9px 8px;
+      }
+
+      .bubble {
+        max-width: 88%;
+        padding: 8px 11px;
+        border-radius: 17px;
         font-size: 14px;
       }
 
-      input:focus {
-        border-color: #555;
+      .composer {
+        width: calc(100% - 12px);
+        min-height: 50px;
+        gap: 4px;
+        margin-bottom: calc(6px + env(safe-area-inset-bottom));
+        padding: 5px;
+        border-radius: 25px;
       }
 
-      .error {
-        min-height: 0;
-        margin: -2px 0 0;
-        color: #ff7b85;
-        font-size: 12px;
+      .composer textarea {
+        height: 40px;
+        min-height: 40px;
+        max-height: 98px;
+        padding: 10px 7px;
+        font-size: 16px;
+        line-height: 20px;
       }
 
-      .error:empty {
-        display: none;
+      .composer button {
+        width: 40px;
+        height: 40px;
+        flex-basis: 40px;
+        font-size: 18px;
       }
 
-      .modal-actions {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 9px;
+      .room {
+        min-height: 66px;
+        grid-template-columns: 50px minmax(0, 1fr) auto;
+        padding: 8px 10px;
       }
 
-      .modal-actions.three {
-        grid-template-columns: 1fr 1fr 1fr;
+      .room .avatar {
+        width: 48px;
+        height: 48px;
       }
 
-      .toast {
-        position: fixed;
-        right: 18px;
-        bottom: 18px;
-        z-index: 30;
-        max-width: min(360px, calc(100vw - 32px));
-        padding: 12px 16px;
-        background: #262626;
-        border: 1px solid var(--line-2);
-        border-radius: 8px;
-        font-size: 13px;
+      .actions { grid-template-columns: 1fr; }
+      .modalBg { padding: 0; place-items: end center; }
+
+      .modal {
+        max-height: 94dvh;
+        overflow: auto;
+        border-right: 0;
+        border-bottom: 0;
+        border-left: 0;
+        border-radius: 12px 12px 0 0;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .brand { font-size: 20px; }
+      .room {
+        grid-template-columns: 46px minmax(0, 1fr) auto;
+        gap: 10px;
+        padding-right: 8px;
+        padding-left: 8px;
+      }
+      .room .avatar { width: 46px; height: 46px; }
+      .icon { width: 38px; height: 38px; flex-basis: 38px; }
+      .composer { width: calc(100% - 8px); }
+      .bubble { max-width: 90%; }
+    }
+
+    @media (max-height: 620px) and (max-width: 760px) {
+      .top,
+      .head {
+        min-height: 54px;
       }
 
-      .toast[hidden] {
-        display: none;
+      .profile {
+        margin-top: 8px;
+        margin-bottom: 8px;
       }
 
-      @media (max-width: 760px) {
-        .app {
-          position: relative;
-          display: block;
-        }
-
-        .sidebar,
-        .conversation {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          transition: transform 220ms cubic-bezier(0.22, 0.7, 0.3, 1);
-        }
-
-        .conversation {
-          z-index: 2;
-          transform: translateX(100%);
-        }
-
-        .app.open .sidebar {
-          transform: translateX(-18%);
-        }
-
-        .app.open .conversation {
-          transform: translateX(0);
-        }
-
-        .topbar,
-        .chat-head {
-          min-height: 66px;
-          padding-right: 16px;
-          padding-left: 16px;
-        }
-
-        .profile {
-          margin: 14px 16px 12px;
-        }
-
-        .messages {
-          padding: 18px 12px 12px;
-        }
-
-        .back {
-          display: grid;
-        }
-
-        .empty {
-          display: none;
-        }
-
-        .bubble {
-          max-width: 82%;
-        }
-
-        .composer {
-          gap: 4px;
-          min-height: 52px;
-          margin-right: 8px;
-          margin-bottom: calc(8px + env(safe-area-inset-bottom));
-          margin-left: 8px;
-          padding: 6px;
-        }
-
-        .emoji,
-        .send {
-          width: 38px;
-          height: 38px;
-          min-width: 38px;
-          flex-basis: 38px;
-        }
-
-        textarea {
-          min-height: 38px;
-          height: 38px;
-          padding-top: 9px;
-          padding-bottom: 7px;
-        }
-
-        .modal-bg {
-          padding: 0;
-          place-items: end center;
-        }
-
-        .modal {
-          max-height: 94dvh;
-          overflow-y: auto;
-          border-right: 0;
-          border-bottom: 0;
-          border-left: 0;
-          border-radius: 12px 12px 0 0;
-        }
-
-        .modal-actions,
-        .modal-actions.three {
-          grid-template-columns: 1fr;
-        }
+      .messages {
+        padding-top: 8px;
       }
 
-      @media (max-width: 380px) {
-        .brand {
-          gap: 9px;
-          font-size: 20px;
-        }
-
-        .brand-mark {
-          width: 36px;
-          height: 36px;
-        }
-
-        .room {
-          grid-template-columns: 52px minmax(0, 1fr) 22px;
-          gap: 10px;
-          padding-right: 8px;
-          padding-left: 8px;
-        }
-
-        .room .avatar {
-          width: 50px;
-          height: 50px;
-        }
-
-        .side-foot {
-          font-size: 10px;
-        }
+      .composer textarea {
+        max-height: 78px;
       }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <aside class="side">
+      <header class="top">
+        <div class="brand">Hot Chat</div>
+        <button class="icon" id="newRoom" type="button" aria-label="Criar sala">+</button>
+      </header>
 
-      @media (max-height: 620px) and (max-width: 760px) {
-        .topbar,
-        .chat-head {
-          min-height: 58px;
-        }
+      <div class="profile">
+        <div class="avatar" id="meAvatar">?</div>
+        <div>
+          <strong id="meName">Visitante</strong>
+          <span id="status">Carregando Supabase...</span>
+        </div>
+        <button class="link" id="logout" type="button" hidden>Sair</button>
+      </div>
 
-        .profile {
-          margin-top: 10px;
-          margin-bottom: 10px;
-          padding: 10px;
-        }
+      <input class="search" id="search" placeholder="Pesquisar salas" autocomplete="off">
+      <div class="count" id="count">0 salas</div>
+      <div class="rooms" id="rooms"></div>
+    </aside>
 
-        .search {
-          margin-bottom: 12px;
-        }
+    <main class="main">
+      <section class="empty" id="empty">
+        <div>
+          <div class="emptyIcon">💬</div>
+          <h1>Suas conversas</h1>
+          <p>Crie ou escolha uma sala. Tudo fica salvo no Supabase e atualiza a cada 1 segundo.</p>
+          <button class="primary" id="emptyNewRoom" type="button">Criar sala</button>
+        </div>
+      </section>
 
-        .messages {
-          padding-top: 12px;
-        }
-
-        .welcome .avatar {
-          width: 64px;
-          height: 64px;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="app" id="app">
-      <aside class="sidebar">
-        <header class="topbar">
-          <div class="brand">
-            <span class="brand-mark">
-              <svg viewBox="0 0 24 24"><path d="M8.7 3.3c.3 2.5-1.3 3.5-2.4 5.2-1.1 1.6-1.7 3-1.3 5.2.6 3.4 3.4 6 7 6 3.9 0 7-3.1 7-7 0-3.3-1.8-6.5-5-8.7.1 2.8-1 4-2.1 5.1-.1-2.5-1-4.3-3.2-5.8Z"/></svg>
-            </span>
-            <span>Hot Chat</span>
+      <section class="chat" id="chatView" hidden>
+        <header class="head">
+          <button class="icon back" id="back" type="button" aria-label="Voltar">‹</button>
+          <div class="avatar" id="roomAvatar">?</div>
+          <div class="title">
+            <strong id="roomTitle">Sala</strong>
+            <span>Sala liberada</span>
           </div>
-          <button class="icon-btn" id="newRoomBtn" type="button" title="Criar sala" aria-label="Criar sala">
-            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-          </button>
+          <button class="icon" id="editRoom" type="button" aria-label="Configurar sala">⚙</button>
         </header>
 
-        <div class="profile">
-          <div class="avatar small" id="profileAvatar">?</div>
-          <div class="profile-info">
-            <strong id="profileName">Visitante</strong>
-            <span id="profileStatus">Entre em uma sala</span>
-          </div>
-          <button class="text-btn" id="logoutBtn" type="button" hidden>Sair</button>
-        </div>
+        <div class="messages" id="messages"></div>
 
-        <label class="search">
-          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
-          <input id="searchInput" type="search" placeholder="Pesquisar salas" autocomplete="off" />
-        </label>
-
-        <div class="section-title">
-          <strong>Mensagens</strong>
-          <span id="roomCount">0 salas</span>
-        </div>
-
-        <div class="rooms" id="rooms"></div>
-
-        <footer class="side-foot">
-          <span class="dot"></span>
-          HTML unico: dados salvos neste navegador
-        </footer>
-      </aside>
-
-      <main class="conversation">
-        <section class="empty" id="empty">
-          <div class="empty-card">
-            <div class="empty-icon">
-              <svg viewBox="0 0 48 48"><path d="M41 23.2A16.5 16.5 0 0 1 24.2 39a18 18 0 0 1-7.1-1.5L7 41l3.3-9A15.3 15.3 0 0 1 7.5 23C7.5 14.2 15 7 24.3 7S41 14.2 41 23.2Z"/><path d="m17 24 4.3 4 9.8-10"/></svg>
-            </div>
-            <h1>Suas conversas</h1>
-            <p>Selecione uma sala para conversar. Cada sala tem sua propria senha.</p>
-            <button class="primary" id="emptyNewRoomBtn" type="button">Criar nova sala</button>
-          </div>
-        </section>
-
-        <section class="chat" id="chat" hidden>
-          <header class="chat-head">
-            <button class="icon-btn back" id="backBtn" type="button" aria-label="Voltar">
-              <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
-            </button>
-            <div class="avatar" id="chatAvatar">G</div>
-            <div class="head-text">
-              <strong id="chatTitle">Sala</strong>
-              <span><i class="dot"></i><span id="chatSubtitle">Protegida por senha</span></span>
-            </div>
-            <button class="icon-btn" id="manageBtn" type="button" title="Configurar sala" aria-label="Configurar sala">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg>
-            </button>
-          </header>
-
-          <div class="messages" id="messages"></div>
-
-          <form class="composer" id="messageForm">
-            <button class="emoji" id="emojiBtn" type="button" aria-label="Adicionar coracao">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5s1.3 2 3.5 2 3.5-2 3.5-2M9 9.5h.01M15 9.5h.01"/></svg>
-            </button>
-            <textarea id="messageInput" rows="1" maxlength="2000" placeholder="Mensagem..." aria-label="Mensagem"></textarea>
-            <button class="send" type="submit" aria-label="Enviar">
-              <svg viewBox="0 0 24 24"><path d="m4 4 17 8-17 8 3-8-3-8Z"/><path d="M7 12h14"/></svg>
-            </button>
-          </form>
-        </section>
-      </main>
-    </div>
-
-    <div class="modal-bg" id="modalBg" hidden>
-      <section class="modal" id="unlockModal" hidden>
-        <button class="icon-btn close" type="button" data-close aria-label="Fechar">
-          <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
-        </button>
-        <h2 id="unlockTitle">Entrar na sala</h2>
-        <p>Digite seu nome e a senha desta conversa.</p>
-        <form id="unlockForm">
-          <label>Seu nome<input id="nameInput" minlength="2" maxlength="32" required /></label>
-          <label>Senha da sala<input id="passwordInput" type="password" maxlength="128" required /></label>
-          <div class="error" id="unlockError"></div>
-          <button class="primary" type="submit">Entrar na conversa</button>
+        <form class="composer" id="msgForm">
+          <textarea id="msgInput" rows="1" maxlength="2000" placeholder="Mensagem..." autocomplete="off" autocorrect="on" autocapitalize="sentences" spellcheck="true"></textarea>
+          <button type="submit" aria-label="Enviar mensagem">➤</button>
         </form>
       </section>
+    </main>
+  </div>
 
-      <section class="modal" id="roomModal" hidden>
-        <button class="icon-btn close" type="button" data-close aria-label="Fechar">
-          <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
-        </button>
-        <h2 id="roomModalTitle">Criar sala</h2>
-        <p>Cada sala fica bloqueada pela senha escolhida.</p>
-        <form id="roomForm">
-          <label>Nome da sala<input id="roomNameInput" minlength="2" maxlength="40" required /></label>
-          <label>Descricao opcional<input id="roomDescriptionInput" maxlength="90" placeholder="Pode deixar em branco" /></label>
-          <label>Senha da sala<input id="roomPasswordInput" type="password" minlength="3" maxlength="128" /></label>
-          <div class="error" id="roomError"></div>
-          <div class="modal-actions three">
-            <button class="danger" id="clearRoomBtn" type="button">Limpar mensagens</button>
-            <button class="danger solid" id="deleteRoomBtn" type="button">Apagar sala</button>
-            <button class="primary" type="submit">Salvar sala</button>
-          </div>
-        </form>
-      </section>
-    </div>
+  <div class="modalBg" id="modalBg" hidden>
+    <section class="modal" id="unlockModal" hidden>
+      <button class="close" data-close type="button">×</button>
+      <h2 id="unlockTitle">Entrar na sala</h2>
+      <p>Digite seu nome e a senha da sala.</p>
+      <form id="unlockForm">
+        <label>Seu nome<input id="nameInput" minlength="2" maxlength="32" required></label>
+        <label>Senha da sala<input id="passInput" type="password" required></label>
+        <div class="error" id="unlockError"></div>
+        <button class="primary" type="submit">Entrar</button>
+      </form>
+    </section>
 
-    <div class="toast" id="toast" hidden></div>
+    <section class="modal" id="roomModal" hidden>
+      <button class="close" data-close type="button">×</button>
+      <h2 id="roomModalTitle">Criar sala</h2>
+      <p>Descrição é opcional. Ao editar, deixe a senha vazia para manter.</p>
+      <form id="roomForm">
+        <label>Nome da sala<input id="roomName" minlength="2" maxlength="40" required></label>
+        <label>Descrição opcional<input id="roomDesc" maxlength="90" placeholder="Pode deixar em branco"></label>
+        <label>Senha da sala<input id="roomPass" type="password" minlength="3" maxlength="128"></label>
+        <div class="error" id="roomError"></div>
+        <div class="actions">
+          <button class="danger" id="clearMessages" type="button">Limpar mensagens</button>
+          <button class="danger solid" id="deleteRoom" type="button">Apagar sala</button>
+          <button class="primary" type="submit">Salvar</button>
+        </div>
+      </form>
+    </section>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <div class="toast" id="toast" hidden></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    "use strict";
 
-    <script>
-      "use strict";
+    const SUPABASE_URL = "https://xpfzqbjyizftllasvbll.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU";
+    const USER_KEY = "hc_user_v4";
+    const UNLOCK_KEY = "hc_unlocked_v4";
+    const LOGIN_KEY = "hc_login_v4";
+    const POLL_MS = 1000;
+    const TTL = 6 * 60 * 60 * 1000;
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const $ = (id) => document.getElementById(id);
+    const e = {
+      app: $("app"),
+      rooms: $("rooms"),
+      count: $("count"),
+      search: $("search"),
+      status: $("status"),
+      meName: $("meName"),
+      meAvatar: $("meAvatar"),
+      logout: $("logout"),
+      empty: $("empty"),
+      chat: $("chatView"),
+      roomTitle: $("roomTitle"),
+      roomAvatar: $("roomAvatar"),
+      messages: $("messages"),
+      msgForm: $("msgForm"),
+      msgInput: $("msgInput"),
+      modalBg: $("modalBg"),
+      unlockModal: $("unlockModal"),
+      unlockTitle: $("unlockTitle"),
+      unlockForm: $("unlockForm"),
+      nameInput: $("nameInput"),
+      passInput: $("passInput"),
+      unlockError: $("unlockError"),
+      roomModal: $("roomModal"),
+      roomModalTitle: $("roomModalTitle"),
+      roomForm: $("roomForm"),
+      roomName: $("roomName"),
+      roomDesc: $("roomDesc"),
+      roomPass: $("roomPass"),
+      roomError: $("roomError"),
+      clearMessages: $("clearMessages"),
+      deleteRoom: $("deleteRoom"),
+      toast: $("toast")
+    };
 
-      const STORAGE_KEY = "hot_chat_single_html_v1";
-      const SESSION_KEY = "hot_chat_single_html_session_v1";
-      const defaultData = {
-        rooms: [
-          {
-            id: "geral",
-            name: "Geral",
-            description: "Conversa principal",
-            password: "a1234",
-            messages: [],
-            createdAt: Date.now(),
-          },
-        ],
+    let salas = [];
+    let mensagens = [];
+    let currentRoomId = null;
+    let roomToUnlock = null;
+    let editingRoomId = null;
+    let salasHasDescricao = true;
+    let loading = false;
+    let toastTimer = null;
+
+    function toast(text) {
+      clearTimeout(toastTimer);
+      e.toast.textContent = text;
+      e.toast.hidden = false;
+      toastTimer = setTimeout(() => e.toast.hidden = true, 5000);
+    }
+
+    function missingColumn(err, col) {
+      return new RegExp(col, "i").test(String(err?.message || "")) && /schema cache|column|could not find/i.test(String(err?.message || ""));
+    }
+
+    function initials(v) {
+      const p = String(v || "?").trim().split(/\s+/).filter(Boolean);
+      return (p.length > 1 ? p[0][0] + p[1][0] : (p[0] || "?").slice(0, 2)).toUpperCase();
+    }
+
+    function getUser() {
+      return localStorage.getItem(USER_KEY) || "";
+    }
+
+    function setUser(name) {
+      localStorage.setItem(USER_KEY, name);
+      e.meName.textContent = name || "Visitante";
+      e.meAvatar.textContent = initials(name || "Visitante");
+      e.logout.hidden = !name;
+    }
+
+    function unlocked() {
+      try { return JSON.parse(localStorage.getItem(UNLOCK_KEY)) || []; }
+      catch { return []; }
+    }
+
+    function setUnlocked(list) {
+      localStorage.setItem(UNLOCK_KEY, JSON.stringify(list));
+    }
+
+    function isUnlocked(id) {
+      return unlocked().includes(id);
+    }
+
+    function unlockRoom(id) {
+      const list = unlocked();
+      if (!list.includes(id)) list.push(id);
+      setUnlocked(list);
+    }
+
+    function lockRoom(id) {
+      setUnlocked(unlocked().filter(x => x !== id));
+    }
+
+    function roomById(id) {
+      return salas.find(s => s.id === id);
+    }
+
+    function roomMessages(id) {
+      return mensagens.filter(m => m.sala_id === id);
+    }
+
+    function normalizeSala(row) {
+      return {
+        id: row.id,
+        nome: row.nome || row.name || "Sala",
+        descricao: row.descricao || row.description || "",
+        senha: row.senha || row.password || ""
       };
+    }
 
-      let data = { rooms: [] };
-      let session = loadSession();
-      let currentRoomId = null;
-      let roomToUnlock = null;
-      let editingRoomId = null;
-      let toastTimer = null;
-
-      const $ = (id) => document.getElementById(id);
-      const els = {
-        app: $("app"),
-        rooms: $("rooms"),
-        roomCount: $("roomCount"),
-        search: $("searchInput"),
-        profileAvatar: $("profileAvatar"),
-        profileName: $("profileName"),
-        profileStatus: $("profileStatus"),
-        logout: $("logoutBtn"),
-        empty: $("empty"),
-        chat: $("chat"),
-        chatAvatar: $("chatAvatar"),
-        chatTitle: $("chatTitle"),
-        chatSubtitle: $("chatSubtitle"),
-        messages: $("messages"),
-        messageForm: $("messageForm"),
-        messageInput: $("messageInput"),
-        modalBg: $("modalBg"),
-        unlockModal: $("unlockModal"),
-        unlockForm: $("unlockForm"),
-        unlockTitle: $("unlockTitle"),
-        nameInput: $("nameInput"),
-        passwordInput: $("passwordInput"),
-        unlockError: $("unlockError"),
-        roomModal: $("roomModal"),
-        roomModalTitle: $("roomModalTitle"),
-        roomForm: $("roomForm"),
-        roomName: $("roomNameInput"),
-        roomDescription: $("roomDescriptionInput"),
-        roomPassword: $("roomPasswordInput"),
-        roomError: $("roomError"),
-        clearRoom: $("clearRoomBtn"),
-        deleteRoom: $("deleteRoomBtn"),
-        toast: $("toast"),
+    function normalizeMsg(row) {
+      return {
+        id: row.id,
+        sala_id: row.sala_id || row.room_id || "geral",
+        usuario: row.usuario || row.author || "Visitante",
+        texto: row.texto || row.text || "",
+        criado_em: row.criado_em || row.created_at || new Date().toISOString()
       };
+    }
 
-      function loadData() {
-        try {
-          const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
-          if (parsed && Array.isArray(parsed.rooms)) return parsed;
-        } catch {}
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
-        return structuredClone(defaultData);
+    function renderRooms() {
+      const q = e.search.value.trim().toLowerCase();
+      const list = salas.filter(s => `${s.nome} ${s.descricao}`.toLowerCase().includes(q));
+      e.count.textContent = `${salas.length} ${salas.length === 1 ? "sala" : "salas"}`;
+      e.rooms.replaceChildren();
+
+      if (!list.length) {
+        e.rooms.innerHTML = `<div style="padding:32px 14px;text-align:center;color:#8e8e93">Nenhuma sala encontrada.</div>`;
+        return;
       }
 
-      function saveData() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      for (const sala of list) {
+        const msgs = roomMessages(sala.id);
+        const last = msgs[msgs.length - 1];
+        const ok = isUnlocked(sala.id);
+        const btn = document.createElement("button");
+        btn.className = `room${currentRoomId === sala.id ? " active" : ""}`;
+        btn.type = "button";
+        btn.innerHTML = `<span class="avatar">${initials(sala.nome)}</span><span><span class="roomName"></span><span class="roomPrev"></span></span><span class="lock">${ok ? "aberta" : "senha"}</span>`;
+        btn.querySelector(".roomName").textContent = sala.nome;
+        btn.querySelector(".roomPrev").textContent = ok ? (last ? `${last.usuario}: ${last.texto}` : "Nenhuma mensagem ainda") : (sala.descricao || "Toque para informar a senha");
+        btn.onclick = () => selectRoom(sala.id);
+        e.rooms.append(btn);
+      }
+    }
+
+    function renderMessages() {
+      const sala = roomById(currentRoomId);
+      e.messages.replaceChildren();
+      if (!sala) return;
+
+      const msgs = roomMessages(sala.id);
+      const user = getUser();
+
+      if (!msgs.length) {
+        e.messages.innerHTML = `<div class="welcome"><div class="avatar" style="width:76px;height:76px;margin:0 auto 12px">${initials(sala.nome)}</div><strong>${sala.nome}</strong><p>${sala.descricao || "Envie a primeira mensagem."}</p></div>`;
+        return;
       }
 
-      function loadSession() {
-        try {
-          return JSON.parse(localStorage.getItem(SESSION_KEY)) || { name: "", unlocked: [] };
-        } catch {
-          return { name: "", unlocked: [] };
-        }
+      for (const msg of msgs) {
+        const row = document.createElement("div");
+        row.className = `row${msg.usuario === user ? " mine" : ""}`;
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.textContent = msg.texto;
+        const meta = document.createElement("span");
+        meta.className = "meta";
+        meta.textContent = `${msg.usuario} · ${new Date(msg.criado_em).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"})}`;
+        bubble.append(meta);
+        row.append(bubble);
+        e.messages.append(row);
       }
 
-      function saveSession() {
-        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+      e.messages.scrollTop = e.messages.scrollHeight;
+    }
+
+    async function insertSala(sala) {
+      const payload = { nome: sala.nome, senha: sala.senha };
+      if (sala.id) payload.id = sala.id;
+      if (salasHasDescricao) payload.descricao = sala.descricao || null;
+      let r = await supabaseClient.from("salas").insert([payload]).select("*").single();
+      if (r.error && missingColumn(r.error, "descricao")) {
+        salasHasDescricao = false;
+        delete payload.descricao;
+        r = await supabaseClient.from("salas").insert([payload]).select("*").single();
       }
+      if (r.error) throw r.error;
+      return normalizeSala(r.data);
+    }
 
-      function initials(value) {
-        const words = String(value || "?").trim().split(/\s+/).filter(Boolean);
-        const text = words.length > 1 ? words[0][0] + words[1][0] : (words[0] || "?").slice(0, 2);
-        return text.toUpperCase();
+    async function updateSala(sala, senha) {
+      const payload = { nome: sala.nome };
+      if (senha) payload.senha = senha;
+      if (salasHasDescricao) payload.descricao = sala.descricao || null;
+      let r = await supabaseClient.from("salas").update(payload).eq("id", sala.id);
+      if (r.error && missingColumn(r.error, "descricao")) {
+        salasHasDescricao = false;
+        delete payload.descricao;
+        r = await supabaseClient.from("salas").update(payload).eq("id", sala.id);
       }
+      if (r.error) throw r.error;
+    }
 
-      function roomById(id) {
-        return data.rooms.find((room) => room.id === id);
-      }
+    async function loadData() {
+      if (loading) return;
+      loading = true;
 
-      function isUnlocked(roomId) {
-        return session.unlocked.includes(roomId);
-      }
+      try {
+        const sr = await supabaseClient.from("salas").select("*");
+        if (sr.error) throw sr.error;
 
-      function timeLabel(value) {
-        if (!value) return "";
-        return new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(new Date(value));
-      }
-
-      function makeId(name) {
-        const base = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "sala";
-        let id = base;
-        let suffix = 2;
-        while (roomById(id)) id = base + "-" + suffix++;
-        return id;
-      }
-
-      function updateProfile() {
-        const name = session.name || "Visitante";
-        els.profileName.textContent = name;
-        els.profileStatus.textContent = session.name ? "Sessao ativa neste navegador" : "Entre em uma sala";
-        els.profileAvatar.textContent = initials(name);
-        els.logout.hidden = !session.name;
-      }
-
-      function renderRooms() {
-        const query = els.search.value.trim().toLowerCase();
-        const rooms = data.rooms.filter((room) => (room.name + " " + room.description).toLowerCase().includes(query));
-        els.roomCount.textContent = data.rooms.length + (data.rooms.length === 1 ? " sala" : " salas");
-        els.rooms.replaceChildren();
-
-        if (!rooms.length) {
-          const empty = document.createElement("div");
-          empty.className = "room-preview";
-          empty.style.padding = "32px 14px";
-          empty.style.textAlign = "center";
-          empty.textContent = "Nenhuma sala encontrada.";
-          els.rooms.append(empty);
+        if (!sr.data.length) {
+          await insertSala({ nome: "Geral", descricao: "Conversa principal", senha: "a1234" });
           return;
         }
 
-        for (const room of rooms) {
-          const latest = room.messages[room.messages.length - 1];
-          const unlocked = isUnlocked(room.id);
-          const button = document.createElement("button");
-          button.className = "room" + (currentRoomId === room.id ? " active" : "");
-          button.type = "button";
-          button.innerHTML = `
-            <span class="avatar">${initials(room.name)}</span>
-            <span class="room-text">
-              <span class="room-name"></span>
-              <span class="room-preview"></span>
-            </span>
-            <span class="lock ${unlocked ? "open" : ""}" title="${unlocked ? "Liberada" : "Bloqueada"}">
-              <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="3"/><path d="${unlocked ? "M9 10V7a3.5 3.5 0 0 1 6.4-1.9" : "M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10"}"/></svg>
-            </span>
-          `;
-          button.querySelector(".room-name").textContent = room.name;
-          button.querySelector(".room-preview").textContent = unlocked
-            ? latest ? `${latest.author}: ${latest.text}` : "Nenhuma mensagem ainda"
-            : room.description || "Toque para informar a senha";
-          button.addEventListener("click", () => selectRoom(room.id));
-          els.rooms.append(button);
-        }
-      }
+        const mr = await supabaseClient.from("mensagens").select("*");
+        if (mr.error) throw mr.error;
 
-      function renderMessages() {
-        const room = roomById(currentRoomId);
-        els.messages.replaceChildren();
-        if (!room) return;
+        salas = sr.data.map(normalizeSala);
+        mensagens = (mr.data || [])
+          .map(normalizeMsg)
+          .filter(m => salas.some(s => s.id === m.sala_id))
+          .sort((a, b) => String(a.criado_em).localeCompare(String(b.criado_em)));
 
-        if (!room.messages.length) {
-          const welcome = document.createElement("div");
-          welcome.className = "welcome";
-          welcome.innerHTML = `<div class="avatar">${initials(room.name)}</div><strong></strong><span></span>`;
-          welcome.querySelector("strong").textContent = room.name;
-          welcome.querySelector("span").textContent = room.description || "Envie a primeira mensagem.";
-          els.messages.append(welcome);
-          return;
-        }
-
-        for (const msg of room.messages) {
-          const row = document.createElement("div");
-          row.className = "row" + (msg.author === session.name ? " mine" : "");
-          const bubble = document.createElement("div");
-          bubble.className = "bubble";
-          bubble.textContent = msg.text;
-          const meta = document.createElement("span");
-          meta.className = "meta";
-          meta.textContent = `${msg.author} · ${timeLabel(msg.createdAt)}`;
-          bubble.append(meta);
-          row.append(bubble);
-          els.messages.append(row);
-        }
-        els.messages.scrollTop = els.messages.scrollHeight;
-      }
-
-      function selectRoom(roomId) {
-        const room = roomById(roomId);
-        if (!room) return;
-        if (!isUnlocked(roomId)) {
-          roomToUnlock = room;
-          els.unlockTitle.textContent = "Entrar em " + room.name;
-          els.nameInput.value = session.name || "";
-          els.passwordInput.value = "";
-          els.unlockError.textContent = "";
-          openModal(els.unlockModal);
-          setTimeout(() => (els.nameInput.value ? els.passwordInput : els.nameInput).focus(), 30);
-          return;
-        }
-        currentRoomId = roomId;
-        els.empty.hidden = true;
-        els.chat.hidden = false;
-        els.app.classList.add("open");
-        els.chatTitle.textContent = room.name;
-        els.chatSubtitle.textContent = "Sala liberada neste navegador";
-        els.chatAvatar.textContent = initials(room.name);
+        e.status.textContent = "Conectado ao Supabase";
         renderRooms();
-        renderMessages();
-        setTimeout(() => els.messageInput.focus(), 30);
+        if (currentRoomId && roomById(currentRoomId)) renderMessages();
+        if (currentRoomId && !roomById(currentRoomId)) closeChat();
+      } catch (err) {
+        console.error(err);
+        e.status.textContent = "Erro no Supabase";
+        toast(`Erro Supabase: ${err.message || err}`);
+      } finally {
+        loading = false;
+      }
+    }
+
+    function openModal(modal) {
+      e.modalBg.hidden = false;
+      e.unlockModal.hidden = modal !== e.unlockModal;
+      e.roomModal.hidden = modal !== e.roomModal;
+    }
+
+    function closeModal() {
+      e.modalBg.hidden = true;
+      e.unlockModal.hidden = true;
+      e.roomModal.hidden = true;
+    }
+
+    function selectRoom(id) {
+      const sala = roomById(id);
+      if (!sala) return;
+
+      if (!isUnlocked(id)) {
+        roomToUnlock = sala;
+        e.unlockTitle.textContent = `Entrar em ${sala.nome}`;
+        e.nameInput.value = getUser();
+        e.passInput.value = "";
+        e.unlockError.textContent = "";
+        openModal(e.unlockModal);
+        setTimeout(() => (e.nameInput.value ? e.passInput : e.nameInput).focus(), 30);
+        return;
       }
 
-      function closeChat() {
-        currentRoomId = null;
-        els.chat.hidden = true;
-        els.empty.hidden = false;
-        els.app.classList.remove("open");
-        renderRooms();
+      currentRoomId = id;
+      e.empty.hidden = true;
+      e.chat.hidden = false;
+      e.app.classList.add("open");
+      e.roomTitle.textContent = sala.nome;
+      e.roomAvatar.textContent = initials(sala.nome);
+      renderRooms();
+      renderMessages();
+      resizeInput();
+      setTimeout(() => e.msgInput.focus(), 30);
+    }
+
+    function closeChat() {
+      currentRoomId = null;
+      e.chat.hidden = true;
+      e.empty.hidden = false;
+      e.app.classList.remove("open");
+      renderRooms();
+    }
+
+    function openRoomModal(id = null) {
+      editingRoomId = id;
+      const sala = roomById(id);
+      e.roomModalTitle.textContent = sala ? "Editar sala" : "Criar sala";
+      e.roomName.value = sala?.nome || "";
+      e.roomDesc.value = sala?.descricao || "";
+      e.roomPass.value = "";
+      e.roomPass.required = !sala;
+      e.roomPass.placeholder = sala ? "Deixe em branco para manter" : "Senha para entrar na sala";
+      e.clearMessages.hidden = !sala;
+      e.deleteRoom.hidden = !sala;
+      e.roomError.textContent = "";
+      openModal(e.roomModal);
+      setTimeout(() => e.roomName.focus(), 30);
+    }
+
+    function resizeInput() {
+      e.msgInput.style.height = "auto";
+      const isMobile = window.matchMedia("(max-width: 760px)").matches;
+      const compactHeight = window.matchMedia("(max-height: 620px)").matches;
+      const minHeight = isMobile ? 40 : 40;
+      const maxHeight = isMobile ? (compactHeight ? 78 : 98) : 116;
+      const next = Math.min(e.msgInput.scrollHeight, maxHeight);
+      e.msgInput.style.height = `${Math.max(next, minHeight)}px`;
+      e.msgInput.style.overflowY = e.msgInput.scrollHeight > next ? "auto" : "hidden";
+    }
+
+    $("newRoom").onclick = () => openRoomModal();
+    $("emptyNewRoom").onclick = () => openRoomModal();
+    $("back").onclick = closeChat;
+    $("editRoom").onclick = () => currentRoomId && openRoomModal(currentRoomId);
+    e.search.oninput = renderRooms;
+
+    e.modalBg.onclick = (ev) => {
+      if (ev.target === e.modalBg || ev.target.closest("[data-close]")) closeModal();
+    };
+
+    document.addEventListener("keydown", ev => {
+      if (ev.key === "Escape") closeModal();
+    });
+
+    window.addEventListener("resize", resizeInput);
+
+    e.logout.onclick = () => {
+      localStorage.removeItem(LOGIN_KEY);
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(UNLOCK_KEY);
+      setUser("");
+      closeChat();
+      toast("Sessão encerrada.");
+    };
+
+    e.unlockForm.onsubmit = (ev) => {
+      ev.preventDefault();
+      if (!roomToUnlock) return;
+
+      if (e.passInput.value !== roomToUnlock.senha) {
+        e.unlockError.textContent = "Senha da sala incorreta.";
+        e.passInput.select();
+        return;
       }
 
-      function openModal(modal) {
-        els.modalBg.hidden = false;
-        els.unlockModal.hidden = modal !== els.unlockModal;
-        els.roomModal.hidden = modal !== els.roomModal;
-      }
+      setUser(e.nameInput.value.trim());
+      localStorage.setItem(LOGIN_KEY, String(Date.now()));
+      unlockRoom(roomToUnlock.id);
+      const id = roomToUnlock.id;
+      roomToUnlock = null;
+      closeModal();
+      selectRoom(id);
+    };
 
-      function closeModal() {
-        els.modalBg.hidden = true;
-        els.unlockModal.hidden = true;
-        els.roomModal.hidden = true;
-      }
+    e.roomForm.onsubmit = async (ev) => {
+      ev.preventDefault();
+      const nome = e.roomName.value.trim();
+      const descricao = e.roomDesc.value.trim();
+      const senha = e.roomPass.value;
+      if (!nome) return;
 
-      function showToast(text) {
-        clearTimeout(toastTimer);
-        els.toast.textContent = text;
-        els.toast.hidden = false;
-        toastTimer = setTimeout(() => els.toast.hidden = true, 3000);
-      }
+      e.roomError.textContent = "";
 
-      function showRoomModal(roomId = null) {
-        editingRoomId = roomId;
-        const room = roomId ? roomById(roomId) : null;
-        els.roomModalTitle.textContent = room ? "Configurar sala" : "Criar sala";
-        els.roomName.value = room?.name || "";
-        els.roomDescription.value = room?.description || "";
-        els.roomPassword.value = "";
-        els.roomPassword.placeholder = room ? "Deixe em branco para manter" : "Senha para entrar na sala";
-        els.roomPassword.required = !room;
-        els.clearRoom.hidden = !room;
-        els.deleteRoom.hidden = !room;
-        els.roomError.textContent = "";
-        openModal(els.roomModal);
-        setTimeout(() => els.roomName.focus(), 30);
-      }
-
-      els.unlockForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        if (!roomToUnlock) return;
-        const name = els.nameInput.value.trim();
-        const password = els.passwordInput.value;
-        if (password !== roomToUnlock.password) {
-          els.unlockError.textContent = "Senha da sala incorreta.";
-          els.passwordInput.select();
-          return;
-        }
-        session.name = name;
-        if (!session.unlocked.includes(roomToUnlock.id)) session.unlocked.push(roomToUnlock.id);
-        saveSession();
-        updateProfile();
-        const roomId = roomToUnlock.id;
-        roomToUnlock = null;
-        closeModal();
-        selectRoom(roomId);
-      });
-
-      els.roomForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        const name = els.roomName.value.trim();
-        const description = els.roomDescription.value.trim();
-        const password = els.roomPassword.value;
-        if (!name) return;
-
+      try {
         if (editingRoomId) {
-          const room = roomById(editingRoomId);
-          room.name = name;
-          room.description = description;
-          if (password) {
-            room.password = password;
-            session.unlocked = session.unlocked.filter((id) => id !== room.id);
-            if (currentRoomId === room.id) closeChat();
-          }
-          saveData();
-          saveSession();
+          const sala = roomById(editingRoomId);
+          await updateSala({...sala, nome, descricao}, senha);
+          if (senha) lockRoom(sala.id);
           closeModal();
-          renderRooms();
-          showToast("Sala atualizada.");
+          await loadData();
+          if (senha && currentRoomId === sala.id) closeChat();
+          toast("Sala atualizada.");
           return;
         }
 
-        if (password.length < 3) {
-          els.roomError.textContent = "Informe uma senha com pelo menos 3 caracteres.";
+        if (senha.length < 3) {
+          e.roomError.textContent = "Informe uma senha com pelo menos 3 caracteres.";
           return;
         }
-        const room = { id: makeId(name), name, description, password, messages: [], createdAt: Date.now() };
-        data.rooms.push(room);
-        saveData();
+
+        const created = await insertSala({nome, descricao, senha});
         closeModal();
-        renderRooms();
-        showToast("Sala criada. Agora entre com a senha.");
-        selectRoom(room.id);
-      });
+        await loadData();
+        toast("Sala criada.");
+        selectRoom(created.id);
+      } catch (err) {
+        console.error(err);
+        e.roomError.textContent = err.message || "Erro ao salvar.";
+      }
+    };
 
-      els.clearRoom.addEventListener("click", () => {
-        const room = roomById(editingRoomId);
-        if (!room) return;
-        if (!confirm("Apagar todas as mensagens desta sala?")) return;
-        room.messages = [];
-        saveData();
+    e.clearMessages.onclick = async () => {
+      const sala = roomById(editingRoomId);
+      if (!sala || !confirm("Apagar todas as mensagens desta sala?")) return;
+
+      try {
+        const r = await supabaseClient.from("mensagens").delete().eq("sala_id", sala.id);
+        if (r.error) throw r.error;
         closeModal();
-        renderRooms();
-        renderMessages();
-        showToast("Mensagens apagadas.");
-      });
+        await loadData();
+        toast("Mensagens apagadas.");
+      } catch (err) {
+        console.error(err);
+        e.roomError.textContent = err.message || "Erro ao limpar.";
+      }
+    };
 
-      els.deleteRoom.addEventListener("click", () => {
-        const room = roomById(editingRoomId);
-        if (!room) return;
-        if (!confirm(`Apagar a sala "${room.name}" e todas as mensagens?`)) return;
+    e.deleteRoom.onclick = async () => {
+      const sala = roomById(editingRoomId);
+      if (!sala || !confirm(`Apagar a sala "${sala.nome}" e todas as mensagens?`)) return;
 
-        data.rooms = data.rooms.filter((item) => item.id !== room.id);
-        session.unlocked = session.unlocked.filter((id) => id !== room.id);
-        saveData();
-        saveSession();
+      try {
+        let r = await supabaseClient.from("mensagens").delete().eq("sala_id", sala.id);
+        if (r.error) throw r.error;
+        r = await supabaseClient.from("salas").delete().eq("id", sala.id);
+        if (r.error) throw r.error;
+        lockRoom(sala.id);
         closeModal();
+        if (currentRoomId === sala.id) closeChat();
+        await loadData();
+        toast("Sala apagada.");
+      } catch (err) {
+        console.error(err);
+        e.roomError.textContent = err.message || "Erro ao apagar.";
+      }
+    };
 
-        if (currentRoomId === room.id) {
-          closeChat();
-        } else {
-          renderRooms();
-        }
-        updateProfile();
-        showToast("Sala apagada.");
-      });
+    e.msgForm.onsubmit = async (ev) => {
+      ev.preventDefault();
+      const text = e.msgInput.value.trim();
+      if (!currentRoomId || !text) return;
 
-      els.messageForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        const room = roomById(currentRoomId);
-        const text = els.messageInput.value.trim();
-        if (!room || !text) return;
-        room.messages.push({
-          author: session.name || "Visitante",
-          text,
-          createdAt: Date.now(),
-        });
-        saveData();
-        els.messageInput.value = "";
+      e.msgInput.disabled = true;
+
+      try {
+        const r = await supabaseClient.from("mensagens").insert([{sala_id: currentRoomId, usuario: getUser() || "Visitante", texto: text}]);
+        if (r.error) throw r.error;
+        e.msgInput.value = "";
         resizeInput();
-        renderRooms();
-        renderMessages();
-      });
-
-      function resizeInput() {
-        els.messageInput.style.height = "auto";
-        els.messageInput.style.height = Math.min(els.messageInput.scrollHeight, 116) + "px";
+        await loadData();
+        e.msgInput.focus();
+      } catch (err) {
+        console.error(err);
+        toast(err.message || "Erro ao enviar mensagem.");
+      } finally {
+        e.msgInput.disabled = false;
       }
+    };
 
-      els.messageInput.addEventListener("input", resizeInput);
-      els.messageInput.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
-          event.preventDefault();
-          els.messageForm.requestSubmit();
-        }
-      });
-      $("emojiBtn").addEventListener("click", () => {
-        const start = els.messageInput.selectionStart;
-        const end = els.messageInput.selectionEnd;
-        els.messageInput.value = els.messageInput.value.slice(0, start) + "❤" + els.messageInput.value.slice(end);
-        els.messageInput.selectionStart = els.messageInput.selectionEnd = start + 1;
-        els.messageInput.focus();
-        resizeInput();
-      });
-      $("newRoomBtn").addEventListener("click", () => showRoomModal());
-      $("emptyNewRoomBtn").addEventListener("click", () => showRoomModal());
-      $("manageBtn").addEventListener("click", () => currentRoomId && showRoomModal(currentRoomId));
-      $("backBtn").addEventListener("click", closeChat);
-      els.search.addEventListener("input", renderRooms);
-      els.logout.addEventListener("click", () => {
-        session = { name: "", unlocked: [] };
-        saveSession();
-        closeChat();
-        updateProfile();
-        showToast("Sessao encerrada.");
-      });
-      els.modalBg.addEventListener("click", (event) => {
-        if (event.target === els.modalBg || event.target.closest("[data-close]")) closeModal();
-      });
-      document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") closeModal();
-      });
-
-      updateProfile();
-      els.rooms.replaceChildren();
-      const loadingSupabase = document.createElement("div");
-      loadingSupabase.className = "room-preview";
-      loadingSupabase.style.padding = "32px 14px";
-      loadingSupabase.style.textAlign = "center";
-      loadingSupabase.textContent = "Carregando Supabase...";
-      els.rooms.append(loadingSupabase);
-
-      // ======================================
-      // MODO SUPABASE
-      // ======================================
-
-      const SUPABASE_URL = "https://xpfzqbjyizftllasvbll.supabase.co";
-      const SUPABASE_KEY = "sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU";
-      const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      let realtimeChannel = null;
-      let salasHasDescricao = true;
-
-      function isMissingDescricaoError(error) {
-        return /descricao/i.test(String(error?.message || "")) &&
-          /schema cache|column|could not find/i.test(String(error?.message || ""));
+    e.msgInput.oninput = resizeInput;
+    e.msgInput.onkeydown = (ev) => {
+      if (ev.key === "Enter" && !ev.shiftKey && !ev.isComposing) {
+        ev.preventDefault();
+        e.msgForm.requestSubmit();
       }
-
-      function normalizeSupabaseRoom(row) {
-        return {
-          id: row.id,
-          name: row.nome || row.name || "Sala",
-          description: row.descricao || row.description || "",
-          password: row.senha || row.password || "",
-          messages: [],
-          createdAt: row.criado_em ? new Date(row.criado_em).getTime() : Date.now(),
-        };
-      }
-
-      function normalizeSupabaseMessage(row) {
-        return {
-          id: row.id,
-          roomId: row.sala_id || row.room_id || "geral",
-          author: row.usuario || row.author || "Visitante",
-          text: row.texto || row.text || "",
-          createdAt: row.criado_em ? new Date(row.criado_em).getTime() : Date.now(),
-        };
-      }
-
-      async function loadSupabaseData() {
-        const { data: roomsData, error: roomsError } = await supabaseClient
-          .from("salas")
-          .select("*")
-          .order("criado_em", { ascending: true });
-
-        if (roomsError) throw roomsError;
-
-        if (!roomsData.length) {
-          let seedPayload = {
-            id: "geral",
-            nome: "Geral",
-            descricao: "Conversa principal",
-            senha: "a1234",
-          };
-          let { error: seedError } = await supabaseClient
-            .from("salas")
-            .insert([seedPayload]);
-          if (seedError && isMissingDescricaoError(seedError)) {
-            salasHasDescricao = false;
-            delete seedPayload.descricao;
-            const retry = await supabaseClient
-              .from("salas")
-              .insert([seedPayload]);
-            seedError = retry.error;
-          }
-          if (seedError) throw seedError;
-          return loadSupabaseData();
-        }
-
-        const { data: messagesData, error: messagesError } = await supabaseClient
-          .from("mensagens")
-          .select("*")
-          .order("criado_em", { ascending: true });
-
-        if (messagesError) throw messagesError;
-
-        const rooms = roomsData.map(normalizeSupabaseRoom);
-        const byId = new Map(rooms.map((room) => [room.id, room]));
-
-        for (const row of messagesData || []) {
-          const message = normalizeSupabaseMessage(row);
-          const room = byId.get(message.roomId);
-          if (room) room.messages.push(message);
-        }
-
-        data = { rooms };
-        renderRooms();
-
-        if (currentRoomId) {
-          const current = roomById(currentRoomId);
-          if (current) {
-            els.chatTitle.textContent = current.name;
-            els.chatAvatar.textContent = initials(current.name);
-            renderMessages();
-          } else {
-            closeChat();
-          }
-        }
-      }
-
-      async function createSupabaseRoom(room) {
-        const payload = {
-          id: room.id,
-          nome: room.name,
-          senha: room.password,
-        };
-        if (salasHasDescricao) payload.descricao = room.description || null;
-
-        let { error } = await supabaseClient
-          .from("salas")
-          .insert([payload]);
-        if (error && isMissingDescricaoError(error)) {
-          salasHasDescricao = false;
-          delete payload.descricao;
-          const retry = await supabaseClient
-            .from("salas")
-            .insert([payload]);
-          error = retry.error;
-        }
-        if (error) throw error;
-      }
-
-      async function updateSupabaseRoom(room, password) {
-        const changes = {
-          nome: room.name,
-        };
-        if (salasHasDescricao) changes.descricao = room.description || null;
-        if (password) changes.senha = password;
-
-        let { error } = await supabaseClient
-          .from("salas")
-          .update(changes)
-          .eq("id", room.id);
-        if (error && isMissingDescricaoError(error)) {
-          salasHasDescricao = false;
-          delete changes.descricao;
-          const retry = await supabaseClient
-            .from("salas")
-            .update(changes)
-            .eq("id", room.id);
-          error = retry.error;
-        }
-        if (error) throw error;
-      }
-
-      async function deleteSupabaseRoom(roomId) {
-        const messagesDelete = await supabaseClient
-          .from("mensagens")
-          .delete()
-          .eq("sala_id", roomId);
-        if (messagesDelete.error) throw messagesDelete.error;
-
-        const roomDelete = await supabaseClient
-          .from("salas")
-          .delete()
-          .eq("id", roomId);
-        if (roomDelete.error) throw roomDelete.error;
-      }
-
-      async function clearSupabaseRoomMessages(roomId) {
-        const { error } = await supabaseClient
-          .from("mensagens")
-          .delete()
-          .eq("sala_id", roomId);
-        if (error) throw error;
-      }
-
-      async function insertSupabaseMessage(roomId, message) {
-        const { error } = await supabaseClient
-          .from("mensagens")
-          .insert([{
-            sala_id: roomId,
-            usuario: message.author,
-            texto: message.text,
-          }]);
-        if (error) throw error;
-      }
-
-      function replaceControl(id, key = null) {
-        const oldElement = document.getElementById(id);
-        const newElement = oldElement.cloneNode(true);
-        oldElement.replaceWith(newElement);
-        if (key) els[key] = newElement;
-        return newElement;
-      }
-
-      function refreshElementRefs() {
-        els.rooms = $("rooms");
-        els.roomCount = $("roomCount");
-        els.search = $("searchInput");
-        els.profileAvatar = $("profileAvatar");
-        els.profileName = $("profileName");
-        els.profileStatus = $("profileStatus");
-        els.logout = $("logoutBtn");
-        els.empty = $("empty");
-        els.chat = $("chat");
-        els.chatAvatar = $("chatAvatar");
-        els.chatTitle = $("chatTitle");
-        els.chatSubtitle = $("chatSubtitle");
-        els.messages = $("messages");
-        els.messageForm = $("messageForm");
-        els.messageInput = $("messageInput");
-        els.modalBg = $("modalBg");
-        els.unlockModal = $("unlockModal");
-        els.unlockForm = $("unlockForm");
-        els.unlockTitle = $("unlockTitle");
-        els.nameInput = $("nameInput");
-        els.passwordInput = $("passwordInput");
-        els.unlockError = $("unlockError");
-        els.roomModal = $("roomModal");
-        els.roomModalTitle = $("roomModalTitle");
-        els.roomForm = $("roomForm");
-        els.roomName = $("roomNameInput");
-        els.roomDescription = $("roomDescriptionInput");
-        els.roomPassword = $("roomPasswordInput");
-        els.roomError = $("roomError");
-        els.clearRoom = $("clearRoomBtn");
-        els.deleteRoom = $("deleteRoomBtn");
-        els.toast = $("toast");
-      }
-
-      function detachLocalOnlyListeners() {
-        replaceControl("newRoomBtn");
-        replaceControl("emptyNewRoomBtn");
-        replaceControl("manageBtn");
-        replaceControl("backBtn");
-        replaceControl("logoutBtn");
-        replaceControl("searchInput");
-        replaceControl("modalBg");
-        replaceControl("unlockForm");
-        replaceControl("roomForm");
-        replaceControl("messageForm");
-        replaceControl("emojiBtn");
-        refreshElementRefs();
-      }
-
-      saveData = function saveDataSupabaseMode() {};
-
-      renderRooms = function renderSupabaseRooms() {
-        const query = els.search.value.trim().toLowerCase();
-        const rooms = data.rooms.filter((room) => (room.name + " " + room.description).toLowerCase().includes(query));
-        els.roomCount.textContent = data.rooms.length + (data.rooms.length === 1 ? " sala" : " salas");
-        els.rooms.replaceChildren();
-
-        if (!rooms.length) {
-          const empty = document.createElement("div");
-          empty.className = "room-preview";
-          empty.style.padding = "32px 14px";
-          empty.style.textAlign = "center";
-          empty.textContent = "Nenhuma sala encontrada.";
-          els.rooms.append(empty);
-          return;
-        }
-
-        for (const room of rooms) {
-          const latest = room.messages[room.messages.length - 1];
-          const unlocked = isUnlocked(room.id);
-          const button = document.createElement("button");
-          button.className = "room" + (currentRoomId === room.id ? " active" : "");
-          button.type = "button";
-          button.innerHTML = `
-            <span class="avatar">${initials(room.name)}</span>
-            <span class="room-text">
-              <span class="room-name"></span>
-              <span class="room-preview"></span>
-            </span>
-            <span class="lock ${unlocked ? "open" : ""}" title="${unlocked ? "Liberada" : "Bloqueada"}">
-              <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="3"/><path d="${unlocked ? "M9 10V7a3.5 3.5 0 0 1 6.4-1.9" : "M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10"}"/></svg>
-            </span>
-          `;
-          button.querySelector(".room-name").textContent = room.name;
-          button.querySelector(".room-preview").textContent = unlocked
-            ? latest ? `${latest.author}: ${latest.text}` : "Nenhuma mensagem ainda"
-            : room.description || "Toque para informar a senha";
-          button.addEventListener("click", () => selectRoom(room.id));
-          els.rooms.append(button);
-        }
-      };
-
-      showRoomModal = function showSupabaseRoomModal(roomId = null) {
-        editingRoomId = roomId;
-        const room = roomId ? roomById(roomId) : null;
-        els.roomModalTitle.textContent = room ? "Configurar sala" : "Criar sala";
-        els.roomName.value = room?.name || "";
-        els.roomDescription.value = room?.description || "";
-        els.roomPassword.value = "";
-        els.roomPassword.placeholder = room ? "Deixe em branco para manter" : "Senha para entrar na sala";
-        els.roomPassword.required = !room;
-        els.clearRoom.hidden = !room;
-        els.deleteRoom.hidden = !room;
-        els.roomError.textContent = "";
-        openModal(els.roomModal);
-        setTimeout(() => els.roomName.focus(), 30);
-      };
-
-      function bindSupabaseEvents() {
-        $("newRoomBtn").addEventListener("click", () => showRoomModal());
-        $("emptyNewRoomBtn").addEventListener("click", () => showRoomModal());
-        $("manageBtn").addEventListener("click", () => currentRoomId && showRoomModal(currentRoomId));
-        $("backBtn").addEventListener("click", closeChat);
-        els.search.addEventListener("input", renderRooms);
-
-        els.logout.addEventListener("click", () => {
-          session = { name: "", unlocked: [] };
-          saveSession();
-          closeChat();
-          updateProfile();
-          showToast("Sessao encerrada.");
-        });
-
-        els.modalBg.addEventListener("click", (event) => {
-          if (event.target === els.modalBg || event.target.closest("[data-close]")) closeModal();
-        });
-
-        els.unlockForm.addEventListener("submit", (event) => {
-          event.preventDefault();
-          if (!roomToUnlock) return;
-
-          const name = els.nameInput.value.trim();
-          const password = els.passwordInput.value;
-
-          if (password !== roomToUnlock.password) {
-            els.unlockError.textContent = "Senha da sala incorreta.";
-            els.passwordInput.select();
-            return;
-          }
-
-          session.name = name;
-          if (!session.unlocked.includes(roomToUnlock.id)) session.unlocked.push(roomToUnlock.id);
-          saveSession();
-          updateProfile();
-
-          const roomId = roomToUnlock.id;
-          roomToUnlock = null;
-          closeModal();
-          selectRoom(roomId);
-        });
-
-        els.roomForm.addEventListener("submit", async (event) => {
-          event.preventDefault();
-
-          const name = els.roomName.value.trim();
-          const description = els.roomDescription.value.trim();
-          const password = els.roomPassword.value;
-          if (!name) return;
-
-          els.roomError.textContent = "";
-
-          try {
-            if (editingRoomId) {
-              const room = roomById(editingRoomId);
-              room.name = name;
-              room.description = description;
-              await updateSupabaseRoom(room, password);
-
-              if (password) {
-                room.password = password;
-                session.unlocked = session.unlocked.filter((id) => id !== room.id);
-                saveSession();
-                if (currentRoomId === room.id) closeChat();
-              }
-
-              closeModal();
-              await loadSupabaseData();
-              showToast("Sala atualizada no Supabase.");
-              return;
-            }
-
-            if (password.length < 3) {
-              els.roomError.textContent = "Informe uma senha com pelo menos 3 caracteres.";
-              return;
-            }
-
-            const room = { id: makeId(name), name, description, password, messages: [], createdAt: Date.now() };
-            await createSupabaseRoom(room);
-            closeModal();
-            await loadSupabaseData();
-            showToast("Sala criada no Supabase.");
-            selectRoom(room.id);
-          } catch (error) {
-            console.error(error);
-            els.roomError.textContent = error.message || "Erro ao salvar sala.";
-          }
-        });
-
-        els.clearRoom.addEventListener("click", async () => {
-          const room = roomById(editingRoomId);
-          if (!room) return;
-          if (!confirm("Apagar todas as mensagens desta sala?")) return;
-
-          try {
-            await clearSupabaseRoomMessages(room.id);
-            closeModal();
-            await loadSupabaseData();
-            showToast("Mensagens apagadas no Supabase.");
-          } catch (error) {
-            console.error(error);
-            els.roomError.textContent = error.message || "Erro ao limpar mensagens.";
-          }
-        });
-
-        els.deleteRoom.addEventListener("click", async () => {
-          const room = roomById(editingRoomId);
-          if (!room) return;
-          if (!confirm(`Apagar a sala "${room.name}" e todas as mensagens?`)) return;
-
-          try {
-            await deleteSupabaseRoom(room.id);
-            session.unlocked = session.unlocked.filter((id) => id !== room.id);
-            saveSession();
-            closeModal();
-            if (currentRoomId === room.id) closeChat();
-            await loadSupabaseData();
-            updateProfile();
-            showToast("Sala apagada no Supabase.");
-          } catch (error) {
-            console.error(error);
-            els.roomError.textContent = error.message || "Erro ao apagar sala.";
-          }
-        });
-
-        els.messageForm.addEventListener("submit", async (event) => {
-          event.preventDefault();
-          const room = roomById(currentRoomId);
-          const text = els.messageInput.value.trim();
-          if (!room || !text) return;
-
-          els.messageInput.disabled = true;
-          try {
-            await insertSupabaseMessage(room.id, {
-              author: session.name || "Visitante",
-              text,
-            });
-            els.messageInput.value = "";
-            resizeInput();
-            await loadSupabaseData();
-            els.messageInput.focus();
-          } catch (error) {
-            console.error(error);
-            showToast(error.message || "Erro ao enviar mensagem.");
-          } finally {
-            els.messageInput.disabled = false;
-          }
-        });
-
-        $("emojiBtn").addEventListener("click", () => {
-          const start = els.messageInput.selectionStart;
-          const end = els.messageInput.selectionEnd;
-          els.messageInput.value = els.messageInput.value.slice(0, start) + "❤" + els.messageInput.value.slice(end);
-          els.messageInput.selectionStart = els.messageInput.selectionEnd = start + 1;
-          els.messageInput.focus();
-          resizeInput();
-        });
-      }
-
-      async function initSupabaseMode() {
-        detachLocalOnlyListeners();
-        bindSupabaseEvents();
-        updateProfile();
-
-        try {
-          await loadSupabaseData();
-
-          realtimeChannel = supabaseClient
-            .channel("hot-chat-salas-mensagens")
-            .on("postgres_changes", { event: "*", schema: "public", table: "salas" }, loadSupabaseData)
-            .on("postgres_changes", { event: "*", schema: "public", table: "mensagens" }, loadSupabaseData)
-            .subscribe();
-
-          showToast("Conectado ao Supabase.");
-        } catch (error) {
-          console.error(error);
-          els.rooms.replaceChildren();
-          const message = document.createElement("div");
-          message.className = "room-preview";
-          message.style.padding = "32px 14px";
-          message.style.textAlign = "center";
-          message.textContent = "Nao foi possivel carregar o Supabase. Confira as tabelas salas e mensagens.";
-          els.rooms.append(message);
-          showToast(error.message || "Erro ao conectar no Supabase.");
-        }
-      }
-
-      initSupabaseMode();
-    </script>
-    <script>
-      (() => {
-        "use strict";
-
-        const SUPABASE_URL = "https://xpfzqbjyizftllasvbll.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU";
-        const USER_KEY = "hc_user_v3";
-        const UNLOCK_KEY = "hc_unlocked_v3";
-        const LOGIN_KEY = "hc_login_v3";
-        const TTL = 6 * 60 * 60 * 1000;
-
-        document.body.innerHTML = `
-          <div class="xapp" id="xapp">
-            <aside class="xside">
-              <header class="xtop"><div class="xbrand">🔥 <strong>Hot Chat</strong></div><button id="newRoom" class="xicon" type="button">+</button></header>
-              <div class="xprofile"><div id="meAvatar" class="xavatar">?</div><div><strong id="meName">Visitante</strong><span id="status">Carregando Supabase...</span></div><button id="logout" class="xlink" hidden>Sair</button></div>
-              <input id="search" class="xsearch" placeholder="Pesquisar salas" autocomplete="off">
-              <div id="count" class="xcount">0 salas</div>
-              <div id="rooms" class="xrooms"></div>
-            </aside>
-            <main class="xmain">
-              <section id="empty" class="xempty"><div class="xemptyIcon">💬</div><h1>Suas conversas</h1><p>Crie ou escolha uma sala. Tudo fica salvo no Supabase.</p><button id="emptyNewRoom" class="xprimary" type="button">Criar sala</button></section>
-              <section id="chatView" class="xchat" hidden>
-                <header class="xchatHead"><button id="back" class="xicon xback" type="button">‹</button><div id="roomAvatar" class="xavatar">?</div><div class="xtitle"><strong id="roomTitle">Sala</strong><span>Sala liberada</span></div><button id="editRoom" class="xicon" type="button">⚙</button></header>
-                <div id="messages" class="xmessages"></div>
-                <form id="msgForm" class="xcomposer"><textarea id="msgInput" rows="1" maxlength="2000" placeholder="Mensagem..."></textarea><button type="submit">➤</button></form>
-              </section>
-            </main>
-          </div>
-          <div id="modalBg" class="xmodalBg" hidden>
-            <section id="unlockModal" class="xmodal" hidden>
-              <button data-close class="xclose" type="button">×</button><h2 id="unlockTitle">Entrar na sala</h2><p>Digite seu nome e a senha da sala.</p>
-              <form id="unlockForm"><label>Seu nome<input id="nameInput" minlength="2" maxlength="32" required></label><label>Senha da sala<input id="passInput" type="password" required></label><div id="unlockError" class="xerror"></div><button class="xprimary" type="submit">Entrar</button></form>
-            </section>
-            <section id="roomModal" class="xmodal" hidden>
-              <button data-close class="xclose" type="button">×</button><h2 id="roomModalTitle">Criar sala</h2><p>Descrição é opcional. Ao editar, deixe a senha vazia para manter.</p>
-              <form id="roomForm"><label>Nome da sala<input id="roomName" minlength="2" maxlength="40" required></label><label>Descrição opcional<input id="roomDesc" maxlength="90" placeholder="Pode deixar em branco"></label><label>Senha da sala<input id="roomPass" type="password" minlength="3" maxlength="128"></label><div id="roomError" class="xerror"></div><div class="xactions"><button id="clearMessages" class="xdanger" type="button">Limpar mensagens</button><button id="deleteRoom" class="xdanger solid" type="button">Apagar sala</button><button class="xprimary" type="submit">Salvar</button></div></form>
-            </section>
-          </div>
-          <div id="toast" class="xtoast" hidden></div>
-        `;
-
-        const css = document.createElement("style");
-        css.textContent = `
-          body{margin:0;overflow:hidden;background:#000;color:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}button,input,textarea{font:inherit;color:inherit;box-sizing:border-box}button{cursor:pointer}.xapp{width:100vw;height:100dvh;display:grid;grid-template-columns:390px 1fr;overflow:hidden;background:#000}.xside{display:flex;min-width:0;min-height:0;flex-direction:column;border-right:1px solid #262626}.xtop,.xchatHead{min-height:72px;display:flex;align-items:center;gap:12px;padding:0 18px;border-bottom:1px solid #262626}.xtop{justify-content:space-between}.xbrand{display:flex;gap:10px;align-items:center;font-size:22px}.xicon{width:42px;height:42px;display:grid;place-items:center;flex:0 0 auto;border-radius:50%;border:1px solid #3a3a3a;background:transparent}.xprofile{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:12px;align-items:center;margin:16px;padding:12px;border:1px solid #262626;border-radius:8px;background:#101010}.xprofile strong,.xtitle strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.xprofile span,.xtitle span{display:block;margin-top:3px;color:#8e8e93;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.xavatar{width:48px;height:48px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(135deg,#ff3040,#fd1d6b 55%,#ff8a35);font-weight:800}.xprofile .xavatar{width:42px;height:42px}.xlink{border:0;background:transparent;color:#ff6a8a;font-size:12px;font-weight:700}.xsearch{height:42px;margin:0 16px 14px;padding:0 14px;border:1px solid transparent;border-radius:8px;outline:0;background:#181818}.xsearch:focus{border-color:#3a3a3a}.xcount{padding:0 20px 8px;color:#8e8e93;font-size:13px;text-align:right}.xrooms{flex:1;min-height:0;overflow:auto;padding:0 10px 12px}.xroom{width:100%;display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border:0;border-radius:8px;background:transparent;text-align:left}.xroom:hover,.xroom.active{background:#181818}.xroomName{display:block;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.xroomPreview{display:block;margin-top:4px;color:#8e8e93;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.xlock{color:#ff6a8a;font-size:14px}.xmain{min-width:0;min-height:0;overflow:hidden}.xempty,.xchat{height:100%;min-height:0}.xempty{display:grid;place-items:center;padding:28px;text-align:center}.xempty h1{margin:12px 0 8px}.xempty p{max-width:340px;color:#8e8e93;line-height:1.45}.xemptyIcon{width:92px;height:92px;display:grid;place-items:center;margin:auto;border:2px solid #3a3a3a;border-radius:50%;font-size:38px}.xprimary{min-height:42px;padding:0 16px;border:0;border-radius:8px;background:#3797f0;color:#fff;font-weight:750}.xdanger{min-height:42px;padding:0 14px;border-radius:8px;border:1px solid rgba(255,91,101,.35);background:rgba(255,91,101,.08);color:#ff7b85;font-weight:750}.xdanger.solid{background:#c92f3d;border-color:#c92f3d;color:#fff}.xchat{display:flex;flex-direction:column;overflow:hidden}.xchat[hidden],.xempty[hidden]{display:none}.xback{display:none;font-size:28px}.xtitle{min-width:0;flex:1}.xmessages{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px;overflow:auto;padding:22px clamp(14px,5vw,72px) 14px}.xwelcome{margin:auto;color:#8e8e93;text-align:center}.xmsgRow{display:flex;width:100%}.xmsgRow.mine{justify-content:flex-end}.xbubble{max-width:min(68%,560px);padding:9px 13px;border:1px solid #3a3a3a;border-radius:18px;background:#181818;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.42}.mine .xbubble{background:#3797f0;border-color:#3797f0}.xmeta{display:block;margin-top:5px;color:rgba(255,255,255,.62);font-size:10px}.xcomposer{display:flex;flex-direction:row;align-items:center;gap:8px;min-height:54px;margin:0 clamp(10px,3vw,24px) calc(12px + env(safe-area-inset-bottom));padding:7px 8px;border:1px solid #3a3a3a;border-radius:999px}.xcomposer textarea{flex:1;min-width:0;height:40px;max-height:116px;resize:none;padding:10px 2px 8px;border:0;outline:0;background:transparent;line-height:20px}.xcomposer button{width:40px;height:40px;flex:0 0 40px;border:0;border-radius:50%;background:transparent;color:#3797f0;font-size:20px}.xmodalBg{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:20px;background:rgba(0,0,0,.74)}.xmodalBg[hidden],.xmodal[hidden]{display:none}.xmodal{position:relative;width:min(430px,100%);padding:28px;border:1px solid #3a3a3a;border-radius:8px;background:#161616}.xmodal p{color:#8e8e93;font-size:13px;line-height:1.45}.xclose{position:absolute;right:12px;top:12px;width:34px;height:34px;border-radius:50%;border:1px solid #3a3a3a;background:transparent;font-size:22px}.xmodal form{display:flex;flex-direction:column;gap:14px}.xmodal label{display:flex;flex-direction:column;gap:7px;color:#cfcfcf;font-size:12px;font-weight:700}.xmodal input{height:44px;padding:0 13px;border:1px solid #3a3a3a;border-radius:6px;outline:0;background:#181818}.xerror{color:#ff7b85;font-size:12px}.xerror:empty{display:none}.xactions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}.xtoast{position:fixed;z-index:30;right:18px;bottom:18px;max-width:min(360px,calc(100vw - 32px));padding:12px 16px;border:1px solid #3a3a3a;border-radius:8px;background:#262626;font-size:13px}.xtoast[hidden]{display:none}@media(max-width:760px){.xapp{position:relative;display:block}.xside,.xmain{position:absolute;inset:0;width:100%;height:100%;transition:transform .22s cubic-bezier(.22,.7,.3,1)}.xmain{z-index:2;transform:translateX(100%);background:#000}.xapp.open .xside{transform:translateX(-18%)}.xapp.open .xmain{transform:translateX(0)}.xtop,.xchatHead{min-height:66px;padding:0 16px}.xback{display:grid}.xempty{display:none}.xmessages{padding:18px 12px 12px}.xbubble{max-width:82%}.xcomposer{margin:0 8px calc(8px + env(safe-area-inset-bottom));gap:4px;padding:6px}.xactions{grid-template-columns:1fr}.xmodalBg{padding:0;place-items:end center}.xmodal{max-height:94dvh;overflow:auto;border-right:0;border-bottom:0;border-left:0;border-radius:12px 12px 0 0}}`;
-        document.head.append(css);
-
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        const $ = (id) => document.getElementById(id);
-        const e = {
-          app:$("xapp"), rooms:$("rooms"), count:$("count"), search:$("search"), status:$("status"),
-          meName:$("meName"), meAvatar:$("meAvatar"), logout:$("logout"), empty:$("empty"), chat:$("chatView"),
-          roomTitle:$("roomTitle"), roomAvatar:$("roomAvatar"), messages:$("messages"), msgForm:$("msgForm"), msgInput:$("msgInput"),
-          modalBg:$("modalBg"), unlockModal:$("unlockModal"), unlockTitle:$("unlockTitle"), unlockForm:$("unlockForm"), nameInput:$("nameInput"), passInput:$("passInput"), unlockError:$("unlockError"),
-          roomModal:$("roomModal"), roomModalTitle:$("roomModalTitle"), roomForm:$("roomForm"), roomName:$("roomName"), roomDesc:$("roomDesc"), roomPass:$("roomPass"), roomError:$("roomError"),
-          clearMessages:$("clearMessages"), deleteRoom:$("deleteRoom"), toast:$("toast")
-        };
-
-        let salas = [], mensagens = [], currentRoomId = null, roomToUnlock = null, editingRoomId = null, salasHasDescricao = true, toastTimer = null;
-
-        const initials = (v) => {
-          const p = String(v || "?").trim().split(/\s+/).filter(Boolean);
-          return (p.length > 1 ? p[0][0] + p[1][0] : (p[0] || "?").slice(0,2)).toUpperCase();
-        };
-        const slug = (v) => {
-          const base = String(v || "sala").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "sala";
-          let id = base, n = 2;
-          while (salas.some(s => s.id === id)) id = `${base}-${n++}`;
-          return id;
-        };
-        const toast = (txt) => { clearTimeout(toastTimer); e.toast.textContent = txt; e.toast.hidden = false; toastTimer = setTimeout(() => e.toast.hidden = true, 3500); };
-        const missingColumn = (err, col) => new RegExp(col, "i").test(String(err?.message || "")) && /schema cache|column|could not find/i.test(String(err?.message || ""));
-        const getUser = () => localStorage.getItem(USER_KEY) || "";
-        const setUser = (name) => { localStorage.setItem(USER_KEY, name); e.meName.textContent = name || "Visitante"; e.meAvatar.textContent = initials(name || "Visitante"); e.logout.hidden = !name; };
-        const unlocked = () => { try { return JSON.parse(localStorage.getItem(UNLOCK_KEY)) || []; } catch { return []; } };
-        const setUnlocked = (list) => localStorage.setItem(UNLOCK_KEY, JSON.stringify(list));
-        const isUnlocked = (id) => unlocked().includes(id);
-        const unlockRoom = (id) => { const list = unlocked(); if (!list.includes(id)) list.push(id); setUnlocked(list); };
-        const lockRoom = (id) => setUnlocked(unlocked().filter(x => x !== id));
-        const roomById = (id) => salas.find(s => s.id === id);
-        const roomMessages = (id) => mensagens.filter(m => m.sala_id === id);
-
-        function normalizeSala(row) { return { id: row.id, nome: row.nome || row.name || "Sala", descricao: row.descricao || row.description || "", senha: row.senha || row.password || "" }; }
-        function normalizeMsg(row) { return { id: row.id, sala_id: row.sala_id || row.room_id || "geral", usuario: row.usuario || row.author || "Visitante", texto: row.texto || row.text || "", criado_em: row.criado_em || row.created_at || new Date().toISOString() }; }
-
-        function renderRooms() {
-          const q = e.search.value.trim().toLowerCase();
-          const list = salas.filter(s => `${s.nome} ${s.descricao}`.toLowerCase().includes(q));
-          e.count.textContent = `${salas.length} ${salas.length === 1 ? "sala" : "salas"}`;
-          e.rooms.replaceChildren();
-          if (!list.length) { e.rooms.innerHTML = `<div style="padding:32px 14px;text-align:center;color:#8e8e93">Nenhuma sala encontrada.</div>`; return; }
-          for (const sala of list) {
-            const msgs = roomMessages(sala.id), last = msgs[msgs.length - 1], ok = isUnlocked(sala.id);
-            const btn = document.createElement("button");
-            btn.className = `xroom${currentRoomId === sala.id ? " active" : ""}`;
-            btn.type = "button";
-            btn.innerHTML = `<span class="xavatar">${initials(sala.nome)}</span><span><span class="xroomName"></span><span class="xroomPreview"></span></span><span class="xlock">${ok ? "🔓" : "🔒"}</span>`;
-            btn.querySelector(".xroomName").textContent = sala.nome;
-            btn.querySelector(".xroomPreview").textContent = ok ? (last ? `${last.usuario}: ${last.texto}` : "Nenhuma mensagem ainda") : (sala.descricao || "Toque para informar a senha");
-            btn.addEventListener("click", () => selectRoom(sala.id));
-            e.rooms.append(btn);
-          }
-        }
-
-        function renderMessages() {
-          const sala = roomById(currentRoomId);
-          e.messages.replaceChildren();
-          if (!sala) return;
-          const msgs = roomMessages(sala.id), user = getUser();
-          if (!msgs.length) { e.messages.innerHTML = `<div class="xwelcome"><div class="xavatar" style="width:76px;height:76px;margin:0 auto 12px">${initials(sala.nome)}</div><strong>${sala.nome}</strong><p>${sala.descricao || "Envie a primeira mensagem."}</p></div>`; return; }
-          for (const msg of msgs) {
-            const row = document.createElement("div");
-            row.className = `xmsgRow${msg.usuario === user ? " mine" : ""}`;
-            const bubble = document.createElement("div");
-            bubble.className = "xbubble";
-            bubble.textContent = msg.texto;
-            const meta = document.createElement("span");
-            meta.className = "xmeta";
-            meta.textContent = `${msg.usuario} · ${new Date(msg.criado_em).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}`;
-            bubble.append(meta); row.append(bubble); e.messages.append(row);
-          }
-          e.messages.scrollTop = e.messages.scrollHeight;
-        }
-
-        async function insertSala(sala) {
-          const payload = { id:sala.id, nome:sala.nome, senha:sala.senha };
-          if (salasHasDescricao) payload.descricao = sala.descricao || null;
-          let r = await supabaseClient.from("salas").insert([payload]);
-          if (r.error && missingColumn(r.error, "descricao")) { salasHasDescricao = false; delete payload.descricao; r = await supabaseClient.from("salas").insert([payload]); }
-          if (r.error) throw r.error;
-        }
-        async function updateSala(sala, senha) {
-          const payload = { nome:sala.nome };
-          if (senha) payload.senha = senha;
-          if (salasHasDescricao) payload.descricao = sala.descricao || null;
-          let r = await supabaseClient.from("salas").update(payload).eq("id", sala.id);
-          if (r.error && missingColumn(r.error, "descricao")) { salasHasDescricao = false; delete payload.descricao; r = await supabaseClient.from("salas").update(payload).eq("id", sala.id); }
-          if (r.error) throw r.error;
-        }
-        async function loadData() {
-          e.status.textContent = "Carregando Supabase...";
-          const sr = await supabaseClient.from("salas").select("*");
-          if (sr.error) throw sr.error;
-          if (!sr.data.length) { await insertSala({id:"geral",nome:"Geral",descricao:"Conversa principal",senha:"a1234"}); return loadData(); }
-          const mr = await supabaseClient.from("mensagens").select("*");
-          if (mr.error) throw mr.error;
-          salas = sr.data.map(normalizeSala);
-          mensagens = (mr.data || []).map(normalizeMsg).filter(m => salas.some(s => s.id === m.sala_id)).sort((a,b) => String(a.criado_em).localeCompare(String(b.criado_em)));
-          e.status.textContent = "Conectado ao Supabase";
-          renderRooms();
-          if (currentRoomId && roomById(currentRoomId)) renderMessages();
-          if (currentRoomId && !roomById(currentRoomId)) closeChat();
-        }
-
-        const openModal = (modal) => { e.modalBg.hidden = false; e.unlockModal.hidden = modal !== e.unlockModal; e.roomModal.hidden = modal !== e.roomModal; };
-        const closeModal = () => { e.modalBg.hidden = true; e.unlockModal.hidden = true; e.roomModal.hidden = true; };
-        function selectRoom(id) {
-          const sala = roomById(id); if (!sala) return;
-          if (!isUnlocked(id)) { roomToUnlock = sala; e.unlockTitle.textContent = `Entrar em ${sala.nome}`; e.nameInput.value = getUser(); e.passInput.value = ""; e.unlockError.textContent = ""; openModal(e.unlockModal); setTimeout(() => (e.nameInput.value ? e.passInput : e.nameInput).focus(), 30); return; }
-          currentRoomId = id; e.empty.hidden = true; e.chat.hidden = false; e.app.classList.add("open"); e.roomTitle.textContent = sala.nome; e.roomAvatar.textContent = initials(sala.nome); renderRooms(); renderMessages(); setTimeout(() => e.msgInput.focus(), 30);
-        }
-        function closeChat() { currentRoomId = null; e.chat.hidden = true; e.empty.hidden = false; e.app.classList.remove("open"); renderRooms(); }
-        function openRoomModal(id=null) {
-          editingRoomId = id; const sala = roomById(id);
-          e.roomModalTitle.textContent = sala ? "Editar sala" : "Criar sala"; e.roomName.value = sala?.nome || ""; e.roomDesc.value = sala?.descricao || ""; e.roomPass.value = ""; e.roomPass.required = !sala; e.roomPass.placeholder = sala ? "Deixe em branco para manter" : "Senha para entrar na sala"; e.clearMessages.hidden = !sala; e.deleteRoom.hidden = !sala; e.roomError.textContent = ""; openModal(e.roomModal); setTimeout(() => e.roomName.focus(), 30);
-        }
-        function resizeInput() { e.msgInput.style.height = "auto"; e.msgInput.style.height = Math.min(e.msgInput.scrollHeight, 116) + "px"; }
-
-        $("newRoom").onclick = () => openRoomModal();
-        $("emptyNewRoom").onclick = () => openRoomModal();
-        $("back").onclick = closeChat;
-        $("editRoom").onclick = () => currentRoomId && openRoomModal(currentRoomId);
-        e.search.oninput = renderRooms;
-        e.modalBg.onclick = (ev) => { if (ev.target === e.modalBg || ev.target.closest("[data-close]")) closeModal(); };
-        document.addEventListener("keydown", ev => { if (ev.key === "Escape") closeModal(); });
-        e.logout.onclick = () => { localStorage.removeItem(LOGIN_KEY); localStorage.removeItem(USER_KEY); localStorage.removeItem(UNLOCK_KEY); setUser(""); closeChat(); toast("Sessão encerrada."); };
-        e.unlockForm.onsubmit = (ev) => { ev.preventDefault(); if (!roomToUnlock) return; if (e.passInput.value !== roomToUnlock.senha) { e.unlockError.textContent = "Senha da sala incorreta."; e.passInput.select(); return; } setUser(e.nameInput.value.trim()); localStorage.setItem(LOGIN_KEY, String(Date.now())); unlockRoom(roomToUnlock.id); const id = roomToUnlock.id; roomToUnlock = null; closeModal(); selectRoom(id); };
-        e.roomForm.onsubmit = async (ev) => {
-          ev.preventDefault(); const nome = e.roomName.value.trim(), descricao = e.roomDesc.value.trim(), senha = e.roomPass.value; if (!nome) return; e.roomError.textContent = "";
-          try {
-            if (editingRoomId) { const sala = roomById(editingRoomId); await updateSala({...sala,nome,descricao}, senha); if (senha) lockRoom(sala.id); closeModal(); await loadData(); if (senha && currentRoomId === sala.id) closeChat(); toast("Sala atualizada."); return; }
-            if (senha.length < 3) { e.roomError.textContent = "Informe uma senha com pelo menos 3 caracteres."; return; }
-            const id = slug(nome); await insertSala({id,nome,descricao,senha}); closeModal(); await loadData(); toast("Sala criada."); selectRoom(id);
-          } catch (err) { console.error(err); e.roomError.textContent = err.message || "Erro ao salvar."; }
-        };
-        e.clearMessages.onclick = async () => { const sala = roomById(editingRoomId); if (!sala || !confirm("Apagar todas as mensagens desta sala?")) return; try { const r = await supabaseClient.from("mensagens").delete().eq("sala_id", sala.id); if (r.error) throw r.error; closeModal(); await loadData(); toast("Mensagens apagadas."); } catch (err) { console.error(err); e.roomError.textContent = err.message || "Erro ao limpar."; } };
-        e.deleteRoom.onclick = async () => { const sala = roomById(editingRoomId); if (!sala || !confirm(`Apagar a sala "${sala.nome}" e todas as mensagens?`)) return; try { let r = await supabaseClient.from("mensagens").delete().eq("sala_id", sala.id); if (r.error) throw r.error; r = await supabaseClient.from("salas").delete().eq("id", sala.id); if (r.error) throw r.error; lockRoom(sala.id); closeModal(); if (currentRoomId === sala.id) closeChat(); await loadData(); toast("Sala apagada."); } catch (err) { console.error(err); e.roomError.textContent = err.message || "Erro ao apagar."; } };
-        e.msgForm.onsubmit = async (ev) => { ev.preventDefault(); const text = e.msgInput.value.trim(); if (!currentRoomId || !text) return; e.msgInput.disabled = true; try { const r = await supabaseClient.from("mensagens").insert([{sala_id:currentRoomId,usuario:getUser() || "Visitante",texto:text}]); if (r.error) throw r.error; e.msgInput.value = ""; resizeInput(); await loadData(); e.msgInput.focus(); } catch (err) { console.error(err); toast(err.message || "Erro ao enviar."); } finally { e.msgInput.disabled = false; } };
-        e.msgInput.oninput = resizeInput;
-        e.msgInput.onkeydown = (ev) => { if (ev.key === "Enter" && !ev.shiftKey && !ev.isComposing) { ev.preventDefault(); e.msgForm.requestSubmit(); } };
-
-        async function start() {
-          setUser(getUser());
-          if (Date.now() - Number(localStorage.getItem(LOGIN_KEY) || 0) > TTL) localStorage.removeItem(UNLOCK_KEY);
-          try {
-            await loadData();
-            supabaseClient.channel("hot-chat-v3").on("postgres_changes", {event:"*", schema:"public", table:"salas"}, loadData).on("postgres_changes", {event:"*", schema:"public", table:"mensagens"}, loadData).subscribe();
-          } catch (err) {
-            console.error(err); e.status.textContent = "Erro no Supabase"; e.rooms.innerHTML = `<div style="padding:32px 14px;text-align:center;color:#ff7b85;line-height:1.45">Erro no Supabase: ${err.message || err}. Confira se existem as tabelas salas e mensagens com as colunas certas.</div>`; toast(err.message || "Erro no Supabase.");
-          }
-        }
-        start();
-      })();
-    </script>
-  </body>
+    };
+
+    setUser(getUser());
+    if (Date.now() - Number(localStorage.getItem(LOGIN_KEY) || 0) > TTL) localStorage.removeItem(UNLOCK_KEY);
+    resizeInput();
+    loadData();
+    setInterval(loadData, POLL_MS);
+  </script>
+</body>
 </html>
