@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#090909" />
+    <meta name="color-scheme" content="dark" />
+    <title>Hot Chat</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient--top" aria-hidden="true"></div>
+    <div class="ambient ambient--bottom" aria-hidden="true"></div>
+
+    <div class="app-shell" id="appShell">
+      <aside class="sidebar" aria-label="Lista de salas">
+        <header class="sidebar__header">
+          <a class="brand" href="/" aria-label="Hot Chat">
+            <span class="brand__mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M8.7 3.3c.3 2.5-1.3 3.5-2.4 5.2-1.1 1.6-1.7 3-1.3 5.2.6 3.4 3.4 6 7 6 3.9 0 7-3.1 7-7 0-3.3-1.8-6.5-5-8.7.1 2.8-1 4-2.1 5.1-.1-2.5-1-4.3-3.2-5.8Z" /></svg>
+            </span>
+            <span>Hot Chat</span>
+          </a>
+          <button class="icon-button" id="newRoomButton" type="button" title="Criar sala" aria-label="Criar nova sala">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+          </button>
+        </header>
+
+        <div class="profile-row">
+          <div class="avatar avatar--profile" id="profileAvatar">?</div>
+          <div class="profile-row__text">
+            <strong id="profileName">Visitante</strong>
+            <span id="sessionStatus">Entre em uma sala</span>
+          </div>
+          <button class="text-button" id="logoutButton" type="button" hidden>Sair</button>
+        </div>
+
+        <label class="search-box" for="roomSearch">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
+          <input id="roomSearch" type="search" placeholder="Pesquisar salas" autocomplete="off" />
+        </label>
+
+        <div class="rooms-heading">
+          <strong>Mensagens</strong>
+          <span id="roomCount">0 salas</span>
+        </div>
+
+        <div class="rooms-list" id="roomsList" role="list">
+          <div class="room-skeleton"></div>
+          <div class="room-skeleton"></div>
+          <div class="room-skeleton"></div>
+        </div>
+
+        <footer class="sidebar__footer">
+          <span class="security-dot" aria-hidden="true"></span>
+          Senhas verificadas com segurança no servidor
+        </footer>
+      </aside>
+
+      <main class="conversation" aria-label="Conversa">
+        <section class="empty-state" id="emptyState">
+          <div class="empty-state__icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48"><path d="M41 23.2A16.5 16.5 0 0 1 24.2 39a18 18 0 0 1-7.1-1.5L7 41l3.3-9A15.3 15.3 0 0 1 7.5 23C7.5 14.2 15 7 24.3 7S41 14.2 41 23.2Z" /><path d="m17 24 4.3 4 9.8-10" /></svg>
+          </div>
+          <h1>Suas conversas</h1>
+          <p>Selecione uma sala ao lado para conversar em tempo real.</p>
+          <button class="primary-button primary-button--compact" id="emptyNewRoomButton" type="button">Criar nova sala</button>
+        </section>
+
+        <section class="chat-view" id="chatView" hidden>
+          <header class="chat-header">
+            <button class="icon-button chat-header__back" id="backButton" type="button" aria-label="Voltar para as salas">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
+            </button>
+            <div class="avatar" id="chatAvatar">G</div>
+            <div class="chat-header__identity">
+              <strong id="chatRoomName">Sala</strong>
+              <span id="chatPresence"><i></i> Conectando...</span>
+            </div>
+            <div class="chat-header__actions">
+              <span class="secure-label" title="Sala protegida">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="3" /><path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10" /></svg>
+                Protegida
+              </span>
+              <button class="icon-button" id="manageRoomButton" type="button" aria-label="Configurar sala" title="Configurar sala">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z" /></svg>
+              </button>
+            </div>
+          </header>
+
+          <div class="connection-banner" id="connectionBanner" hidden>Reconectando ao servidor…</div>
+
+          <div class="messages" id="messages" aria-live="polite" aria-label="Mensagens da sala">
+            <button class="load-more" id="loadMoreButton" type="button" hidden>Carregar mensagens anteriores</button>
+          </div>
+
+          <div class="typing-status" id="typingStatus" aria-live="polite"></div>
+
+          <form class="composer" id="messageForm">
+            <button class="composer__emoji" id="emojiButton" type="button" aria-label="Adicionar coração" title="Adicionar coração">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M8.5 14.5s1.3 2 3.5 2 3.5-2 3.5-2M9 9.5h.01M15 9.5h.01" /></svg>
+            </button>
+            <textarea id="messageInput" rows="1" maxlength="2000" placeholder="Mensagem..." autocomplete="off" aria-label="Mensagem"></textarea>
+            <button class="send-button" id="sendButton" type="submit" aria-label="Enviar mensagem">
+              <span>Enviar</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 4 17 8-17 8 3-8-3-8Z" /><path d="M7 12h14" /></svg>
+            </button>
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <div class="modal-backdrop" id="modalBackdrop" hidden>
+      <section class="modal" id="unlockModal" role="dialog" aria-modal="true" aria-labelledby="unlockTitle" hidden>
+        <button class="modal__close" type="button" data-close-modal aria-label="Fechar">×</button>
+        <div class="modal__mark">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="3" /><path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10" /></svg>
+        </div>
+        <h2 id="unlockTitle">Entrar na sala</h2>
+        <p id="unlockDescription">Informe seu nome e a senha desta conversa.</p>
+        <form id="unlockForm">
+          <label class="field">
+            <span>Seu nome</span>
+            <input id="displayNameInput" name="displayName" minlength="2" maxlength="32" placeholder="Como devemos chamar você?" required />
+          </label>
+          <label class="field">
+            <span>Senha da sala</span>
+            <span class="password-field">
+              <input id="roomPasswordInput" name="password" type="password" maxlength="128" placeholder="Digite a senha" required />
+              <button type="button" data-toggle-password="roomPasswordInput" aria-label="Mostrar ou ocultar senha">Ver</button>
+            </span>
+          </label>
+          <p class="form-error" id="unlockError" role="alert"></p>
+          <button class="primary-button" type="submit">Entrar na conversa</button>
+        </form>
+      </section>
+
+      <section class="modal" id="createRoomModal" role="dialog" aria-modal="true" aria-labelledby="createRoomTitle" hidden>
+        <button class="modal__close" type="button" data-close-modal aria-label="Fechar">×</button>
+        <div class="modal__mark modal__mark--plus">+</div>
+        <h2 id="createRoomTitle">Criar nova sala</h2>
+        <p>A sala aparecerá para todos, mas somente a senha correta libera as mensagens.</p>
+        <form id="createRoomForm">
+          <label class="field">
+            <span>Nome da sala</span>
+            <input name="name" minlength="2" maxlength="40" placeholder="Ex.: Equipe comercial" required />
+          </label>
+          <label class="field">
+            <span>Descrição <small>opcional</small></span>
+            <input name="description" maxlength="90" placeholder="Sobre o que vocês vão conversar?" />
+          </label>
+          <label class="field">
+            <span>Senha da sala</span>
+            <span class="password-field">
+              <input id="newRoomPassword" name="password" type="password" minlength="6" maxlength="128" placeholder="Mínimo de 6 caracteres" required />
+              <button type="button" data-toggle-password="newRoomPassword" aria-label="Mostrar ou ocultar senha">Ver</button>
+            </span>
+          </label>
+          <label class="field">
+            <span>Senha administrativa</span>
+            <span class="password-field">
+              <input id="createAdminPassword" name="adminPassword" type="password" maxlength="128" placeholder="Definida no servidor" required />
+              <button type="button" data-toggle-password="createAdminPassword" aria-label="Mostrar ou ocultar senha">Ver</button>
+            </span>
+          </label>
+          <p class="form-error" id="createRoomError" role="alert"></p>
+          <button class="primary-button" type="submit">Criar sala protegida</button>
+        </form>
+      </section>
+
+      <section class="modal" id="manageRoomModal" role="dialog" aria-modal="true" aria-labelledby="manageRoomTitle" hidden>
+        <button class="modal__close" type="button" data-close-modal aria-label="Fechar">×</button>
+        <div class="modal__mark">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.9 4.9 7 7M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1" /></svg>
+        </div>
+        <h2 id="manageRoomTitle">Configurar sala</h2>
+        <p>Somente quem possui a senha administrativa pode aplicar alterações.</p>
+        <form id="manageRoomForm">
+          <label class="field">
+            <span>Nome</span>
+            <input id="manageRoomName" name="name" minlength="2" maxlength="40" required />
+          </label>
+          <label class="field">
+            <span>Descrição</span>
+            <input id="manageRoomDescription" name="description" maxlength="90" />
+          </label>
+          <label class="field">
+            <span>Nova senha <small>deixe vazio para manter</small></span>
+            <span class="password-field">
+              <input id="manageRoomPassword" name="password" type="password" minlength="6" maxlength="128" placeholder="Nova senha da sala" />
+              <button type="button" data-toggle-password="manageRoomPassword" aria-label="Mostrar ou ocultar senha">Ver</button>
+            </span>
+          </label>
+          <label class="field">
+            <span>Senha administrativa</span>
+            <span class="password-field">
+              <input id="manageAdminPassword" name="adminPassword" type="password" maxlength="128" placeholder="Obrigatória para salvar ou limpar" required />
+              <button type="button" data-toggle-password="manageAdminPassword" aria-label="Mostrar ou ocultar senha">Ver</button>
+            </span>
+          </label>
+          <p class="form-error" id="manageRoomError" role="alert"></p>
+          <div class="modal__actions">
+            <button class="danger-button" id="clearMessagesButton" type="button">Limpar mensagens</button>
+            <button class="primary-button" type="submit">Salvar alterações</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>
