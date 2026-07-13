@@ -1,1091 +1,1805 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Hot Chat</title>
-
-<style>
- 
-:root{
-    --primary:#fc3c3c;
-    --primary2:#ff2d75;
-    --primary3:#ff5f8f;
-
-    --bg:#090909;
-    --card:#141414;
-    --card2:#1b1b1b;
-
-    --border:#2b2b2b;
-
-    --text:#ffffff;
-    --text2:#cfcfcf;
-
-    --gradient:linear-gradient(135deg,#fc3c3c,#ff2d75);
-    --shadow:0 0 40px rgba(255,45,117,.25);
-}
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-}
-
-body{
-    background:
-    radial-gradient(circle at top,#391313 0%,transparent 35%),
-    radial-gradient(circle at bottom right,#4d1231 0%,transparent 35%),
-    var(--bg);
-
-    height:100vh;
-    height:100dvh;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    color:var(--text);
-
-    overflow:hidden;
-}
-
-/* LOGIN */
-
-.login{
-
-    width:100%;
-    max-width:360px;
-
-    padding:30px;
-
-    border-radius:26px;
-
-    background:rgba(20,20,20,.92);
-
-    backdrop-filter:blur(25px);
-
-    border:1px solid rgba(255,255,255,.08);
-
-    box-shadow:var(--shadow);
-
-    display:flex;
-    flex-direction:column;
-
-    gap:16px;
-
-}
-
-.login h2{
-
-    text-align:center;
-
-    font-size:24px;
-
-    background:var(--gradient);
-
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-
-}
-
-.login input{
-
-    padding:15px;
-
-    border-radius:16px;
-
-    background:#222;
-
-    border:1px solid #333;
-
-    color:white;
-
-    outline:none;
-
-    transition:.3s;
-
-    font-size:16px;
-
-}
-
-.login input:focus{
-
-    border-color:#ff2d75;
-
-    box-shadow:
-    0 0 0 3px rgba(255,45,117,.15),
-    0 0 20px rgba(255,45,117,.25);
-
-}
-
-.login button{
-
-    padding:15px;
-
-    border:none;
-
-    border-radius:16px;
-
-    background:var(--gradient);
-
-    color:white;
-
-    font-weight:bold;
-
-    cursor:pointer;
-
-    transition:.25s;
-
-}
-
-.login button:hover{
-
-    transform:translateY(-2px);
-
-    box-shadow:
-    0 0 25px rgba(255,45,117,.45);
-
-}
-
-/* CHAT */
-
-.chat-container{
-
-    width:100%;
-    max-width:530px;
-
-    height:95vh;
-    height:95dvh;
-
-    display:none;
-
-    flex-direction:column;
-
-    overflow:hidden;
-
-    border-radius:28px;
-
-    background:rgba(18,18,18,.94);
-
-    backdrop-filter:blur(25px);
-
-    border:1px solid rgba(255,255,255,.08);
-
-    box-shadow:var(--shadow);
-
-}
-
-@media(max-width:480px){
-
-body{
-padding:0;
-}
-
-.chat-container{
-
-height:100vh;
-height:100dvh;
-
-border-radius:0;
-
-}
-
-}
-
-/* TOPO */
-
-.topo{
-
-    background:var(--gradient);
-
-    padding:18px;
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    box-shadow:0 10px 25px rgba(0,0,0,.3);
-
-}
-
-.topo h2{
-
-    font-size:19px;
-
-}
-
-.online{
-
-    color:#fff;
-
-    opacity:.9;
-
-    font-size:12px;
-
-}
-
-/* CHAT */
-
-#chat{
-
-    flex:1;
-
-    overflow-y:auto;
-
-    padding:18px;
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:12px;
-
-}
-
-/* MENSAGENS */
-
-.msg{
-
-    max-width:82%;
-
-    padding:13px 16px;
-
-    border-radius:18px;
-
-    animation:fade .25s;
-
-    word-break:break-word;
-
-}
-
-.eu{
-
-    align-self:flex-end;
-
-    background:var(--gradient);
-
-    color:white;
-
-    border-bottom-right-radius:6px;
-
-    box-shadow:
-    0 8px 20px rgba(255,45,117,.25);
-
-}
-
-.outro{
-
-    align-self:flex-start;
-
-    background:#222;
-
-    color:white;
-
-    border:1px solid #303030;
-
-    border-bottom-left-radius:6px;
-
-}
-
-.nome{
-
-    font-size:12px;
-
-    font-weight:700;
-
-    opacity:.85;
-
-    margin-bottom:5px;
-
-}
-
-.hora{
-
-    margin-top:6px;
-
-    text-align:right;
-
-    font-size:10px;
-
-    opacity:.55;
-
-}
-
-/* FORM */
-
-.form{
-
-    display:flex;
-
-    gap:10px;
-
-    padding:14px;
-
-    background:#181818;
-
-    border-top:1px solid #2d2d2d;
-
-}
-
-.form input{
-
-    flex:1;
-
-    padding:15px;
-
-    border-radius:16px;
-
-    background:#232323;
-
-    border:1px solid #333;
-
-    color:white;
-
-    outline:none;
-
-    font-size:16px;
-
-}
-
-.form input:focus{
-
-    border-color:#ff2d75;
-
-    box-shadow:
-    0 0 18px rgba(255,45,117,.25);
-
-}
-
-.form button{
-
-    width:58px;
-
-    border:none;
-
-    border-radius:16px;
-
-    background:var(--gradient);
-
-    color:white;
-
-    font-size:20px;
-
-    cursor:pointer;
-
-    transition:.25s;
-
-}
-
-.form button:hover{
-
-    transform:scale(1.05);
-
-}
-
-/* BOTÕES */
-
-.botoes{
-
-    display:flex;
-
-    gap:8px;
-
-}
-
-.botoes button{
-
-    width:46px;
-
-    height:46px;
-
-    border:none;
-
-    border-radius:14px;
-
-    background:rgba(255,255,255,.15);
-
-    color:white;
-
-    cursor:pointer;
-
-    backdrop-filter:blur(12px);
-
-    transition:.25s;
-
-}
-
-.botoes button:hover{
-
-    background:rgba(255,255,255,.25);
-
-    transform:translateY(-2px);
-
-}
-
-#timerMinutos{
-
-    font-size:10px;
-
-    color:white;
-
-    font-weight:bold;
-
-}
-
-::-webkit-scrollbar{
-
-width:8px;
-
-}
-
-::-webkit-scrollbar-thumb{
-
-background:var(--gradient);
-
-border-radius:20px;
-
-}
-
-::-webkit-scrollbar-track{
-
-background:#171717;
-
-}
-
-@keyframes fade{
-
-from{
-
-opacity:0;
-
-transform:translateY(8px);
-
-}
-
-to{
-
-opacity:1;
-
-transform:none;
-
-}
-
-}
- 
-</style>
-</head>
-<body>
-
-<div class="login" id="loginBox">
-    <h2>🔐 Área Privada</h2>
-    <input
-        type="password"
-        id="senha"
-        placeholder="Digite a senha"
-    />
-    <button id="entrarBtn">Entrar</button>
-</div>
-
-<div class="chat-container" id="chatContainer">
-    <div class="topo">
-        <div>
-            <h2>Realtime</h2>
-            <div class="online">🟢 Online</div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#000000" />
+    <title>Hot Chat</title>
+    <style>
+      :root {
+        --bg: #000;
+        --line: #262626;
+        --line-2: #3a3a3a;
+        --panel: #101010;
+        --panel-2: #181818;
+        --text: #f5f5f5;
+        --soft: #a8a8a8;
+        --muted: #737373;
+        --blue: #3797f0;
+        --red: #ff3040;
+        --pink: #fd1d6b;
+        --orange: #ff8a35;
+        --green: #39d078;
+        --grad: linear-gradient(135deg, var(--red), var(--pink) 52%, var(--orange));
+        --side: 390px;
+      }
+
+      * { box-sizing: border-box; }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        min-width: 320px;
+        margin: 0;
+      }
+
+      body {
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button,
+      input,
+      textarea {
+        color: inherit;
+        font: inherit;
+      }
+
+      button {
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      svg {
+        display: block;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .app {
+        display: grid;
+        grid-template-columns: var(--side) 1fr;
+        width: 100vw;
+        height: 100dvh;
+        overflow: hidden;
+        background: #000;
+      }
+
+      .sidebar {
+        display: flex;
+        min-width: 0;
+        min-height: 0;
+        flex-direction: column;
+        border-right: 1px solid var(--line);
+      }
+
+      .topbar,
+      .chat-head {
+        display: flex;
+        min-height: 74px;
+        align-items: center;
+        padding: 0 20px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .topbar {
+        justify-content: space-between;
+      }
+
+      .brand {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        font-size: 22px;
+        font-weight: 800;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 38px;
+        height: 38px;
+        place-items: center;
+        background: var(--grad);
+        border-radius: 11px;
+      }
+
+      .brand-mark svg {
+        width: 20px;
+        fill: #fff;
+        stroke: 0;
+      }
+
+      .icon-btn {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        flex: 0 0 auto;
+        place-items: center;
+        background: transparent;
+        border: 1px solid var(--line-2);
+        border-radius: 50%;
+        cursor: pointer;
+      }
+
+      .icon-btn:hover {
+        background: var(--panel-2);
+      }
+
+      .icon-btn svg {
+        width: 21px;
+        stroke-width: 2;
+      }
+
+      .profile {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin: 16px 16px 12px;
+        padding: 12px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      .avatar {
+        display: grid;
+        width: 48px;
+        height: 48px;
+        flex: 0 0 auto;
+        place-items: center;
+        background: var(--grad);
+        border: 2px solid #333;
+        border-radius: 50%;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 850;
+        text-transform: uppercase;
+      }
+
+      .avatar.small {
+        width: 40px;
+        height: 40px;
+      }
+
+      .profile-info,
+      .room-text,
+      .head-text {
+        min-width: 0;
+        flex: 1;
+      }
+
+      .profile-info strong,
+      .room-name,
+      .head-text strong {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .profile-info strong,
+      .room-name {
+        font-size: 14px;
+        font-weight: 750;
+      }
+
+      .profile-info span,
+      .room-preview,
+      .head-text span {
+        display: block;
+        margin-top: 3px;
+        overflow: hidden;
+        color: var(--muted);
+        font-size: 12px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .text-btn {
+        padding: 6px 4px;
+        color: #ff6a8a;
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 750;
+      }
+
+      .search {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        align-items: center;
+        margin: 0 16px 18px;
+        padding: 0 14px;
+        color: var(--muted);
+        background: var(--panel-2);
+        border: 1px solid transparent;
+        border-radius: 8px;
+      }
+
+      .search:focus-within {
+        border-color: var(--line-2);
+      }
+
+      .search svg {
+        width: 18px;
+        stroke-width: 2;
+      }
+
+      .search input {
+        width: 100%;
+        height: 42px;
+        min-width: 0;
+        background: transparent;
+        border: 0;
+        outline: 0;
+        font-size: 14px;
+      }
+
+      .section-title {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 20px 8px;
+        font-size: 13px;
+      }
+
+      .section-title span {
+        color: var(--muted);
+      }
+
+      .rooms {
+        min-height: 0;
+        flex: 1;
+        overflow-y: auto;
+        padding: 0 10px 12px;
+      }
+
+      .room {
+        display: grid;
+        grid-template-columns: 58px minmax(0, 1fr) auto;
+        gap: 12px;
+        width: 100%;
+        align-items: center;
+        padding: 10px 12px;
+        text-align: left;
+        background: transparent;
+        border: 0;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      .room:hover,
+      .room.active {
+        background: var(--panel-2);
+      }
+
+      .room .avatar {
+        width: 56px;
+        height: 56px;
+      }
+
+      .room-time {
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .lock {
+        display: grid;
+        width: 22px;
+        height: 22px;
+        place-items: center;
+        color: #fff;
+        background: #242424;
+        border-radius: 50%;
+      }
+
+      .lock.open {
+        background: var(--grad);
+      }
+
+      .lock svg {
+        width: 12px;
+        stroke-width: 2.2;
+      }
+
+      .side-foot {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        padding: 13px 20px calc(13px + env(safe-area-inset-bottom));
+        color: var(--muted);
+        border-top: 1px solid var(--line);
+        font-size: 11px;
+      }
+
+      .dot {
+        width: 7px;
+        height: 7px;
+        background: var(--green);
+        border-radius: 50%;
+      }
+
+      .conversation {
+        position: relative;
+        min-width: 0;
+        min-height: 0;
+        overflow: hidden;
+        background: #000;
+      }
+
+      .empty,
+      .chat {
+        height: 100%;
+        min-height: 0;
+      }
+
+      .empty {
+        display: grid;
+        place-items: center;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .empty-card {
+        max-width: 360px;
+      }
+
+      .empty-icon {
+        display: grid;
+        width: 96px;
+        height: 96px;
+        margin: 0 auto 22px;
+        place-items: center;
+        border: 2px solid var(--line-2);
+        border-radius: 50%;
+      }
+
+      .empty-icon svg {
+        width: 52px;
+        stroke-width: 1.45;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 24px;
+      }
+
+      .empty p {
+        margin: 10px 0 22px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .primary {
+        min-height: 42px;
+        padding: 0 17px;
+        color: #fff;
+        background: var(--blue);
+        border: 0;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 760;
+      }
+
+      .danger {
+        min-height: 42px;
+        padding: 0 17px;
+        color: #ff7b85;
+        background: rgba(255, 91, 101, 0.08);
+        border: 1px solid rgba(255, 91, 101, 0.32);
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 760;
+      }
+
+      .danger.solid {
+        color: #fff;
+        background: #c92f3d;
+        border-color: #c92f3d;
+      }
+
+      .chat {
+        display: flex;
+        min-height: 0;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .chat[hidden],
+      .empty[hidden] {
+        display: none;
+      }
+
+      .back {
+        display: none;
+        margin-right: 10px;
+      }
+
+      .head-text strong {
+        font-size: 15px;
+      }
+
+      .head-text span {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+
+      .messages {
+        display: flex;
+        min-height: 0;
+        flex: 1;
+        flex-direction: column;
+        gap: 6px;
+        overflow-y: auto;
+        padding: 24px clamp(16px, 5vw, 76px) 16px;
+      }
+
+      .welcome {
+        margin: auto;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .welcome .avatar {
+        width: 76px;
+        height: 76px;
+        margin: 0 auto 14px;
+        font-size: 22px;
+      }
+
+      .welcome strong {
+        display: block;
+        color: var(--text);
+        margin-bottom: 6px;
+      }
+
+      .row {
+        display: flex;
+        width: 100%;
+      }
+
+      .row.mine {
+        justify-content: flex-end;
+      }
+
+      .bubble {
+        max-width: min(68%, 560px);
+        padding: 9px 13px;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+        background: var(--panel-2);
+        border: 1px solid var(--line-2);
+        border-radius: 18px;
+        font-size: 14px;
+        line-height: 1.42;
+      }
+
+      .row.mine .bubble {
+        background: var(--blue);
+        border-color: var(--blue);
+      }
+
+      .meta {
+        display: block;
+        margin-top: 5px;
+        color: var(--muted);
+        font-size: 10px;
+      }
+
+      .composer {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        align-items: center;
+        width: auto;
+        min-height: 54px;
+        margin: 0 clamp(10px, 3vw, 24px) calc(12px + env(safe-area-inset-bottom));
+        padding: 7px 8px;
+        border: 1px solid var(--line-2);
+        border-radius: 999px;
+      }
+
+      .emoji,
+      .send {
+        display: grid;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        flex: 0 0 40px;
+        place-items: center;
+        background: transparent;
+        border: 0;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+
+      .emoji svg,
+      .send svg {
+        width: 22px;
+        stroke-width: 1.8;
+      }
+
+      .send {
+        color: var(--blue);
+      }
+
+      textarea {
+        min-width: 0;
+        max-height: 116px;
+        min-height: 40px;
+        height: 40px;
+        flex: 1;
+        resize: none;
+        padding: 10px 2px 8px;
+        overflow-y: auto;
+        background: transparent;
+        border: 0;
+        outline: 0;
+        font-size: 14px;
+        line-height: 20px;
+      }
+
+      .modal-bg {
+        position: fixed;
+        z-index: 20;
+        inset: 0;
+        display: grid;
+        padding: 20px;
+        place-items: center;
+        background: rgba(0, 0, 0, 0.74);
+      }
+
+      .modal-bg[hidden],
+      .modal[hidden] {
+        display: none;
+      }
+
+      .modal {
+        position: relative;
+        width: min(430px, 100%);
+        padding: 28px;
+        background: #161616;
+        border: 1px solid var(--line-2);
+        border-radius: 8px;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.58);
+      }
+
+      .close {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+      }
+
+      .modal h2 {
+        margin: 0;
+        font-size: 21px;
+      }
+
+      .modal p {
+        margin: 7px 0 20px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .modal form {
+        display: flex;
+        gap: 14px;
+        flex-direction: column;
+      }
+
+      label {
+        display: flex;
+        gap: 7px;
+        flex-direction: column;
+        color: var(--soft);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      input {
+        width: 100%;
+        height: 44px;
+        padding: 0 13px;
+        background: var(--panel-2);
+        border: 1px solid var(--line-2);
+        border-radius: 6px;
+        outline: 0;
+        font-size: 14px;
+      }
+
+      input:focus {
+        border-color: #555;
+      }
+
+      .error {
+        min-height: 0;
+        margin: -2px 0 0;
+        color: #ff7b85;
+        font-size: 12px;
+      }
+
+      .error:empty {
+        display: none;
+      }
+
+      .modal-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+      }
+
+      .modal-actions.three {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+
+      .toast {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 30;
+        max-width: min(360px, calc(100vw - 32px));
+        padding: 12px 16px;
+        background: #262626;
+        border: 1px solid var(--line-2);
+        border-radius: 8px;
+        font-size: 13px;
+      }
+
+      .toast[hidden] {
+        display: none;
+      }
+
+      @media (max-width: 760px) {
+        .app {
+          position: relative;
+          display: block;
+        }
+
+        .sidebar,
+        .conversation {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          transition: transform 220ms cubic-bezier(0.22, 0.7, 0.3, 1);
+        }
+
+        .conversation {
+          z-index: 2;
+          transform: translateX(100%);
+        }
+
+        .app.open .sidebar {
+          transform: translateX(-18%);
+        }
+
+        .app.open .conversation {
+          transform: translateX(0);
+        }
+
+        .topbar,
+        .chat-head {
+          min-height: 66px;
+          padding-right: 16px;
+          padding-left: 16px;
+        }
+
+        .profile {
+          margin: 14px 16px 12px;
+        }
+
+        .messages {
+          padding: 18px 12px 12px;
+        }
+
+        .back {
+          display: grid;
+        }
+
+        .empty {
+          display: none;
+        }
+
+        .bubble {
+          max-width: 82%;
+        }
+
+        .composer {
+          gap: 4px;
+          min-height: 52px;
+          margin-right: 8px;
+          margin-bottom: calc(8px + env(safe-area-inset-bottom));
+          margin-left: 8px;
+          padding: 6px;
+        }
+
+        .emoji,
+        .send {
+          width: 38px;
+          height: 38px;
+          min-width: 38px;
+          flex-basis: 38px;
+        }
+
+        textarea {
+          min-height: 38px;
+          height: 38px;
+          padding-top: 9px;
+          padding-bottom: 7px;
+        }
+
+        .modal-bg {
+          padding: 0;
+          place-items: end center;
+        }
+
+        .modal {
+          max-height: 94dvh;
+          overflow-y: auto;
+          border-right: 0;
+          border-bottom: 0;
+          border-left: 0;
+          border-radius: 12px 12px 0 0;
+        }
+
+        .modal-actions,
+        .modal-actions.three {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 380px) {
+        .brand {
+          gap: 9px;
+          font-size: 20px;
+        }
+
+        .brand-mark {
+          width: 36px;
+          height: 36px;
+        }
+
+        .room {
+          grid-template-columns: 52px minmax(0, 1fr) 22px;
+          gap: 10px;
+          padding-right: 8px;
+          padding-left: 8px;
+        }
+
+        .room .avatar {
+          width: 50px;
+          height: 50px;
+        }
+
+        .side-foot {
+          font-size: 10px;
+        }
+      }
+
+      @media (max-height: 620px) and (max-width: 760px) {
+        .topbar,
+        .chat-head {
+          min-height: 58px;
+        }
+
+        .profile {
+          margin-top: 10px;
+          margin-bottom: 10px;
+          padding: 10px;
+        }
+
+        .search {
+          margin-bottom: 12px;
+        }
+
+        .messages {
+          padding-top: 12px;
+        }
+
+        .welcome .avatar {
+          width: 64px;
+          height: 64px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app" id="app">
+      <aside class="sidebar">
+        <header class="topbar">
+          <div class="brand">
+            <span class="brand-mark">
+              <svg viewBox="0 0 24 24"><path d="M8.7 3.3c.3 2.5-1.3 3.5-2.4 5.2-1.1 1.6-1.7 3-1.3 5.2.6 3.4 3.4 6 7 6 3.9 0 7-3.1 7-7 0-3.3-1.8-6.5-5-8.7.1 2.8-1 4-2.1 5.1-.1-2.5-1-4.3-3.2-5.8Z"/></svg>
+            </span>
+            <span>Hot Chat</span>
+          </div>
+          <button class="icon-btn" id="newRoomBtn" type="button" title="Criar sala" aria-label="Criar sala">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </header>
+
+        <div class="profile">
+          <div class="avatar small" id="profileAvatar">?</div>
+          <div class="profile-info">
+            <strong id="profileName">Visitante</strong>
+            <span id="profileStatus">Entre em uma sala</span>
+          </div>
+          <button class="text-btn" id="logoutBtn" type="button" hidden>Sair</button>
         </div>
 
-        <div class="botoes">
-            <button id="timerBtn" title="Configurar Temporizador">
-                ⏱️ <span id="timerMinutos">Off</span>
-            </button>
+        <label class="search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <input id="searchInput" type="search" placeholder="Pesquisar salas" autocomplete="off" />
+        </label>
 
-            <button id="trocarNomeBtn" title="Trocar nome">
-                👤
-            </button>
-
-            <button id="limparBtn" title="Limpar chat">
-                🗑️
-            </button>
+        <div class="section-title">
+          <strong>Mensagens</strong>
+          <span id="roomCount">0 salas</span>
         </div>
+
+        <div class="rooms" id="rooms"></div>
+
+        <footer class="side-foot">
+          <span class="dot"></span>
+          HTML unico: dados salvos neste navegador
+        </footer>
+      </aside>
+
+      <main class="conversation">
+        <section class="empty" id="empty">
+          <div class="empty-card">
+            <div class="empty-icon">
+              <svg viewBox="0 0 48 48"><path d="M41 23.2A16.5 16.5 0 0 1 24.2 39a18 18 0 0 1-7.1-1.5L7 41l3.3-9A15.3 15.3 0 0 1 7.5 23C7.5 14.2 15 7 24.3 7S41 14.2 41 23.2Z"/><path d="m17 24 4.3 4 9.8-10"/></svg>
+            </div>
+            <h1>Suas conversas</h1>
+            <p>Selecione uma sala para conversar. Cada sala tem sua propria senha.</p>
+            <button class="primary" id="emptyNewRoomBtn" type="button">Criar nova sala</button>
+          </div>
+        </section>
+
+        <section class="chat" id="chat" hidden>
+          <header class="chat-head">
+            <button class="icon-btn back" id="backBtn" type="button" aria-label="Voltar">
+              <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <div class="avatar" id="chatAvatar">G</div>
+            <div class="head-text">
+              <strong id="chatTitle">Sala</strong>
+              <span><i class="dot"></i><span id="chatSubtitle">Protegida por senha</span></span>
+            </div>
+            <button class="icon-btn" id="manageBtn" type="button" title="Configurar sala" aria-label="Configurar sala">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg>
+            </button>
+          </header>
+
+          <div class="messages" id="messages"></div>
+
+          <form class="composer" id="messageForm">
+            <button class="emoji" id="emojiBtn" type="button" aria-label="Adicionar coracao">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5s1.3 2 3.5 2 3.5-2 3.5-2M9 9.5h.01M15 9.5h.01"/></svg>
+            </button>
+            <textarea id="messageInput" rows="1" maxlength="2000" placeholder="Mensagem..." aria-label="Mensagem"></textarea>
+            <button class="send" type="submit" aria-label="Enviar">
+              <svg viewBox="0 0 24 24"><path d="m4 4 17 8-17 8 3-8-3-8Z"/><path d="M7 12h14"/></svg>
+            </button>
+          </form>
+        </section>
+      </main>
     </div>
 
-    <div id="chat"></div>
+    <div class="modal-bg" id="modalBg" hidden>
+      <section class="modal" id="unlockModal" hidden>
+        <button class="icon-btn close" type="button" data-close aria-label="Fechar">
+          <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+        <h2 id="unlockTitle">Entrar na sala</h2>
+        <p>Digite seu nome e a senha desta conversa.</p>
+        <form id="unlockForm">
+          <label>Seu nome<input id="nameInput" minlength="2" maxlength="32" required /></label>
+          <label>Senha da sala<input id="passwordInput" type="password" maxlength="128" required /></label>
+          <div class="error" id="unlockError"></div>
+          <button class="primary" type="submit">Entrar na conversa</button>
+        </form>
+      </section>
 
-    <form class="form" id="form">
-        <input
-            type="text"
-            id="mensagem"
-            placeholder="Digite..."
-            autocomplete="off"
-            required
-        />
-        <button type="submit">➤</button>
-    </form>
-</div>
+      <section class="modal" id="roomModal" hidden>
+        <button class="icon-btn close" type="button" data-close aria-label="Fechar">
+          <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+        <h2 id="roomModalTitle">Criar sala</h2>
+        <p>Cada sala fica bloqueada pela senha escolhida.</p>
+        <form id="roomForm">
+          <label>Nome da sala<input id="roomNameInput" minlength="2" maxlength="40" required /></label>
+          <label>Descricao opcional<input id="roomDescriptionInput" maxlength="90" placeholder="Pode deixar em branco" /></label>
+          <label>Senha da sala<input id="roomPasswordInput" type="password" minlength="3" maxlength="128" /></label>
+          <div class="error" id="roomError"></div>
+          <div class="modal-actions three">
+            <button class="danger" id="clearRoomBtn" type="button">Limpar mensagens</button>
+            <button class="danger solid" id="deleteRoomBtn" type="button">Apagar sala</button>
+            <button class="primary" type="submit">Salvar sala</button>
+          </div>
+        </form>
+      </section>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <div class="toast" id="toast" hidden></div>
 
-<script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-// ======================================
-// CONFIG
-// ======================================
+    <script>
+      "use strict";
 
-const SENHA = "a1234";
+      const STORAGE_KEY = "hot_chat_single_html_v1";
+      const SESSION_KEY = "hot_chat_single_html_session_v1";
+      const defaultData = {
+        rooms: [
+          {
+            id: "geral",
+            name: "Geral",
+            description: "Conversa principal",
+            password: "a1234",
+            messages: [],
+            createdAt: Date.now(),
+          },
+        ],
+      };
 
-const TEMPO_LOGIN =
-6 * 60 * 60 * 1000;
-// 6 horas
+      let data = { rooms: [] };
+      let session = loadSession();
+      let currentRoomId = null;
+      let roomToUnlock = null;
+      let editingRoomId = null;
+      let toastTimer = null;
 
-const SUPABASE_URL =
-"https://xpfzqbjyizftllasvbll.supabase.co";
+      const $ = (id) => document.getElementById(id);
+      const els = {
+        app: $("app"),
+        rooms: $("rooms"),
+        roomCount: $("roomCount"),
+        search: $("searchInput"),
+        profileAvatar: $("profileAvatar"),
+        profileName: $("profileName"),
+        profileStatus: $("profileStatus"),
+        logout: $("logoutBtn"),
+        empty: $("empty"),
+        chat: $("chat"),
+        chatAvatar: $("chatAvatar"),
+        chatTitle: $("chatTitle"),
+        chatSubtitle: $("chatSubtitle"),
+        messages: $("messages"),
+        messageForm: $("messageForm"),
+        messageInput: $("messageInput"),
+        modalBg: $("modalBg"),
+        unlockModal: $("unlockModal"),
+        unlockForm: $("unlockForm"),
+        unlockTitle: $("unlockTitle"),
+        nameInput: $("nameInput"),
+        passwordInput: $("passwordInput"),
+        unlockError: $("unlockError"),
+        roomModal: $("roomModal"),
+        roomModalTitle: $("roomModalTitle"),
+        roomForm: $("roomForm"),
+        roomName: $("roomNameInput"),
+        roomDescription: $("roomDescriptionInput"),
+        roomPassword: $("roomPasswordInput"),
+        roomError: $("roomError"),
+        clearRoom: $("clearRoomBtn"),
+        deleteRoom: $("deleteRoomBtn"),
+        toast: $("toast"),
+      };
 
-const SUPABASE_KEY =
-"sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU";
+      function loadData() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (parsed && Array.isArray(parsed.rooms)) return parsed;
+        } catch {}
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
+        return structuredClone(defaultData);
+      }
 
-// ======================================
-// SUPABASE
-// ======================================
+      function saveData() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }
 
-const supabaseClient =
-window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
-
-// ======================================
-// ELEMENTOS
-// ======================================
-
-const loginBox =
-document.getElementById("loginBox");
-
-const chatContainer =
-document.getElementById("chatContainer");
-
-const entrarBtn =
-document.getElementById("entrarBtn");
-
-const senhaInput =
-document.getElementById("senha");
-
-const form =
-document.getElementById("form");
-
-const mensagemInput =
-document.getElementById("mensagem");
-
-const chat =
-document.getElementById("chat");
-
-const limparBtn =
-document.getElementById("limparBtn");
-
-const trocarNomeBtn =
-document.getElementById("trocarNomeBtn");
-
-const timerBtn =
-document.getElementById("timerBtn");
-
-const timerMinutos =
-document.getElementById("timerMinutos");
-
-// ======================================
-// CONTROLE
-// ======================================
-
-let usuario = "";
-
-let intervaloLimpeza = null;
-
-let chatIniciado = false;
-
-// ======================================
-// VERIFICAR LOGIN CACHE
-// ======================================
-
-verificarLoginCache();
-
-// ======================================
-// EVENTOS LOGIN
-// ======================================
-
-entrarBtn.addEventListener(
-    "click",
-    entrar
-);
-
-senhaInput.addEventListener(
-    "keydown",
-    e => {
-
-        if(e.key === "Enter"){
-
-            entrar();
+      function loadSession() {
+        try {
+          return JSON.parse(localStorage.getItem(SESSION_KEY)) || { name: "", unlocked: [] };
+        } catch {
+          return { name: "", unlocked: [] };
         }
-    }
-);
+      }
 
-// ======================================
-// VERIFICAR CACHE
-// ======================================
+      function saveSession() {
+        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+      }
 
-function verificarLoginCache(){
+      function initials(value) {
+        const words = String(value || "?").trim().split(/\s+/).filter(Boolean);
+        const text = words.length > 1 ? words[0][0] + words[1][0] : (words[0] || "?").slice(0, 2);
+        return text.toUpperCase();
+      }
 
-    const loginSalvo =
-    localStorage.getItem(
-        "chat_login"
-    );
+      function roomById(id) {
+        return data.rooms.find((room) => room.id === id);
+      }
 
-    const timestamp =
-    localStorage.getItem(
-        "chat_login_time"
-    );
+      function isUnlocked(roomId) {
+        return session.unlocked.includes(roomId);
+      }
 
-    if(
-        !loginSalvo
-        ||
-        !timestamp
-    ){
-        return;
-    }
+      function timeLabel(value) {
+        if (!value) return "";
+        return new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(new Date(value));
+      }
 
-    const agora =
-    Date.now();
+      function makeId(name) {
+        const base = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "sala";
+        let id = base;
+        let suffix = 2;
+        while (roomById(id)) id = base + "-" + suffix++;
+        return id;
+      }
 
-    const diferenca =
-    agora - Number(timestamp);
+      function updateProfile() {
+        const name = session.name || "Visitante";
+        els.profileName.textContent = name;
+        els.profileStatus.textContent = session.name ? "Sessao ativa neste navegador" : "Entre em uma sala";
+        els.profileAvatar.textContent = initials(name);
+        els.logout.hidden = !session.name;
+      }
 
-    if(
-        diferenca <
-        TEMPO_LOGIN
-    ){
+      function renderRooms() {
+        const query = els.search.value.trim().toLowerCase();
+        const rooms = data.rooms.filter((room) => (room.name + " " + room.description).toLowerCase().includes(query));
+        els.roomCount.textContent = data.rooms.length + (data.rooms.length === 1 ? " sala" : " salas");
+        els.rooms.replaceChildren();
 
-        liberarChat();
-
-    }else{
-
-        localStorage.removeItem(
-            "chat_login"
-        );
-
-        localStorage.removeItem(
-            "chat_login_time"
-        );
-    }
-}
-
-// ======================================
-// LOGIN
-// ======================================
-
-function entrar(){
-
-    const senha =
-    senhaInput.value.trim();
-
-    if(senha !== SENHA){
-
-        alert(
-            "Senha incorreta"
-        );
-
-        return;
-    }
-
-    localStorage.setItem(
-        "chat_login",
-        "true"
-    );
-
-    localStorage.setItem(
-        "chat_login_time",
-        Date.now()
-    );
-
-    liberarChat();
-}
-
-// ======================================
-// LIBERAR CHAT
-// ======================================
-
-function liberarChat(){
-
-    loginBox.style.display =
-    "none";
-
-    chatContainer.style.display =
-    "flex";
-
-    iniciarChat();
-}
-
-// ======================================
-// LOGOUT
-// ======================================
-
-function logout(){
-
-    localStorage.removeItem(
-        "chat_login"
-    );
-
-    localStorage.removeItem(
-        "chat_login_time"
-    );
-
-    location.reload();
-}
-
-// ======================================
-// INICIAR CHAT
-// ======================================
-
-async function iniciarChat(){
-
-    if(chatIniciado) return;
-
-    chatIniciado = true;
-
-    usuario =
-    localStorage.getItem(
-        "usuario"
-    );
-
-    if(!usuario){
-
-        usuario =
-        prompt("Seu nome?");
-
-        if(!usuario){
-
-            usuario =
-            "Anônimo";
+        if (!rooms.length) {
+          const empty = document.createElement("div");
+          empty.className = "room-preview";
+          empty.style.padding = "32px 14px";
+          empty.style.textAlign = "center";
+          empty.textContent = "Nenhuma sala encontrada.";
+          els.rooms.append(empty);
+          return;
         }
 
-        localStorage.setItem(
-            "usuario",
-            usuario
-        );
-    }
+        for (const room of rooms) {
+          const latest = room.messages[room.messages.length - 1];
+          const unlocked = isUnlocked(room.id);
+          const button = document.createElement("button");
+          button.className = "room" + (currentRoomId === room.id ? " active" : "");
+          button.type = "button";
+          button.innerHTML = `
+            <span class="avatar">${initials(room.name)}</span>
+            <span class="room-text">
+              <span class="room-name"></span>
+              <span class="room-preview"></span>
+            </span>
+            <span class="lock ${unlocked ? "open" : ""}" title="${unlocked ? "Liberada" : "Bloqueada"}">
+              <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="3"/><path d="${unlocked ? "M9 10V7a3.5 3.5 0 0 1 6.4-1.9" : "M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10"}"/></svg>
+            </span>
+          `;
+          button.querySelector(".room-name").textContent = room.name;
+          button.querySelector(".room-preview").textContent = unlocked
+            ? latest ? `${latest.author}: ${latest.text}` : "Nenhuma mensagem ainda"
+            : room.description || "Toque para informar a senha";
+          button.addEventListener("click", () => selectRoom(room.id));
+          els.rooms.append(button);
+        }
+      }
 
-    // ======================================
-    // TROCAR NOME
-    // ======================================
+      function renderMessages() {
+        const room = roomById(currentRoomId);
+        els.messages.replaceChildren();
+        if (!room) return;
 
-    trocarNomeBtn.onclick =
-    () => {
+        if (!room.messages.length) {
+          const welcome = document.createElement("div");
+          welcome.className = "welcome";
+          welcome.innerHTML = `<div class="avatar">${initials(room.name)}</div><strong></strong><span></span>`;
+          welcome.querySelector("strong").textContent = room.name;
+          welcome.querySelector("span").textContent = room.description || "Envie a primeira mensagem.";
+          els.messages.append(welcome);
+          return;
+        }
 
-        const novo =
-        prompt("Novo nome:");
+        for (const msg of room.messages) {
+          const row = document.createElement("div");
+          row.className = "row" + (msg.author === session.name ? " mine" : "");
+          const bubble = document.createElement("div");
+          bubble.className = "bubble";
+          bubble.textContent = msg.text;
+          const meta = document.createElement("span");
+          meta.className = "meta";
+          meta.textContent = `${msg.author} · ${timeLabel(msg.createdAt)}`;
+          bubble.append(meta);
+          row.append(bubble);
+          els.messages.append(row);
+        }
+        els.messages.scrollTop = els.messages.scrollHeight;
+      }
 
-        if(!novo) return;
+      function selectRoom(roomId) {
+        const room = roomById(roomId);
+        if (!room) return;
+        if (!isUnlocked(roomId)) {
+          roomToUnlock = room;
+          els.unlockTitle.textContent = "Entrar em " + room.name;
+          els.nameInput.value = session.name || "";
+          els.passwordInput.value = "";
+          els.unlockError.textContent = "";
+          openModal(els.unlockModal);
+          setTimeout(() => (els.nameInput.value ? els.passwordInput : els.nameInput).focus(), 30);
+          return;
+        }
+        currentRoomId = roomId;
+        els.empty.hidden = true;
+        els.chat.hidden = false;
+        els.app.classList.add("open");
+        els.chatTitle.textContent = room.name;
+        els.chatSubtitle.textContent = "Sala liberada neste navegador";
+        els.chatAvatar.textContent = initials(room.name);
+        renderRooms();
+        renderMessages();
+        setTimeout(() => els.messageInput.focus(), 30);
+      }
 
-        usuario = novo;
+      function closeChat() {
+        currentRoomId = null;
+        els.chat.hidden = true;
+        els.empty.hidden = false;
+        els.app.classList.remove("open");
+        renderRooms();
+      }
 
-        localStorage.setItem(
-            "usuario",
-            usuario
-        );
-    };
+      function openModal(modal) {
+        els.modalBg.hidden = false;
+        els.unlockModal.hidden = modal !== els.unlockModal;
+        els.roomModal.hidden = modal !== els.roomModal;
+      }
 
-    // ======================================
-    // LIMPAR CHAT
-    // ======================================
+      function closeModal() {
+        els.modalBg.hidden = true;
+        els.unlockModal.hidden = true;
+        els.roomModal.hidden = true;
+      }
 
-    limparBtn.onclick =
-    async () => {
+      function showToast(text) {
+        clearTimeout(toastTimer);
+        els.toast.textContent = text;
+        els.toast.hidden = false;
+        toastTimer = setTimeout(() => els.toast.hidden = true, 3000);
+      }
 
-        const ok =
-        confirm(
-            "Apagar todas mensagens?"
-        );
+      function showRoomModal(roomId = null) {
+        editingRoomId = roomId;
+        const room = roomId ? roomById(roomId) : null;
+        els.roomModalTitle.textContent = room ? "Configurar sala" : "Criar sala";
+        els.roomName.value = room?.name || "";
+        els.roomDescription.value = room?.description || "";
+        els.roomPassword.value = "";
+        els.roomPassword.placeholder = room ? "Deixe em branco para manter" : "Senha para entrar na sala";
+        els.roomPassword.required = !room;
+        els.clearRoom.hidden = !room;
+        els.deleteRoom.hidden = !room;
+        els.roomError.textContent = "";
+        openModal(els.roomModal);
+        setTimeout(() => els.roomName.focus(), 30);
+      }
 
-        if(!ok) return;
+      els.unlockForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (!roomToUnlock) return;
+        const name = els.nameInput.value.trim();
+        const password = els.passwordInput.value;
+        if (password !== roomToUnlock.password) {
+          els.unlockError.textContent = "Senha da sala incorreta.";
+          els.passwordInput.select();
+          return;
+        }
+        session.name = name;
+        if (!session.unlocked.includes(roomToUnlock.id)) session.unlocked.push(roomToUnlock.id);
+        saveSession();
+        updateProfile();
+        const roomId = roomToUnlock.id;
+        roomToUnlock = null;
+        closeModal();
+        selectRoom(roomId);
+      });
 
-        const { error } =
-        await supabaseClient
+      els.roomForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const name = els.roomName.value.trim();
+        const description = els.roomDescription.value.trim();
+        const password = els.roomPassword.value;
+        if (!name) return;
 
-        .from("mensagens")
+        if (editingRoomId) {
+          const room = roomById(editingRoomId);
+          room.name = name;
+          room.description = description;
+          if (password) {
+            room.password = password;
+            session.unlocked = session.unlocked.filter((id) => id !== room.id);
+            if (currentRoomId === room.id) closeChat();
+          }
+          saveData();
+          saveSession();
+          closeModal();
+          renderRooms();
+          showToast("Sala atualizada.");
+          return;
+        }
 
-        .delete()
+        if (password.length < 3) {
+          els.roomError.textContent = "Informe uma senha com pelo menos 3 caracteres.";
+          return;
+        }
+        const room = { id: makeId(name), name, description, password, messages: [], createdAt: Date.now() };
+        data.rooms.push(room);
+        saveData();
+        closeModal();
+        renderRooms();
+        showToast("Sala criada. Agora entre com a senha.");
+        selectRoom(room.id);
+      });
 
-        .not(
-            "id",
-            "is",
-            null
-        );
+      els.clearRoom.addEventListener("click", () => {
+        const room = roomById(editingRoomId);
+        if (!room) return;
+        if (!confirm("Apagar todas as mensagens desta sala?")) return;
+        room.messages = [];
+        saveData();
+        closeModal();
+        renderRooms();
+        renderMessages();
+        showToast("Mensagens apagadas.");
+      });
 
-        if(error){
+      els.deleteRoom.addEventListener("click", () => {
+        const room = roomById(editingRoomId);
+        if (!room) return;
+        if (!confirm(`Apagar a sala "${room.name}" e todas as mensagens?`)) return;
 
-            console.log(error);
+        data.rooms = data.rooms.filter((item) => item.id !== room.id);
+        session.unlocked = session.unlocked.filter((id) => id !== room.id);
+        saveData();
+        saveSession();
+        closeModal();
 
-            alert(
-                "Erro ao limpar"
-            );
+        if (currentRoomId === room.id) {
+          closeChat();
+        } else {
+          renderRooms();
+        }
+        updateProfile();
+        showToast("Sala apagada.");
+      });
 
+      els.messageForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const room = roomById(currentRoomId);
+        const text = els.messageInput.value.trim();
+        if (!room || !text) return;
+        room.messages.push({
+          author: session.name || "Visitante",
+          text,
+          createdAt: Date.now(),
+        });
+        saveData();
+        els.messageInput.value = "";
+        resizeInput();
+        renderRooms();
+        renderMessages();
+      });
+
+      function resizeInput() {
+        els.messageInput.style.height = "auto";
+        els.messageInput.style.height = Math.min(els.messageInput.scrollHeight, 116) + "px";
+      }
+
+      els.messageInput.addEventListener("input", resizeInput);
+      els.messageInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+          event.preventDefault();
+          els.messageForm.requestSubmit();
+        }
+      });
+      $("emojiBtn").addEventListener("click", () => {
+        const start = els.messageInput.selectionStart;
+        const end = els.messageInput.selectionEnd;
+        els.messageInput.value = els.messageInput.value.slice(0, start) + "❤" + els.messageInput.value.slice(end);
+        els.messageInput.selectionStart = els.messageInput.selectionEnd = start + 1;
+        els.messageInput.focus();
+        resizeInput();
+      });
+      $("newRoomBtn").addEventListener("click", () => showRoomModal());
+      $("emptyNewRoomBtn").addEventListener("click", () => showRoomModal());
+      $("manageBtn").addEventListener("click", () => currentRoomId && showRoomModal(currentRoomId));
+      $("backBtn").addEventListener("click", closeChat);
+      els.search.addEventListener("input", renderRooms);
+      els.logout.addEventListener("click", () => {
+        session = { name: "", unlocked: [] };
+        saveSession();
+        closeChat();
+        updateProfile();
+        showToast("Sessao encerrada.");
+      });
+      els.modalBg.addEventListener("click", (event) => {
+        if (event.target === els.modalBg || event.target.closest("[data-close]")) closeModal();
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeModal();
+      });
+
+      updateProfile();
+      els.rooms.replaceChildren();
+      const loadingSupabase = document.createElement("div");
+      loadingSupabase.className = "room-preview";
+      loadingSupabase.style.padding = "32px 14px";
+      loadingSupabase.style.textAlign = "center";
+      loadingSupabase.textContent = "Carregando Supabase...";
+      els.rooms.append(loadingSupabase);
+
+      // ======================================
+      // MODO SUPABASE
+      // ======================================
+
+      const SUPABASE_URL = "https://xpfzqbjyizftllasvbll.supabase.co";
+      const SUPABASE_KEY = "sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU";
+      const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      let realtimeChannel = null;
+
+      function normalizeSupabaseRoom(row) {
+        return {
+          id: row.id,
+          name: row.nome || row.name || "Sala",
+          description: row.descricao || row.description || "",
+          password: row.senha || row.password || "",
+          messages: [],
+          createdAt: row.criado_em ? new Date(row.criado_em).getTime() : Date.now(),
+        };
+      }
+
+      function normalizeSupabaseMessage(row) {
+        return {
+          id: row.id,
+          roomId: row.sala_id || row.room_id || "geral",
+          author: row.usuario || row.author || "Visitante",
+          text: row.texto || row.text || "",
+          createdAt: row.criado_em ? new Date(row.criado_em).getTime() : Date.now(),
+        };
+      }
+
+      async function loadSupabaseData() {
+        const { data: roomsData, error: roomsError } = await supabaseClient
+          .from("salas")
+          .select("*")
+          .order("criado_em", { ascending: true });
+
+        if (roomsError) throw roomsError;
+
+        if (!roomsData.length) {
+          const { error: seedError } = await supabaseClient
+            .from("salas")
+            .insert([{
+              id: "geral",
+              nome: "Geral",
+              descricao: "Conversa principal",
+              senha: "a1234",
+            }]);
+          if (seedError) throw seedError;
+          return loadSupabaseData();
+        }
+
+        const { data: messagesData, error: messagesError } = await supabaseClient
+          .from("mensagens")
+          .select("*")
+          .order("criado_em", { ascending: true });
+
+        if (messagesError) throw messagesError;
+
+        const rooms = roomsData.map(normalizeSupabaseRoom);
+        const byId = new Map(rooms.map((room) => [room.id, room]));
+
+        for (const row of messagesData || []) {
+          const message = normalizeSupabaseMessage(row);
+          const room = byId.get(message.roomId);
+          if (room) room.messages.push(message);
+        }
+
+        data = { rooms };
+        renderRooms();
+
+        if (currentRoomId) {
+          const current = roomById(currentRoomId);
+          if (current) {
+            els.chatTitle.textContent = current.name;
+            els.chatAvatar.textContent = initials(current.name);
+            renderMessages();
+          } else {
+            closeChat();
+          }
+        }
+      }
+
+      async function createSupabaseRoom(room) {
+        const { error } = await supabaseClient
+          .from("salas")
+          .insert([{
+            id: room.id,
+            nome: room.name,
+            descricao: room.description || null,
+            senha: room.password,
+          }]);
+        if (error) throw error;
+      }
+
+      async function updateSupabaseRoom(room, password) {
+        const changes = {
+          nome: room.name,
+          descricao: room.description || null,
+        };
+        if (password) changes.senha = password;
+
+        const { error } = await supabaseClient
+          .from("salas")
+          .update(changes)
+          .eq("id", room.id);
+        if (error) throw error;
+      }
+
+      async function deleteSupabaseRoom(roomId) {
+        const messagesDelete = await supabaseClient
+          .from("mensagens")
+          .delete()
+          .eq("sala_id", roomId);
+        if (messagesDelete.error) throw messagesDelete.error;
+
+        const roomDelete = await supabaseClient
+          .from("salas")
+          .delete()
+          .eq("id", roomId);
+        if (roomDelete.error) throw roomDelete.error;
+      }
+
+      async function clearSupabaseRoomMessages(roomId) {
+        const { error } = await supabaseClient
+          .from("mensagens")
+          .delete()
+          .eq("sala_id", roomId);
+        if (error) throw error;
+      }
+
+      async function insertSupabaseMessage(roomId, message) {
+        const { error } = await supabaseClient
+          .from("mensagens")
+          .insert([{
+            sala_id: roomId,
+            usuario: message.author,
+            texto: message.text,
+          }]);
+        if (error) throw error;
+      }
+
+      function replaceControl(id, key = null) {
+        const oldElement = document.getElementById(id);
+        const newElement = oldElement.cloneNode(true);
+        oldElement.replaceWith(newElement);
+        if (key) els[key] = newElement;
+        return newElement;
+      }
+
+      function refreshElementRefs() {
+        els.rooms = $("rooms");
+        els.roomCount = $("roomCount");
+        els.search = $("searchInput");
+        els.profileAvatar = $("profileAvatar");
+        els.profileName = $("profileName");
+        els.profileStatus = $("profileStatus");
+        els.logout = $("logoutBtn");
+        els.empty = $("empty");
+        els.chat = $("chat");
+        els.chatAvatar = $("chatAvatar");
+        els.chatTitle = $("chatTitle");
+        els.chatSubtitle = $("chatSubtitle");
+        els.messages = $("messages");
+        els.messageForm = $("messageForm");
+        els.messageInput = $("messageInput");
+        els.modalBg = $("modalBg");
+        els.unlockModal = $("unlockModal");
+        els.unlockForm = $("unlockForm");
+        els.unlockTitle = $("unlockTitle");
+        els.nameInput = $("nameInput");
+        els.passwordInput = $("passwordInput");
+        els.unlockError = $("unlockError");
+        els.roomModal = $("roomModal");
+        els.roomModalTitle = $("roomModalTitle");
+        els.roomForm = $("roomForm");
+        els.roomName = $("roomNameInput");
+        els.roomDescription = $("roomDescriptionInput");
+        els.roomPassword = $("roomPasswordInput");
+        els.roomError = $("roomError");
+        els.clearRoom = $("clearRoomBtn");
+        els.deleteRoom = $("deleteRoomBtn");
+        els.toast = $("toast");
+      }
+
+      function detachLocalOnlyListeners() {
+        replaceControl("newRoomBtn");
+        replaceControl("emptyNewRoomBtn");
+        replaceControl("manageBtn");
+        replaceControl("backBtn");
+        replaceControl("logoutBtn");
+        replaceControl("searchInput");
+        replaceControl("modalBg");
+        replaceControl("unlockForm");
+        replaceControl("roomForm");
+        replaceControl("messageForm");
+        replaceControl("emojiBtn");
+        refreshElementRefs();
+      }
+
+      saveData = function saveDataSupabaseMode() {};
+
+      renderRooms = function renderSupabaseRooms() {
+        const query = els.search.value.trim().toLowerCase();
+        const rooms = data.rooms.filter((room) => (room.name + " " + room.description).toLowerCase().includes(query));
+        els.roomCount.textContent = data.rooms.length + (data.rooms.length === 1 ? " sala" : " salas");
+        els.rooms.replaceChildren();
+
+        if (!rooms.length) {
+          const empty = document.createElement("div");
+          empty.className = "room-preview";
+          empty.style.padding = "32px 14px";
+          empty.style.textAlign = "center";
+          empty.textContent = "Nenhuma sala encontrada.";
+          els.rooms.append(empty);
+          return;
+        }
+
+        for (const room of rooms) {
+          const latest = room.messages[room.messages.length - 1];
+          const unlocked = isUnlocked(room.id);
+          const button = document.createElement("button");
+          button.className = "room" + (currentRoomId === room.id ? " active" : "");
+          button.type = "button";
+          button.innerHTML = `
+            <span class="avatar">${initials(room.name)}</span>
+            <span class="room-text">
+              <span class="room-name"></span>
+              <span class="room-preview"></span>
+            </span>
+            <span class="lock ${unlocked ? "open" : ""}" title="${unlocked ? "Liberada" : "Bloqueada"}">
+              <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="3"/><path d="${unlocked ? "M9 10V7a3.5 3.5 0 0 1 6.4-1.9" : "M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10"}"/></svg>
+            </span>
+          `;
+          button.querySelector(".room-name").textContent = room.name;
+          button.querySelector(".room-preview").textContent = unlocked
+            ? latest ? `${latest.author}: ${latest.text}` : "Nenhuma mensagem ainda"
+            : room.description || "Toque para informar a senha";
+          button.addEventListener("click", () => selectRoom(room.id));
+          els.rooms.append(button);
+        }
+      };
+
+      showRoomModal = function showSupabaseRoomModal(roomId = null) {
+        editingRoomId = roomId;
+        const room = roomId ? roomById(roomId) : null;
+        els.roomModalTitle.textContent = room ? "Configurar sala" : "Criar sala";
+        els.roomName.value = room?.name || "";
+        els.roomDescription.value = room?.description || "";
+        els.roomPassword.value = "";
+        els.roomPassword.placeholder = room ? "Deixe em branco para manter" : "Senha para entrar na sala";
+        els.roomPassword.required = !room;
+        els.clearRoom.hidden = !room;
+        els.deleteRoom.hidden = !room;
+        els.roomError.textContent = "";
+        openModal(els.roomModal);
+        setTimeout(() => els.roomName.focus(), 30);
+      };
+
+      function bindSupabaseEvents() {
+        $("newRoomBtn").addEventListener("click", () => showRoomModal());
+        $("emptyNewRoomBtn").addEventListener("click", () => showRoomModal());
+        $("manageBtn").addEventListener("click", () => currentRoomId && showRoomModal(currentRoomId));
+        $("backBtn").addEventListener("click", closeChat);
+        els.search.addEventListener("input", renderRooms);
+
+        els.logout.addEventListener("click", () => {
+          session = { name: "", unlocked: [] };
+          saveSession();
+          closeChat();
+          updateProfile();
+          showToast("Sessao encerrada.");
+        });
+
+        els.modalBg.addEventListener("click", (event) => {
+          if (event.target === els.modalBg || event.target.closest("[data-close]")) closeModal();
+        });
+
+        els.unlockForm.addEventListener("submit", (event) => {
+          event.preventDefault();
+          if (!roomToUnlock) return;
+
+          const name = els.nameInput.value.trim();
+          const password = els.passwordInput.value;
+
+          if (password !== roomToUnlock.password) {
+            els.unlockError.textContent = "Senha da sala incorreta.";
+            els.passwordInput.select();
             return;
-        }
+          }
 
-        await carregarMensagens();
-    };
+          session.name = name;
+          if (!session.unlocked.includes(roomToUnlock.id)) session.unlocked.push(roomToUnlock.id);
+          saveSession();
+          updateProfile();
 
-    // ======================================
-    // TIMER
-    // ======================================
+          const roomId = roomToUnlock.id;
+          roomToUnlock = null;
+          closeModal();
+          selectRoom(roomId);
+        });
 
-    timerBtn.onclick =
-    () => {
+        els.roomForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
 
-        const valor =
-        prompt(
-            "Tempo em minutos:"
-        );
+          const name = els.roomName.value.trim();
+          const description = els.roomDescription.value.trim();
+          const password = els.roomPassword.value;
+          if (!name) return;
 
-        if(valor === null)
-        return;
+          els.roomError.textContent = "";
 
-        const minutos =
-        parseInt(valor);
+          try {
+            if (editingRoomId) {
+              const room = roomById(editingRoomId);
+              room.name = name;
+              room.description = description;
+              await updateSupabaseRoom(room, password);
 
-        clearInterval(
-            intervaloLimpeza
-        );
+              if (password) {
+                room.password = password;
+                session.unlocked = session.unlocked.filter((id) => id !== room.id);
+                saveSession();
+                if (currentRoomId === room.id) closeChat();
+              }
 
-        intervaloLimpeza =
-        null;
-
-        if(
-            isNaN(minutos)
-            ||
-            minutos <= 0
-        ){
-
-            timerMinutos.innerText =
-            "Off";
-
-            alert(
-                "Temporizador desligado"
-            );
-
-            return;
-        }
-
-        timerMinutos.innerText =
-        minutos + "m";
-
-        intervaloLimpeza =
-        setInterval(
-        async () => {
-
-            const { error } =
-            await supabaseClient
-
-            .from("mensagens")
-
-            .delete()
-
-            .not(
-                "id",
-                "is",
-                null
-            );
-
-            if(error){
-
-                console.log(error);
-
-                return;
+              closeModal();
+              await loadSupabaseData();
+              showToast("Sala atualizada no Supabase.");
+              return;
             }
 
-            await carregarMensagens();
-
-        }, minutos * 60000);
-
-        alert(
-            `Limpeza automática: ${minutos} min`
-        );
-    };
-
-    // ======================================
-    // LOAD INICIAL
-    // ======================================
-
-    await carregarMensagens();
-
-    // ======================================
-    // REALTIME
-    // ======================================
-
-    supabaseClient
-
-    .channel("chat-global")
-
-    .on(
-        "postgres_changes",
-
-        {
-            event:"*",
-            schema:"public",
-            table:"mensagens"
-        },
-
-        async payload => {
-
-            console.log(payload);
-
-            await carregarMensagens();
-        }
-    )
-
-    .subscribe(status => {
-
-        console.log(
-            "Realtime:",
-            status
-        );
-    });
-}
-
-// ======================================
-// CARREGAR MSG
-// ======================================
-
-async function carregarMensagens(){
-
-    const { data, error } =
-
-    await supabaseClient
-
-    .from("mensagens")
-
-    .select("*")
-
-    .order(
-        "criado_em",
-        {
-            ascending:true
-        }
-    );
-
-    if(error){
-
-        console.log(error);
-
-        return;
-    }
-
-    chat.innerHTML = "";
-
-    data.forEach(msg => {
-
-        const div =
-        document.createElement("div");
-
-        div.className =
-        "msg " +
-
-        (
-            msg.usuario === usuario
-            ? "eu"
-            : "outro"
-        );
-
-        const hora =
-        new Date(
-            msg.criado_em
-        )
-
-        .toLocaleTimeString(
-            [],
-            {
-                hour:"2-digit",
-                minute:"2-digit"
+            if (password.length < 3) {
+              els.roomError.textContent = "Informe uma senha com pelo menos 3 caracteres.";
+              return;
             }
-        );
 
-        div.innerHTML = `
+            const room = { id: makeId(name), name, description, password, messages: [], createdAt: Date.now() };
+            await createSupabaseRoom(room);
+            closeModal();
+            await loadSupabaseData();
+            showToast("Sala criada no Supabase.");
+            selectRoom(room.id);
+          } catch (error) {
+            console.error(error);
+            els.roomError.textContent = error.message || "Erro ao salvar sala.";
+          }
+        });
 
-            <div class="nome">
-                ${msg.usuario}
-            </div>
+        els.clearRoom.addEventListener("click", async () => {
+          const room = roomById(editingRoomId);
+          if (!room) return;
+          if (!confirm("Apagar todas as mensagens desta sala?")) return;
 
-            <div>
-                ${msg.texto}
-            </div>
+          try {
+            await clearSupabaseRoomMessages(room.id);
+            closeModal();
+            await loadSupabaseData();
+            showToast("Mensagens apagadas no Supabase.");
+          } catch (error) {
+            console.error(error);
+            els.roomError.textContent = error.message || "Erro ao limpar mensagens.";
+          }
+        });
 
-            <div class="hora">
-                ${hora}
-            </div>
+        els.deleteRoom.addEventListener("click", async () => {
+          const room = roomById(editingRoomId);
+          if (!room) return;
+          if (!confirm(`Apagar a sala "${room.name}" e todas as mensagens?`)) return;
 
-        `;
+          try {
+            await deleteSupabaseRoom(room.id);
+            session.unlocked = session.unlocked.filter((id) => id !== room.id);
+            saveSession();
+            closeModal();
+            if (currentRoomId === room.id) closeChat();
+            await loadSupabaseData();
+            updateProfile();
+            showToast("Sala apagada no Supabase.");
+          } catch (error) {
+            console.error(error);
+            els.roomError.textContent = error.message || "Erro ao apagar sala.";
+          }
+        });
 
-        chat.appendChild(div);
-    });
+        els.messageForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const room = roomById(currentRoomId);
+          const text = els.messageInput.value.trim();
+          if (!room || !text) return;
 
-    chat.scrollTop =
-    chat.scrollHeight;
-}
+          els.messageInput.disabled = true;
+          try {
+            await insertSupabaseMessage(room.id, {
+              author: session.name || "Visitante",
+              text,
+            });
+            els.messageInput.value = "";
+            resizeInput();
+            await loadSupabaseData();
+            els.messageInput.focus();
+          } catch (error) {
+            console.error(error);
+            showToast(error.message || "Erro ao enviar mensagem.");
+          } finally {
+            els.messageInput.disabled = false;
+          }
+        });
 
-// ======================================
-// ENVIAR MSG
-// ======================================
+        $("emojiBtn").addEventListener("click", () => {
+          const start = els.messageInput.selectionStart;
+          const end = els.messageInput.selectionEnd;
+          els.messageInput.value = els.messageInput.value.slice(0, start) + "❤" + els.messageInput.value.slice(end);
+          els.messageInput.selectionStart = els.messageInput.selectionEnd = start + 1;
+          els.messageInput.focus();
+          resizeInput();
+        });
+      }
 
-form.addEventListener(
+      async function initSupabaseMode() {
+        detachLocalOnlyListeners();
+        bindSupabaseEvents();
+        updateProfile();
 
-    "submit",
+        try {
+          await loadSupabaseData();
 
-    async e => {
+          realtimeChannel = supabaseClient
+            .channel("hot-chat-salas-mensagens")
+            .on("postgres_changes", { event: "*", schema: "public", table: "salas" }, loadSupabaseData)
+            .on("postgres_changes", { event: "*", schema: "public", table: "mensagens" }, loadSupabaseData)
+            .subscribe();
 
-        e.preventDefault();
-
-        const texto =
-        mensagemInput.value.trim();
-
-        if(!texto) return;
-
-        mensagemInput.disabled =
-        true;
-
-        const { error } =
-
-        await supabaseClient
-
-        .from("mensagens")
-
-        .insert([
-            {
-                usuario,
-                texto
-            }
-        ]);
-
-        mensagemInput.disabled =
-        false;
-
-        if(error){
-
-            console.log(error);
-
-            alert(
-                "Erro ao enviar"
-            );
-
-            return;
+          showToast("Conectado ao Supabase.");
+        } catch (error) {
+          console.error(error);
+          els.rooms.replaceChildren();
+          const message = document.createElement("div");
+          message.className = "room-preview";
+          message.style.padding = "32px 14px";
+          message.style.textAlign = "center";
+          message.textContent = "Nao foi possivel carregar o Supabase. Confira as tabelas salas e mensagens.";
+          els.rooms.append(message);
+          showToast(error.message || "Erro ao conectar no Supabase.");
         }
+      }
 
-        mensagemInput.value = "";
-
-        mensagemInput.focus();
-
-        await carregarMensagens();
-    }
-);
-
-</script>
-
-</body>
+      initSupabaseMode();
+    </script>
+  </body>
 </html>
