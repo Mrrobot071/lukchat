@@ -329,12 +329,14 @@
         position: relative;
         min-width: 0;
         min-height: 0;
+        overflow: hidden;
         background: #000;
       }
 
       .empty,
       .chat {
         height: 100%;
+        min-height: 0;
       }
 
       .empty {
@@ -399,10 +401,17 @@
         font-weight: 760;
       }
 
+      .danger.solid {
+        color: #fff;
+        background: #c92f3d;
+        border-color: #c92f3d;
+      }
+
       .chat {
         display: flex;
         min-height: 0;
         flex-direction: column;
+        overflow: hidden;
       }
 
       .chat[hidden],
@@ -432,7 +441,7 @@
         flex-direction: column;
         gap: 6px;
         overflow-y: auto;
-        padding: 24px clamp(16px, 5vw, 76px) 18px;
+        padding: 24px clamp(16px, 5vw, 76px) 16px;
       }
 
       .welcome {
@@ -489,9 +498,12 @@
 
       .composer {
         display: flex;
+        flex-direction: row;
         gap: 8px;
-        align-items: flex-end;
-        margin: 0 clamp(10px, 3vw, 24px) calc(14px + env(safe-area-inset-bottom));
+        align-items: center;
+        width: auto;
+        min-height: 54px;
+        margin: 0 clamp(10px, 3vw, 24px) calc(12px + env(safe-area-inset-bottom));
         padding: 7px 8px;
         border: 1px solid var(--line-2);
         border-radius: 999px;
@@ -500,9 +512,10 @@
       .emoji,
       .send {
         display: grid;
-        width: 38px;
-        height: 38px;
-        flex: 0 0 auto;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        flex: 0 0 40px;
         place-items: center;
         background: transparent;
         border: 0;
@@ -523,10 +536,11 @@
       textarea {
         min-width: 0;
         max-height: 116px;
-        min-height: 38px;
+        min-height: 40px;
+        height: 40px;
         flex: 1;
         resize: none;
-        padding: 9px 2px 7px;
+        padding: 10px 2px 8px;
         overflow-y: auto;
         background: transparent;
         border: 0;
@@ -578,7 +592,7 @@
         line-height: 1.5;
       }
 
-      form {
+      .modal form {
         display: flex;
         gap: 14px;
         flex-direction: column;
@@ -623,6 +637,10 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 9px;
+      }
+
+      .modal-actions.three {
+        grid-template-columns: 1fr 1fr 1fr;
       }
 
       .toast {
@@ -677,6 +695,14 @@
           padding-left: 16px;
         }
 
+        .profile {
+          margin: 14px 16px 12px;
+        }
+
+        .messages {
+          padding: 18px 12px 12px;
+        }
+
         .back {
           display: grid;
         }
@@ -687,6 +713,30 @@
 
         .bubble {
           max-width: 82%;
+        }
+
+        .composer {
+          gap: 4px;
+          min-height: 52px;
+          margin-right: 8px;
+          margin-bottom: calc(8px + env(safe-area-inset-bottom));
+          margin-left: 8px;
+          padding: 6px;
+        }
+
+        .emoji,
+        .send {
+          width: 38px;
+          height: 38px;
+          min-width: 38px;
+          flex-basis: 38px;
+        }
+
+        textarea {
+          min-height: 38px;
+          height: 38px;
+          padding-top: 9px;
+          padding-bottom: 7px;
         }
 
         .modal-bg {
@@ -701,6 +751,65 @@
           border-bottom: 0;
           border-left: 0;
           border-radius: 12px 12px 0 0;
+        }
+
+        .modal-actions,
+        .modal-actions.three {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 380px) {
+        .brand {
+          gap: 9px;
+          font-size: 20px;
+        }
+
+        .brand-mark {
+          width: 36px;
+          height: 36px;
+        }
+
+        .room {
+          grid-template-columns: 52px minmax(0, 1fr) 22px;
+          gap: 10px;
+          padding-right: 8px;
+          padding-left: 8px;
+        }
+
+        .room .avatar {
+          width: 50px;
+          height: 50px;
+        }
+
+        .side-foot {
+          font-size: 10px;
+        }
+      }
+
+      @media (max-height: 620px) and (max-width: 760px) {
+        .topbar,
+        .chat-head {
+          min-height: 58px;
+        }
+
+        .profile {
+          margin-top: 10px;
+          margin-bottom: 10px;
+          padding: 10px;
+        }
+
+        .search {
+          margin-bottom: 12px;
+        }
+
+        .messages {
+          padding-top: 12px;
+        }
+
+        .welcome .avatar {
+          width: 64px;
+          height: 64px;
         }
       }
     </style>
@@ -812,11 +921,12 @@
         <p>Cada sala fica bloqueada pela senha escolhida.</p>
         <form id="roomForm">
           <label>Nome da sala<input id="roomNameInput" minlength="2" maxlength="40" required /></label>
-          <label>Descricao<input id="roomDescriptionInput" maxlength="90" /></label>
+          <label>Descricao opcional<input id="roomDescriptionInput" maxlength="90" placeholder="Pode deixar em branco" /></label>
           <label>Senha da sala<input id="roomPasswordInput" type="password" minlength="3" maxlength="128" /></label>
           <div class="error" id="roomError"></div>
-          <div class="modal-actions">
+          <div class="modal-actions three">
             <button class="danger" id="clearRoomBtn" type="button">Limpar mensagens</button>
+            <button class="danger solid" id="deleteRoomBtn" type="button">Apagar sala</button>
             <button class="primary" type="submit">Salvar sala</button>
           </div>
         </form>
@@ -824,6 +934,8 @@
     </div>
 
     <div class="toast" id="toast" hidden></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
       "use strict";
@@ -843,7 +955,7 @@
         ],
       };
 
-      let data = loadData();
+      let data = { rooms: [] };
       let session = loadSession();
       let currentRoomId = null;
       let roomToUnlock = null;
@@ -883,6 +995,7 @@
         roomPassword: $("roomPasswordInput"),
         roomError: $("roomError"),
         clearRoom: $("clearRoomBtn"),
+        deleteRoom: $("deleteRoomBtn"),
         toast: $("toast"),
       };
 
@@ -1077,8 +1190,10 @@
         els.roomName.value = room?.name || "";
         els.roomDescription.value = room?.description || "";
         els.roomPassword.value = "";
+        els.roomPassword.placeholder = room ? "Deixe em branco para manter" : "Senha para entrar na sala";
         els.roomPassword.required = !room;
         els.clearRoom.hidden = !room;
+        els.deleteRoom.hidden = !room;
         els.roomError.textContent = "";
         openModal(els.roomModal);
         setTimeout(() => els.roomName.focus(), 30);
@@ -1153,6 +1268,26 @@
         showToast("Mensagens apagadas.");
       });
 
+      els.deleteRoom.addEventListener("click", () => {
+        const room = roomById(editingRoomId);
+        if (!room) return;
+        if (!confirm(`Apagar a sala "${room.name}" e todas as mensagens?`)) return;
+
+        data.rooms = data.rooms.filter((item) => item.id !== room.id);
+        session.unlocked = session.unlocked.filter((id) => id !== room.id);
+        saveData();
+        saveSession();
+        closeModal();
+
+        if (currentRoomId === room.id) {
+          closeChat();
+        } else {
+          renderRooms();
+        }
+        updateProfile();
+        showToast("Sala apagada.");
+      });
+
       els.messageForm.addEventListener("submit", (event) => {
         event.preventDefault();
         const room = roomById(currentRoomId);
@@ -1210,7 +1345,461 @@
       });
 
       updateProfile();
-      renderRooms();
+      els.rooms.replaceChildren();
+      const loadingSupabase = document.createElement("div");
+      loadingSupabase.className = "room-preview";
+      loadingSupabase.style.padding = "32px 14px";
+      loadingSupabase.style.textAlign = "center";
+      loadingSupabase.textContent = "Carregando Supabase...";
+      els.rooms.append(loadingSupabase);
+
+      // ======================================
+      // MODO SUPABASE
+      // ======================================
+
+      const SUPABASE_URL = "https://xpfzqbjyizftllasvbll.supabase.co";
+      const SUPABASE_KEY = "sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU";
+      const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      let realtimeChannel = null;
+
+      function normalizeSupabaseRoom(row) {
+        return {
+          id: row.id,
+          name: row.nome || row.name || "Sala",
+          description: row.descricao || row.description || "",
+          password: row.senha || row.password || "",
+          messages: [],
+          createdAt: row.criado_em ? new Date(row.criado_em).getTime() : Date.now(),
+        };
+      }
+
+      function normalizeSupabaseMessage(row) {
+        return {
+          id: row.id,
+          roomId: row.sala_id || row.room_id || "geral",
+          author: row.usuario || row.author || "Visitante",
+          text: row.texto || row.text || "",
+          createdAt: row.criado_em ? new Date(row.criado_em).getTime() : Date.now(),
+        };
+      }
+
+      async function loadSupabaseData() {
+        const { data: roomsData, error: roomsError } = await supabaseClient
+          .from("salas")
+          .select("*")
+          .order("criado_em", { ascending: true });
+
+        if (roomsError) throw roomsError;
+
+        if (!roomsData.length) {
+          const { error: seedError } = await supabaseClient
+            .from("salas")
+            .insert([{
+              id: "geral",
+              nome: "Geral",
+              descricao: "Conversa principal",
+              senha: "a1234",
+            }]);
+          if (seedError) throw seedError;
+          return loadSupabaseData();
+        }
+
+        const { data: messagesData, error: messagesError } = await supabaseClient
+          .from("mensagens")
+          .select("*")
+          .order("criado_em", { ascending: true });
+
+        if (messagesError) throw messagesError;
+
+        const rooms = roomsData.map(normalizeSupabaseRoom);
+        const byId = new Map(rooms.map((room) => [room.id, room]));
+
+        for (const row of messagesData || []) {
+          const message = normalizeSupabaseMessage(row);
+          const room = byId.get(message.roomId);
+          if (room) room.messages.push(message);
+        }
+
+        data = { rooms };
+        renderRooms();
+
+        if (currentRoomId) {
+          const current = roomById(currentRoomId);
+          if (current) {
+            els.chatTitle.textContent = current.name;
+            els.chatAvatar.textContent = initials(current.name);
+            renderMessages();
+          } else {
+            closeChat();
+          }
+        }
+      }
+
+      async function createSupabaseRoom(room) {
+        const { error } = await supabaseClient
+          .from("salas")
+          .insert([{
+            id: room.id,
+            nome: room.name,
+            descricao: room.description || null,
+            senha: room.password,
+          }]);
+        if (error) throw error;
+      }
+
+      async function updateSupabaseRoom(room, password) {
+        const changes = {
+          nome: room.name,
+          descricao: room.description || null,
+        };
+        if (password) changes.senha = password;
+
+        const { error } = await supabaseClient
+          .from("salas")
+          .update(changes)
+          .eq("id", room.id);
+        if (error) throw error;
+      }
+
+      async function deleteSupabaseRoom(roomId) {
+        const messagesDelete = await supabaseClient
+          .from("mensagens")
+          .delete()
+          .eq("sala_id", roomId);
+        if (messagesDelete.error) throw messagesDelete.error;
+
+        const roomDelete = await supabaseClient
+          .from("salas")
+          .delete()
+          .eq("id", roomId);
+        if (roomDelete.error) throw roomDelete.error;
+      }
+
+      async function clearSupabaseRoomMessages(roomId) {
+        const { error } = await supabaseClient
+          .from("mensagens")
+          .delete()
+          .eq("sala_id", roomId);
+        if (error) throw error;
+      }
+
+      async function insertSupabaseMessage(roomId, message) {
+        const { error } = await supabaseClient
+          .from("mensagens")
+          .insert([{
+            sala_id: roomId,
+            usuario: message.author,
+            texto: message.text,
+          }]);
+        if (error) throw error;
+      }
+
+      function replaceControl(id, key = null) {
+        const oldElement = document.getElementById(id);
+        const newElement = oldElement.cloneNode(true);
+        oldElement.replaceWith(newElement);
+        if (key) els[key] = newElement;
+        return newElement;
+      }
+
+      function refreshElementRefs() {
+        els.rooms = $("rooms");
+        els.roomCount = $("roomCount");
+        els.search = $("searchInput");
+        els.profileAvatar = $("profileAvatar");
+        els.profileName = $("profileName");
+        els.profileStatus = $("profileStatus");
+        els.logout = $("logoutBtn");
+        els.empty = $("empty");
+        els.chat = $("chat");
+        els.chatAvatar = $("chatAvatar");
+        els.chatTitle = $("chatTitle");
+        els.chatSubtitle = $("chatSubtitle");
+        els.messages = $("messages");
+        els.messageForm = $("messageForm");
+        els.messageInput = $("messageInput");
+        els.modalBg = $("modalBg");
+        els.unlockModal = $("unlockModal");
+        els.unlockForm = $("unlockForm");
+        els.unlockTitle = $("unlockTitle");
+        els.nameInput = $("nameInput");
+        els.passwordInput = $("passwordInput");
+        els.unlockError = $("unlockError");
+        els.roomModal = $("roomModal");
+        els.roomModalTitle = $("roomModalTitle");
+        els.roomForm = $("roomForm");
+        els.roomName = $("roomNameInput");
+        els.roomDescription = $("roomDescriptionInput");
+        els.roomPassword = $("roomPasswordInput");
+        els.roomError = $("roomError");
+        els.clearRoom = $("clearRoomBtn");
+        els.deleteRoom = $("deleteRoomBtn");
+        els.toast = $("toast");
+      }
+
+      function detachLocalOnlyListeners() {
+        replaceControl("newRoomBtn");
+        replaceControl("emptyNewRoomBtn");
+        replaceControl("manageBtn");
+        replaceControl("backBtn");
+        replaceControl("logoutBtn");
+        replaceControl("searchInput");
+        replaceControl("modalBg");
+        replaceControl("unlockForm");
+        replaceControl("roomForm");
+        replaceControl("messageForm");
+        replaceControl("emojiBtn");
+        refreshElementRefs();
+      }
+
+      saveData = function saveDataSupabaseMode() {};
+
+      renderRooms = function renderSupabaseRooms() {
+        const query = els.search.value.trim().toLowerCase();
+        const rooms = data.rooms.filter((room) => (room.name + " " + room.description).toLowerCase().includes(query));
+        els.roomCount.textContent = data.rooms.length + (data.rooms.length === 1 ? " sala" : " salas");
+        els.rooms.replaceChildren();
+
+        if (!rooms.length) {
+          const empty = document.createElement("div");
+          empty.className = "room-preview";
+          empty.style.padding = "32px 14px";
+          empty.style.textAlign = "center";
+          empty.textContent = "Nenhuma sala encontrada.";
+          els.rooms.append(empty);
+          return;
+        }
+
+        for (const room of rooms) {
+          const latest = room.messages[room.messages.length - 1];
+          const unlocked = isUnlocked(room.id);
+          const button = document.createElement("button");
+          button.className = "room" + (currentRoomId === room.id ? " active" : "");
+          button.type = "button";
+          button.innerHTML = `
+            <span class="avatar">${initials(room.name)}</span>
+            <span class="room-text">
+              <span class="room-name"></span>
+              <span class="room-preview"></span>
+            </span>
+            <span class="lock ${unlocked ? "open" : ""}" title="${unlocked ? "Liberada" : "Bloqueada"}">
+              <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="3"/><path d="${unlocked ? "M9 10V7a3.5 3.5 0 0 1 6.4-1.9" : "M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10"}"/></svg>
+            </span>
+          `;
+          button.querySelector(".room-name").textContent = room.name;
+          button.querySelector(".room-preview").textContent = unlocked
+            ? latest ? `${latest.author}: ${latest.text}` : "Nenhuma mensagem ainda"
+            : room.description || "Toque para informar a senha";
+          button.addEventListener("click", () => selectRoom(room.id));
+          els.rooms.append(button);
+        }
+      };
+
+      showRoomModal = function showSupabaseRoomModal(roomId = null) {
+        editingRoomId = roomId;
+        const room = roomId ? roomById(roomId) : null;
+        els.roomModalTitle.textContent = room ? "Configurar sala" : "Criar sala";
+        els.roomName.value = room?.name || "";
+        els.roomDescription.value = room?.description || "";
+        els.roomPassword.value = "";
+        els.roomPassword.placeholder = room ? "Deixe em branco para manter" : "Senha para entrar na sala";
+        els.roomPassword.required = !room;
+        els.clearRoom.hidden = !room;
+        els.deleteRoom.hidden = !room;
+        els.roomError.textContent = "";
+        openModal(els.roomModal);
+        setTimeout(() => els.roomName.focus(), 30);
+      };
+
+      function bindSupabaseEvents() {
+        $("newRoomBtn").addEventListener("click", () => showRoomModal());
+        $("emptyNewRoomBtn").addEventListener("click", () => showRoomModal());
+        $("manageBtn").addEventListener("click", () => currentRoomId && showRoomModal(currentRoomId));
+        $("backBtn").addEventListener("click", closeChat);
+        els.search.addEventListener("input", renderRooms);
+
+        els.logout.addEventListener("click", () => {
+          session = { name: "", unlocked: [] };
+          saveSession();
+          closeChat();
+          updateProfile();
+          showToast("Sessao encerrada.");
+        });
+
+        els.modalBg.addEventListener("click", (event) => {
+          if (event.target === els.modalBg || event.target.closest("[data-close]")) closeModal();
+        });
+
+        els.unlockForm.addEventListener("submit", (event) => {
+          event.preventDefault();
+          if (!roomToUnlock) return;
+
+          const name = els.nameInput.value.trim();
+          const password = els.passwordInput.value;
+
+          if (password !== roomToUnlock.password) {
+            els.unlockError.textContent = "Senha da sala incorreta.";
+            els.passwordInput.select();
+            return;
+          }
+
+          session.name = name;
+          if (!session.unlocked.includes(roomToUnlock.id)) session.unlocked.push(roomToUnlock.id);
+          saveSession();
+          updateProfile();
+
+          const roomId = roomToUnlock.id;
+          roomToUnlock = null;
+          closeModal();
+          selectRoom(roomId);
+        });
+
+        els.roomForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+
+          const name = els.roomName.value.trim();
+          const description = els.roomDescription.value.trim();
+          const password = els.roomPassword.value;
+          if (!name) return;
+
+          els.roomError.textContent = "";
+
+          try {
+            if (editingRoomId) {
+              const room = roomById(editingRoomId);
+              room.name = name;
+              room.description = description;
+              await updateSupabaseRoom(room, password);
+
+              if (password) {
+                room.password = password;
+                session.unlocked = session.unlocked.filter((id) => id !== room.id);
+                saveSession();
+                if (currentRoomId === room.id) closeChat();
+              }
+
+              closeModal();
+              await loadSupabaseData();
+              showToast("Sala atualizada no Supabase.");
+              return;
+            }
+
+            if (password.length < 3) {
+              els.roomError.textContent = "Informe uma senha com pelo menos 3 caracteres.";
+              return;
+            }
+
+            const room = { id: makeId(name), name, description, password, messages: [], createdAt: Date.now() };
+            await createSupabaseRoom(room);
+            closeModal();
+            await loadSupabaseData();
+            showToast("Sala criada no Supabase.");
+            selectRoom(room.id);
+          } catch (error) {
+            console.error(error);
+            els.roomError.textContent = error.message || "Erro ao salvar sala.";
+          }
+        });
+
+        els.clearRoom.addEventListener("click", async () => {
+          const room = roomById(editingRoomId);
+          if (!room) return;
+          if (!confirm("Apagar todas as mensagens desta sala?")) return;
+
+          try {
+            await clearSupabaseRoomMessages(room.id);
+            closeModal();
+            await loadSupabaseData();
+            showToast("Mensagens apagadas no Supabase.");
+          } catch (error) {
+            console.error(error);
+            els.roomError.textContent = error.message || "Erro ao limpar mensagens.";
+          }
+        });
+
+        els.deleteRoom.addEventListener("click", async () => {
+          const room = roomById(editingRoomId);
+          if (!room) return;
+          if (!confirm(`Apagar a sala "${room.name}" e todas as mensagens?`)) return;
+
+          try {
+            await deleteSupabaseRoom(room.id);
+            session.unlocked = session.unlocked.filter((id) => id !== room.id);
+            saveSession();
+            closeModal();
+            if (currentRoomId === room.id) closeChat();
+            await loadSupabaseData();
+            updateProfile();
+            showToast("Sala apagada no Supabase.");
+          } catch (error) {
+            console.error(error);
+            els.roomError.textContent = error.message || "Erro ao apagar sala.";
+          }
+        });
+
+        els.messageForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const room = roomById(currentRoomId);
+          const text = els.messageInput.value.trim();
+          if (!room || !text) return;
+
+          els.messageInput.disabled = true;
+          try {
+            await insertSupabaseMessage(room.id, {
+              author: session.name || "Visitante",
+              text,
+            });
+            els.messageInput.value = "";
+            resizeInput();
+            await loadSupabaseData();
+            els.messageInput.focus();
+          } catch (error) {
+            console.error(error);
+            showToast(error.message || "Erro ao enviar mensagem.");
+          } finally {
+            els.messageInput.disabled = false;
+          }
+        });
+
+        $("emojiBtn").addEventListener("click", () => {
+          const start = els.messageInput.selectionStart;
+          const end = els.messageInput.selectionEnd;
+          els.messageInput.value = els.messageInput.value.slice(0, start) + "❤" + els.messageInput.value.slice(end);
+          els.messageInput.selectionStart = els.messageInput.selectionEnd = start + 1;
+          els.messageInput.focus();
+          resizeInput();
+        });
+      }
+
+      async function initSupabaseMode() {
+        detachLocalOnlyListeners();
+        bindSupabaseEvents();
+        updateProfile();
+
+        try {
+          await loadSupabaseData();
+
+          realtimeChannel = supabaseClient
+            .channel("hot-chat-salas-mensagens")
+            .on("postgres_changes", { event: "*", schema: "public", table: "salas" }, loadSupabaseData)
+            .on("postgres_changes", { event: "*", schema: "public", table: "mensagens" }, loadSupabaseData)
+            .subscribe();
+
+          showToast("Conectado ao Supabase.");
+        } catch (error) {
+          console.error(error);
+          els.rooms.replaceChildren();
+          const message = document.createElement("div");
+          message.className = "room-preview";
+          message.style.padding = "32px 14px";
+          message.style.textAlign = "center";
+          message.textContent = "Nao foi possivel carregar o Supabase. Confira as tabelas salas e mensagens.";
+          els.rooms.append(message);
+          showToast(error.message || "Erro ao conectar no Supabase.");
+        }
+      }
+
+      initSupabaseMode();
     </script>
   </body>
 </html>
