@@ -375,10 +375,62 @@
       border-radius: 14px;
       background: #050505;
       object-fit: cover;
+      touch-action: pan-y;
     }
 
     video.mediaItem {
       object-fit: contain;
+    }
+
+    .videoOpen {
+      display: flex;
+      width: min(70vw, 360px);
+      max-width: 100%;
+      min-height: 92px;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border: 0;
+      border-radius: 14px;
+      background: #050505;
+      color: #fff;
+      text-align: left;
+      touch-action: pan-y;
+    }
+
+    .videoOpenIcon {
+      display: grid;
+      width: 46px;
+      height: 46px;
+      flex: 0 0 46px;
+      place-items: center;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .16);
+      color: #fff;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .videoOpenText {
+      min-width: 0;
+    }
+
+    .videoOpenText strong,
+    .videoOpenText span {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .videoOpenText strong {
+      font-size: 13px;
+    }
+
+    .videoOpenText span {
+      margin-top: 4px;
+      color: rgba(255, 255, 255, .68);
+      font-size: 11px;
     }
 
     .mediaCaption {
@@ -963,7 +1015,6 @@
     const TTL = 6 * 60 * 60 * 1000;
     const MEDIA_BUCKET = "hot-chat-media";
     const MEDIA_PREFIX = "__HC_MEDIA_V1__:";
-    const MAX_MEDIA_FILES = 6;
     const MAX_MEDIA_BYTES = 50 * 1024 * 1024;
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const $ = (id) => document.getElementById(id);
@@ -1015,6 +1066,8 @@
     let loading = false;
     let toastTimer = null;
     let pendingMedia = [];
+    let renderedRoomId = null;
+    let renderedMessagesKey = "";
 
     function toast(text) {
       clearTimeout(toastTimer);
@@ -1083,19 +1136,50 @@
       return msg.texto ? `${label}: ${msg.texto}` : label;
     }
 
-    function createMediaElement(item) {
-      const media = document.createElement(item.type === "video" ? "video" : "img");
+    function createVideoPlayer(item) {
+      const media = document.createElement("video");
       media.className = "mediaItem";
       media.src = item.url;
       media.title = item.name;
+      media.controls = true;
+      media.playsInline = true;
+      media.autoplay = false;
+      media.loop = false;
+      media.preload = "metadata";
+      return media;
+    }
 
+    function createMediaElement(item) {
       if (item.type === "video") {
-        media.controls = true;
-        media.playsInline = true;
-        media.preload = "metadata";
-        return media;
+        const button = document.createElement("button");
+        button.className = "videoOpen";
+        button.type = "button";
+        button.setAttribute("aria-label", `Abrir video ${item.name}`);
+
+        const icon = document.createElement("span");
+        icon.className = "videoOpenIcon";
+        icon.textContent = "▶";
+
+        const text = document.createElement("span");
+        text.className = "videoOpenText";
+        const title = document.createElement("strong");
+        title.textContent = item.name || "Video";
+        const detail = document.createElement("span");
+        detail.textContent = item.size ? `Toque para abrir · ${formatBytes(item.size)}` : "Toque para abrir";
+        text.append(title, detail);
+        button.append(icon, text);
+        button.onclick = () => {
+          const player = createVideoPlayer(item);
+          button.replaceWith(player);
+          player.focus();
+        };
+        return button;
       }
 
+      const media = document.createElement("img");
+      media.className = "mediaItem";
+      media.src = item.url;
+      media.title = item.name;
       media.alt = item.name || "Foto enviada";
       const link = document.createElement("a");
       link.className = "mediaLink";
@@ -1199,13 +1283,8 @@
       let added = 0;
       let invalid = 0;
       let tooLarge = 0;
-      let clipped = false;
 
       for (const file of files) {
-        if (pendingMedia.length >= MAX_MEDIA_FILES) {
-          clipped = true;
-          break;
-        }
         if (!acceptedMedia(file)) {
           invalid++;
           continue;
@@ -1227,7 +1306,6 @@
       renderAttachments();
       if (invalid) notices.push("Apenas fotos e videos sao aceitos.");
       if (tooLarge) notices.push(`Cada arquivo pode ter ate ${formatBytes(MAX_MEDIA_BYTES)}.`);
-      if (clipped) notices.push(`Voce pode anexar ate ${MAX_MEDIA_FILES} arquivos por mensagem.`);
       if (notices.length) toast(notices.join(" "));
       if (added) resizeInput();
     }
@@ -1315,6 +1393,22 @@
       return mensagens.filter(m => m.sala_id === id);
     }
 
+    function messagesKey(id) {
+      return roomMessages(id)
+        .map(msg => [
+          msg.id,
+          msg.usuario,
+          msg.criado_em,
+          msg.texto,
+          (msg.media || []).map(item => `${item.type}:${item.url}:${item.size}`).join(",")
+        ].join("|"))
+        .join(";");
+    }
+
+    function isNearMessagesBottom() {
+      return e.messages.scrollHeight - e.messages.scrollTop - e.messages.clientHeight < 90;
+    }
+
     function normalizeSala(row) {
       return {
         id: row.id,
@@ -1362,16 +1456,24 @@
       }
     }
 
-    function renderMessages() {
+    function renderMessages(options = {}) {
       const sala = roomById(currentRoomId);
-      e.messages.replaceChildren();
       if (!sala) return;
+
+      const key = messagesKey(sala.id);
+      if (!options.force && renderedRoomId === sala.id && renderedMessagesKey === key) return;
 
       const msgs = roomMessages(sala.id);
       const user = getUser();
+      const wasNearBottom = options.scrollToBottom || isNearMessagesBottom();
+      const previousBottom = e.messages.scrollHeight - e.messages.scrollTop;
+
+      e.messages.replaceChildren();
 
       if (!msgs.length) {
         e.messages.innerHTML = `<div class="welcome"><div class="avatar" style="width:76px;height:76px;margin:0 auto 12px">${initials(sala.nome)}</div><strong>${sala.nome}</strong><p>${sala.descricao || "Envie a primeira mensagem."}</p></div>`;
+        renderedRoomId = sala.id;
+        renderedMessagesKey = key;
         return;
       }
 
@@ -1406,7 +1508,17 @@
         e.messages.append(row);
       }
 
-      e.messages.scrollTop = e.messages.scrollHeight;
+      renderedRoomId = sala.id;
+      renderedMessagesKey = key;
+
+      requestAnimationFrame(() => {
+        if (options.scrollToBottom || wasNearBottom) {
+          e.messages.scrollTop = e.messages.scrollHeight;
+          return;
+        }
+
+        e.messages.scrollTop = Math.max(0, e.messages.scrollHeight - previousBottom);
+      });
     }
 
     async function insertSala(sala) {
@@ -1505,13 +1617,15 @@
       e.roomTitle.textContent = sala.nome;
       e.roomAvatar.textContent = initials(sala.nome);
       renderRooms();
-      renderMessages();
+      renderMessages({ force: true, scrollToBottom: true });
       resizeInput();
       setTimeout(() => e.msgInput.focus(), 30);
     }
 
     function closeChat() {
       currentRoomId = null;
+      renderedRoomId = null;
+      renderedMessagesKey = "";
       e.chat.hidden = true;
       e.empty.hidden = false;
       e.app.classList.remove("open");
@@ -1673,7 +1787,7 @@
 
       try {
         if (files.length) {
-          toast("Subindo midia...");
+          toast(`Subindo ${files.length} ${files.length === 1 ? "midia" : "midias"}...`);
           uploaded = await uploadMediaFiles(files);
         }
 
@@ -1684,6 +1798,7 @@
         clearPendingMedia();
         resizeInput();
         await loadData();
+        e.messages.scrollTop = e.messages.scrollHeight;
         e.msgInput.focus();
       } catch (err) {
         console.error(err);
