@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
   <title>HChat</title>
   <style>
     :root {
@@ -27,9 +27,10 @@
     body {
       width: 100%;
       height: 100%;
-      min-width: 320px;
+      min-width: 0;
       margin: 0;
       overflow: hidden;
+      overscroll-behavior: none;
     }
 
     body {
@@ -37,6 +38,8 @@
       color: var(--txt);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
       -webkit-font-smoothing: antialiased;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
     }
 
     button,
@@ -46,8 +49,15 @@
       font: inherit;
     }
 
+    input,
+    textarea,
+    select {
+      font-size: 16px;
+    }
+
     button {
       cursor: pointer;
+      touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -55,10 +65,12 @@
       display: grid;
       width: 100vw;
       height: 100vh;
+      min-height: 100svh;
       height: 100dvh;
       grid-template-columns: var(--side) minmax(0, 1fr);
       overflow: hidden;
       background: #000;
+      isolation: isolate;
     }
 
     .side {
@@ -203,8 +215,11 @@
       text-align: left;
     }
 
-    .room:hover,
     .room.active { background: var(--card2); }
+
+    @media (hover: hover) and (pointer: fine) {
+      .room:hover { background: var(--card2); }
+    }
 
     .roomName { font-weight: 750; }
     .roomPrev { font-size: 13px; }
@@ -304,6 +319,7 @@
       overflow-y: auto;
       padding: 22px clamp(14px, 5vw, 72px) 14px;
       overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
     }
 
     .welcome {
@@ -330,9 +346,49 @@
       white-space: pre-wrap;
     }
 
+    .bubble.hasMedia {
+      padding: 5px;
+      white-space: normal;
+    }
+
     .mine .bubble {
       border-color: var(--blue);
       background: var(--blue);
+    }
+
+    .mediaStack {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .mediaLink {
+      display: block;
+      color: inherit;
+    }
+
+    .mediaItem {
+      display: block;
+      width: min(70vw, 360px);
+      max-width: 100%;
+      max-height: 380px;
+      border-radius: 14px;
+      background: #050505;
+      object-fit: cover;
+    }
+
+    video.mediaItem {
+      object-fit: contain;
+    }
+
+    .mediaCaption {
+      padding: 5px 8px 0;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+
+    .hasMedia .meta {
+      margin: 6px 8px 3px;
     }
 
     .meta {
@@ -357,6 +413,76 @@
       background: #000;
     }
 
+    .composerMain {
+      display: flex;
+      min-width: 0;
+      flex: 1 1 auto;
+      flex-direction: column;
+    }
+
+    .attachmentTray {
+      display: flex;
+      max-width: 100%;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 3px 4px 8px;
+      scrollbar-width: thin;
+    }
+
+    .attachmentTray[hidden] {
+      display: none;
+    }
+
+    .attachment {
+      position: relative;
+      width: 76px;
+      height: 76px;
+      flex: 0 0 76px;
+      overflow: hidden;
+      border: 1px solid var(--line2);
+      border-radius: 8px;
+      background: var(--card2);
+    }
+
+    .attachment img,
+    .attachment video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .attachmentInfo {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      overflow: hidden;
+      padding: 18px 6px 5px;
+      background: linear-gradient(to top, rgba(0, 0, 0, .78), transparent);
+      font-size: 10px;
+      font-weight: 750;
+      text-overflow: ellipsis;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, .8);
+      white-space: nowrap;
+    }
+
+    .attachmentRemove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      display: grid;
+      width: 22px;
+      height: 22px;
+      place-items: center;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, .72);
+      color: #fff;
+      font-size: 16px;
+      line-height: 1;
+    }
+
     .composer textarea {
       display: block;
       width: 100%;
@@ -377,7 +503,7 @@
 
     .composer textarea:focus { outline: 0; }
 
-    .composer button {
+    .composer > button {
       display: grid;
       width: 40px;
       height: 40px;
@@ -392,6 +518,22 @@
       line-height: 1;
     }
 
+    .composer > button:disabled,
+    .attachmentRemove:disabled {
+      opacity: .45;
+      cursor: wait;
+    }
+
+    .composer svg {
+      width: 21px;
+      height: 21px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
     .modalBg {
       position: fixed;
       z-index: 20;
@@ -400,6 +542,7 @@
       place-items: center;
       padding: 20px;
       background: rgba(0, 0, 0, .74);
+      overscroll-behavior: contain;
     }
 
     .modal {
@@ -494,6 +637,12 @@
         inset: 0;
       }
 
+      input,
+      textarea,
+      select {
+        font-size: 16px !important;
+      }
+
       .app {
         position: relative;
         display: block;
@@ -507,22 +656,34 @@
         inset: 0;
         width: 100%;
         height: 100%;
+        overflow: hidden;
         transition: transform .22s cubic-bezier(.22, .7, .3, 1);
+        will-change: transform;
       }
 
       .main {
         z-index: 2;
         transform: translateX(100%);
         background: #000;
+        visibility: hidden;
+        pointer-events: none;
       }
 
-      .app.open .side { transform: translateX(-18%); }
-      .app.open .main { transform: translateX(0); }
+      .app.open .side {
+        transform: translateX(-18%);
+        pointer-events: none;
+      }
+
+      .app.open .main {
+        transform: translateX(0);
+        visibility: visible;
+        pointer-events: auto;
+      }
 
       .top,
       .head {
-        min-height: 58px;
-        padding: 0 10px;
+        min-height: calc(60px + env(safe-area-inset-top));
+        padding: env(safe-area-inset-top) max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left));
       }
 
       .brand {
@@ -535,8 +696,9 @@
       }
 
       .search {
-        height: 40px;
+        height: 44px;
         margin: 0 12px 10px;
+        font-size: 16px;
       }
 
       .count {
@@ -551,41 +713,61 @@
       .back { display: grid; }
       .empty { display: none; }
 
+      .rooms {
+        padding-right: max(10px, env(safe-area-inset-right));
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
+        padding-left: max(10px, env(safe-area-inset-left));
+        -webkit-overflow-scrolling: touch;
+      }
+
       .messages {
         gap: 5px;
-        padding: 12px 9px 8px;
+        padding: 12px max(9px, env(safe-area-inset-right)) 8px max(9px, env(safe-area-inset-left));
       }
 
       .bubble {
-        max-width: 88%;
+        max-width: min(88%, 42rem);
         padding: 8px 11px;
         border-radius: 17px;
         font-size: 14px;
       }
 
       .composer {
-        width: calc(100% - 12px);
+        width: auto;
         min-height: 50px;
         gap: 4px;
-        margin-bottom: calc(6px + env(safe-area-inset-bottom));
+        margin: 0 max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left));
         padding: 5px;
         border-radius: 25px;
       }
 
       .composer textarea {
-        height: 40px;
-        min-height: 40px;
+        height: 44px;
+        min-height: 44px;
         max-height: 98px;
-        padding: 10px 7px;
+        padding: 12px 7px;
         font-size: 16px;
         line-height: 20px;
+        transform: translateZ(0);
       }
 
-      .composer button {
-        width: 40px;
-        height: 40px;
-        flex-basis: 40px;
+      .composer > button {
+        width: 44px;
+        height: 44px;
+        flex-basis: 44px;
         font-size: 18px;
+      }
+
+      .attachment {
+        width: 64px;
+        height: 64px;
+        flex-basis: 64px;
+      }
+
+      .icon {
+        width: 44px;
+        height: 44px;
+        flex-basis: 44px;
       }
 
       .room {
@@ -600,15 +782,40 @@
       }
 
       .actions { grid-template-columns: 1fr; }
-      .modalBg { padding: 0; place-items: end center; }
+      .modalBg {
+        padding: env(safe-area-inset-top) 0 0;
+        place-items: end center;
+      }
 
       .modal {
-        max-height: 94dvh;
+        width: 100%;
+        max-height: calc(100dvh - env(safe-area-inset-top));
         overflow: auto;
+        padding: 24px max(20px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
         border-right: 0;
         border-bottom: 0;
         border-left: 0;
         border-radius: 12px 12px 0 0;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .modal input {
+        min-height: 48px;
+        font-size: 16px;
+      }
+
+      .primary,
+      .danger,
+      .close {
+        min-height: 44px;
+      }
+
+      .toast {
+        right: max(12px, env(safe-area-inset-right));
+        bottom: max(12px, env(safe-area-inset-bottom));
+        left: max(12px, env(safe-area-inset-left));
+        max-width: none;
       }
     }
 
@@ -622,7 +829,11 @@
       }
       .room .avatar { width: 46px; height: 46px; }
       .icon { width: 38px; height: 38px; flex-basis: 38px; }
-      .composer { width: calc(100% - 8px); }
+      .composer {
+        width: auto;
+        margin-right: max(4px, env(safe-area-inset-right));
+        margin-left: max(4px, env(safe-area-inset-left));
+      }
       .bubble { max-width: 90%; }
     }
 
@@ -693,8 +904,15 @@
         <div class="messages" id="messages"></div>
 
         <form class="composer" id="msgForm">
-          <textarea id="msgInput" rows="1" maxlength="2000" placeholder="Mensagem..." autocomplete="off" autocorrect="on" autocapitalize="sentences" spellcheck="true"></textarea>
-          <button type="submit" aria-label="Enviar mensagem">➤</button>
+          <button class="mediaButton" id="mediaButton" type="button" aria-label="Anexar foto ou video" title="Anexar foto ou video">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          </button>
+          <input id="mediaInput" type="file" accept="image/*,video/*" multiple hidden>
+          <div class="composerMain">
+            <div class="attachmentTray" id="attachmentTray" hidden></div>
+            <textarea id="msgInput" rows="1" maxlength="2000" placeholder="Mensagem..." autocomplete="off" autocorrect="on" autocapitalize="sentences" spellcheck="true"></textarea>
+          </div>
+          <button id="sendMessage" type="submit" aria-label="Enviar mensagem">➤</button>
         </form>
       </section>
     </main>
@@ -743,6 +961,10 @@
     const LOGIN_KEY = "hc_login_v4";
     const POLL_MS = 1000;
     const TTL = 6 * 60 * 60 * 1000;
+    const MEDIA_BUCKET = "hot-chat-media";
+    const MEDIA_PREFIX = "__HC_MEDIA_V1__:";
+    const MAX_MEDIA_FILES = 6;
+    const MAX_MEDIA_BYTES = 50 * 1024 * 1024;
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const $ = (id) => document.getElementById(id);
     const e = {
@@ -761,6 +983,10 @@
       messages: $("messages"),
       msgForm: $("msgForm"),
       msgInput: $("msgInput"),
+      mediaButton: $("mediaButton"),
+      mediaInput: $("mediaInput"),
+      attachmentTray: $("attachmentTray"),
+      sendMessage: $("sendMessage"),
       modalBg: $("modalBg"),
       unlockModal: $("unlockModal"),
       unlockTitle: $("unlockTitle"),
@@ -788,6 +1014,7 @@
     let salasHasDescricao = true;
     let loading = false;
     let toastTimer = null;
+    let pendingMedia = [];
 
     function toast(text) {
       clearTimeout(toastTimer);
@@ -803,6 +1030,247 @@
     function initials(v) {
       const p = String(v || "?").trim().split(/\s+/).filter(Boolean);
       return (p.length > 1 ? p[0][0] + p[1][0] : (p[0] || "?").slice(0, 2)).toUpperCase();
+    }
+
+    function safeMediaUrl(url) {
+      const value = String(url || "");
+      if (!value) return false;
+
+      try {
+        const parsed = new URL(value, window.location.href);
+        return ["http:", "https:", "data:"].includes(parsed.protocol);
+      } catch {
+        return false;
+      }
+    }
+
+    function normalizeMediaItem(item) {
+      if (!item || !safeMediaUrl(item.url)) return null;
+      const mime = String(item.mime || "");
+      const type = String(item.type || "").toLowerCase().startsWith("video") || mime.startsWith("video/") ? "video" : "image";
+      return {
+        type,
+        url: String(item.url),
+        path: String(item.path || ""),
+        name: String(item.name || (type === "video" ? "Video" : "Foto")),
+        mime,
+        size: Number(item.size) || 0
+      };
+    }
+
+    function parseMessageContent(value) {
+      const raw = String(value || "");
+      if (!raw.startsWith(MEDIA_PREFIX)) return { texto: raw, media: [] };
+
+      try {
+        const payload = JSON.parse(raw.slice(MEDIA_PREFIX.length));
+        const media = Array.isArray(payload.items) ? payload.items.map(normalizeMediaItem).filter(Boolean) : [];
+        return { texto: String(payload.text || ""), media };
+      } catch {
+        return { texto: raw, media: [] };
+      }
+    }
+
+    function buildMediaPayload(text, items) {
+      return MEDIA_PREFIX + JSON.stringify({ text, items });
+    }
+
+    function messagePreview(msg) {
+      if (!msg?.media?.length) return msg?.texto || "";
+      const hasImage = msg.media.some(item => item.type === "image");
+      const hasVideo = msg.media.some(item => item.type === "video");
+      const label = hasImage && hasVideo ? "Midia" : (hasVideo ? "Video" : "Foto");
+      return msg.texto ? `${label}: ${msg.texto}` : label;
+    }
+
+    function createMediaElement(item) {
+      const media = document.createElement(item.type === "video" ? "video" : "img");
+      media.className = "mediaItem";
+      media.src = item.url;
+      media.title = item.name;
+
+      if (item.type === "video") {
+        media.controls = true;
+        media.playsInline = true;
+        media.preload = "metadata";
+        return media;
+      }
+
+      media.alt = item.name || "Foto enviada";
+      const link = document.createElement("a");
+      link.className = "mediaLink";
+      link.href = item.url;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.append(media);
+      return link;
+    }
+
+    function randomId() {
+      return window.crypto?.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function formatBytes(bytes) {
+      if (bytes >= 1024 * 1024) return `${Math.round(bytes / 1024 / 1024)} MB`;
+      if (bytes >= 1024) return `${Math.round(bytes / 1024)} KB`;
+      return `${bytes} B`;
+    }
+
+    function acceptedMedia(file) {
+      return /^image\//.test(file.type) || /^video\//.test(file.type) || /\.(png|jpe?g|gif|webp|heic|heif|mp4|mov|m4v|webm)$/i.test(file.name);
+    }
+
+    function mediaKind(file) {
+      return /^video\//.test(file.type) || /\.(mp4|mov|m4v|webm)$/i.test(file.name) ? "video" : "image";
+    }
+
+    function cleanFileName(name) {
+      return String(name || "media")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^\w.-]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(-90) || "media";
+    }
+
+    function storagePathFor(file) {
+      return `${cleanFileName(currentRoomId || "geral")}/${Date.now()}-${randomId()}-${cleanFileName(file.name)}`;
+    }
+
+    function mediaUploadErrorMessage(err) {
+      const msg = String(err?.message || err || "");
+      if (/bucket/i.test(msg) && /not.*found|not exist|does not exist/i.test(msg)) {
+        return `Crie um bucket publico chamado "${MEDIA_BUCKET}" no Supabase Storage.`;
+      }
+      if (/row-level security|policy|permission|unauthorized|not authorized|forbidden/i.test(msg)) {
+        return `Sem permissao para subir arquivos no bucket "${MEDIA_BUCKET}". Ajuste as policies do Storage.`;
+      }
+      return msg || "Erro ao subir arquivo.";
+    }
+
+    function renderAttachments() {
+      e.attachmentTray.replaceChildren();
+      e.attachmentTray.hidden = pendingMedia.length === 0;
+
+      for (const item of pendingMedia) {
+        const wrap = document.createElement("div");
+        wrap.className = "attachment";
+        wrap.title = `${item.file.name} (${formatBytes(item.file.size)})`;
+
+        const preview = document.createElement(item.kind === "video" ? "video" : "img");
+        preview.src = item.previewUrl;
+        if (item.kind === "video") {
+          preview.muted = true;
+          preview.playsInline = true;
+          preview.preload = "metadata";
+        } else {
+          preview.alt = item.file.name;
+        }
+
+        const remove = document.createElement("button");
+        remove.className = "attachmentRemove";
+        remove.type = "button";
+        remove.setAttribute("aria-label", "Remover anexo");
+        remove.textContent = "x";
+        remove.onclick = () => {
+          URL.revokeObjectURL(item.previewUrl);
+          pendingMedia = pendingMedia.filter(file => file.id !== item.id);
+          renderAttachments();
+        };
+
+        const info = document.createElement("span");
+        info.className = "attachmentInfo";
+        info.textContent = item.kind === "video" ? "Video" : "Foto";
+        wrap.append(preview, remove, info);
+        e.attachmentTray.append(wrap);
+      }
+    }
+
+    function clearPendingMedia() {
+      for (const item of pendingMedia) URL.revokeObjectURL(item.previewUrl);
+      pendingMedia = [];
+      e.mediaInput.value = "";
+      renderAttachments();
+    }
+
+    function addPendingFiles(fileList) {
+      const files = Array.from(fileList || []);
+      const notices = [];
+      let added = 0;
+      let invalid = 0;
+      let tooLarge = 0;
+      let clipped = false;
+
+      for (const file of files) {
+        if (pendingMedia.length >= MAX_MEDIA_FILES) {
+          clipped = true;
+          break;
+        }
+        if (!acceptedMedia(file)) {
+          invalid++;
+          continue;
+        }
+        if (file.size > MAX_MEDIA_BYTES) {
+          tooLarge++;
+          continue;
+        }
+
+        pendingMedia.push({
+          id: randomId(),
+          file,
+          kind: mediaKind(file),
+          previewUrl: URL.createObjectURL(file)
+        });
+        added++;
+      }
+
+      renderAttachments();
+      if (invalid) notices.push("Apenas fotos e videos sao aceitos.");
+      if (tooLarge) notices.push(`Cada arquivo pode ter ate ${formatBytes(MAX_MEDIA_BYTES)}.`);
+      if (clipped) notices.push(`Voce pode anexar ate ${MAX_MEDIA_FILES} arquivos por mensagem.`);
+      if (notices.length) toast(notices.join(" "));
+      if (added) resizeInput();
+    }
+
+    function setComposerBusy(busy) {
+      e.msgInput.disabled = busy;
+      e.mediaButton.disabled = busy;
+      e.mediaInput.disabled = busy;
+      e.sendMessage.disabled = busy;
+      e.attachmentTray.querySelectorAll("button").forEach(button => {
+        button.disabled = busy;
+      });
+    }
+
+    async function uploadMediaFiles(items) {
+      const uploaded = [];
+
+      for (const item of items) {
+        const path = storagePathFor(item.file);
+        const result = await supabaseClient.storage.from(MEDIA_BUCKET).upload(path, item.file, {
+          cacheControl: "3600",
+          contentType: item.file.type || (item.kind === "video" ? "video/mp4" : "image/jpeg"),
+          upsert: false
+        });
+
+        if (result.error) throw new Error(mediaUploadErrorMessage(result.error));
+        const publicUrl = supabaseClient.storage.from(MEDIA_BUCKET).getPublicUrl(path).data.publicUrl;
+        uploaded.push({
+          type: item.kind,
+          url: publicUrl,
+          path,
+          name: item.file.name,
+          mime: item.file.type,
+          size: item.file.size
+        });
+      }
+
+      return uploaded;
+    }
+
+    async function removeUploadedMedia(items) {
+      const paths = items.map(item => item.path).filter(Boolean);
+      if (paths.length) await supabaseClient.storage.from(MEDIA_BUCKET).remove(paths);
     }
 
     function getUser() {
@@ -857,11 +1325,13 @@
     }
 
     function normalizeMsg(row) {
+      const content = parseMessageContent(row.texto || row.text || "");
       return {
         id: row.id,
         sala_id: row.sala_id || row.room_id || "geral",
         usuario: row.usuario || row.author || "Visitante",
-        texto: row.texto || row.text || "",
+        texto: content.texto,
+        media: content.media,
         criado_em: row.criado_em || row.created_at || new Date().toISOString()
       };
     }
@@ -886,7 +1356,7 @@
         btn.type = "button";
         btn.innerHTML = `<span class="avatar">${initials(sala.nome)}</span><span><span class="roomName"></span><span class="roomPrev"></span></span><span class="lock">${ok ? "aberta" : "senha"}</span>`;
         btn.querySelector(".roomName").textContent = sala.nome;
-        btn.querySelector(".roomPrev").textContent = ok ? (last ? `${last.usuario}: ${last.texto}` : "Nenhuma mensagem ainda") : (sala.descricao || "Toque para informar a senha");
+        btn.querySelector(".roomPrev").textContent = ok ? (last ? `${last.usuario}: ${messagePreview(last)}` : "Nenhuma mensagem ainda") : (sala.descricao || "Toque para informar a senha");
         btn.onclick = () => selectRoom(sala.id);
         e.rooms.append(btn);
       }
@@ -910,7 +1380,24 @@
         row.className = `row${msg.usuario === user ? " mine" : ""}`;
         const bubble = document.createElement("div");
         bubble.className = "bubble";
-        bubble.textContent = msg.texto;
+
+        if (msg.media?.length) {
+          bubble.classList.add("hasMedia");
+          const stack = document.createElement("div");
+          stack.className = "mediaStack";
+          for (const item of msg.media) stack.append(createMediaElement(item));
+          bubble.append(stack);
+
+          if (msg.texto) {
+            const caption = document.createElement("div");
+            caption.className = "mediaCaption";
+            caption.textContent = msg.texto;
+            bubble.append(caption);
+          }
+        } else {
+          bubble.textContent = msg.texto;
+        }
+
         const meta = document.createElement("span");
         meta.className = "meta";
         meta.textContent = `${msg.usuario} · ${new Date(msg.criado_em).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"})}`;
@@ -1178,23 +1665,43 @@
     e.msgForm.onsubmit = async (ev) => {
       ev.preventDefault();
       const text = e.msgInput.value.trim();
-      if (!currentRoomId || !text) return;
+      const files = [...pendingMedia];
+      if (!currentRoomId || (!text && !files.length)) return;
 
-      e.msgInput.disabled = true;
+      setComposerBusy(true);
+      let uploaded = [];
 
       try {
-        const r = await supabaseClient.from("mensagens").insert([{sala_id: currentRoomId, usuario: getUser() || "Visitante", texto: text}]);
+        if (files.length) {
+          toast("Subindo midia...");
+          uploaded = await uploadMediaFiles(files);
+        }
+
+        const body = uploaded.length ? buildMediaPayload(text, uploaded) : text;
+        const r = await supabaseClient.from("mensagens").insert([{sala_id: currentRoomId, usuario: getUser() || "Visitante", texto: body}]);
         if (r.error) throw r.error;
         e.msgInput.value = "";
+        clearPendingMedia();
         resizeInput();
         await loadData();
         e.msgInput.focus();
       } catch (err) {
         console.error(err);
+        if (uploaded.length) await removeUploadedMedia(uploaded).catch(() => {});
         toast(err.message || "Erro ao enviar mensagem.");
       } finally {
-        e.msgInput.disabled = false;
+        setComposerBusy(false);
       }
+    };
+
+    e.mediaButton.onclick = () => {
+      if (!currentRoomId) return;
+      e.mediaInput.click();
+    };
+
+    e.mediaInput.onchange = () => {
+      addPendingFiles(e.mediaInput.files);
+      e.mediaInput.value = "";
     };
 
     e.msgInput.oninput = resizeInput;
