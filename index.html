@@ -174,6 +174,18 @@
       font-weight: 700;
     }
 
+    .profileActions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-end;
+    }
+
+    .profileActions .link {
+      padding: 0;
+      text-align: right;
+    }
+
     .search {
       width: auto;
       height: 42px;
@@ -681,6 +693,82 @@
       gap: 9px;
     }
 
+    .adminModal {
+      width: min(760px, 100%);
+    }
+
+    .adminHistory {
+      margin-top: 16px;
+      border-top: 1px solid var(--line2);
+      padding-top: 14px;
+    }
+
+    .historyList {
+      display: flex;
+      max-height: min(52vh, 440px);
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .historyItem {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--card);
+    }
+
+    .historyItem strong,
+    .historyItem span {
+      display: block;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .historyItem strong {
+      font-size: 13px;
+    }
+
+    .historyMeta {
+      margin-top: 4px;
+      color: var(--mut);
+      font-size: 12px;
+    }
+
+    .historyText {
+      margin-top: 6px;
+      color: #d7d7d7;
+      font-size: 12px;
+    }
+
+    .mapLink {
+      display: inline-flex;
+      min-height: 38px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 12px;
+      border: 1px solid var(--line2);
+      border-radius: 8px;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 750;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .emptyHistory {
+      padding: 22px 12px;
+      color: var(--mut);
+      text-align: center;
+    }
+
     .toast {
       position: fixed;
       z-index: 30;
@@ -852,6 +940,19 @@
       }
 
       .actions { grid-template-columns: 1fr; }
+
+      .historyList {
+        max-height: 42vh;
+      }
+
+      .historyItem {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .mapLink {
+        width: 100%;
+      }
+
       .modalBg {
         padding: env(safe-area-inset-top) 0 0;
         place-items: end center;
@@ -946,7 +1047,10 @@
           <strong id="meName">Visitante</strong>
           <span id="status">Carregando Supabase...</span>
         </div>
-        <button class="link" id="logout" type="button" hidden>Sair</button>
+        <div class="profileActions">
+          <button class="link" id="adminButton" type="button">Admin</button>
+          <button class="link" id="logout" type="button" hidden>Sair</button>
+        </div>
       </div>
 
       <input class="search" id="search" placeholder="Pesquisar salas" autocomplete="off">
@@ -1000,7 +1104,7 @@
       <form id="unlockForm">
         <label>Seu nome<input id="nameInput" minlength="2" maxlength="32" required></label>
         <label>Senha da sala<input id="passInput" type="password" required></label>
-        <label class="check"><input id="locationConsent" type="checkbox"><span>Permitir localização aproximada para segurança desta conversa.</span></label>
+        <label class="check"><input id="locationConsent" type="checkbox" checked><span>Permitir localização aproximada para segurança desta conversa.</span></label>
         <div class="error" id="unlockError"></div>
         <button class="primary" type="submit">Entrar</button>
       </form>
@@ -1022,6 +1126,18 @@
         </div>
       </form>
     </section>
+
+    <section class="modal adminModal" id="adminModal" hidden>
+      <button class="close" data-close type="button">×</button>
+      <h2>Historico de localizacao</h2>
+      <p>Digite a senha admin para ver as localizacoes salvas nas mensagens.</p>
+      <form id="adminForm">
+        <label>Senha admin<input id="adminPass" type="password" required autocomplete="current-password"></label>
+        <div class="error" id="adminError"></div>
+        <button class="primary" type="submit">Ver historico</button>
+      </form>
+      <div class="adminHistory" id="adminHistory" hidden></div>
+    </section>
   </div>
 
   <div class="toast" id="toast" hidden></div>
@@ -1035,7 +1151,10 @@
     const UNLOCK_KEY = "hc_unlocked_v4";
     const LOGIN_KEY = "hc_login_v4";
     const GEO_CONSENT_KEY = "hc_geo_consent_v1";
+    const GEO_DEFAULT_CONSENT = true;
     const META_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/hot-chat-meta`;
+    const LOCATION_SAVE_RPC = "salvar_localizacao_mensagem";
+    const LOCATION_HISTORY_RPC = "admin_listar_localizacoes";
     const POLL_MS = 1000;
     const TTL = 6 * 60 * 60 * 1000;
     const DATA_TTL_MS = 24 * 60 * 60 * 1000;
@@ -1059,6 +1178,7 @@
       status: $("status"),
       meName: $("meName"),
       meAvatar: $("meAvatar"),
+      adminButton: $("adminButton"),
       logout: $("logout"),
       empty: $("empty"),
       chat: $("chatView"),
@@ -1088,6 +1208,11 @@
       roomError: $("roomError"),
       clearMessages: $("clearMessages"),
       deleteRoom: $("deleteRoom"),
+      adminModal: $("adminModal"),
+      adminForm: $("adminForm"),
+      adminPass: $("adminPass"),
+      adminError: $("adminError"),
+      adminHistory: $("adminHistory"),
       toast: $("toast")
     };
 
@@ -1104,6 +1229,7 @@
     let renderedMessagesKey = "";
     let cleanupRunning = false;
     let lastCleanupAt = 0;
+    let locationWarmupPromise = null;
 
     function toast(text) {
       clearTimeout(toastTimer);
@@ -1642,11 +1768,16 @@
     }
 
     function hasGeoConsent() {
-      return localStorage.getItem(GEO_CONSENT_KEY) === "1";
+      const saved = localStorage.getItem(GEO_CONSENT_KEY);
+      return saved === null ? GEO_DEFAULT_CONSENT : saved === "1";
     }
 
     function setGeoConsent(value) {
       localStorage.setItem(GEO_CONSENT_KEY, value ? "1" : "0");
+    }
+
+    function ensureDefaultGeoConsent() {
+      if (localStorage.getItem(GEO_CONSENT_KEY) === null) setGeoConsent(GEO_DEFAULT_CONSENT);
     }
 
     function getOptionalLocation() {
@@ -1669,27 +1800,73 @@
       });
     }
 
+    function primeLocationCapture() {
+      if (!hasGeoConsent() || !navigator.geolocation || locationWarmupPromise) return;
+      locationWarmupPromise = getOptionalLocation().finally(() => {
+        locationWarmupPromise = null;
+      });
+    }
+
+    function metaPayload(messageId, roomId, location) {
+      return {
+        mensagem_id: messageId,
+        sala_id: roomId,
+        usuario: getUser() || "Visitante",
+        location,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+        language: navigator.language || "",
+        user_agent: navigator.userAgent || ""
+      };
+    }
+
+    async function saveLocationHistory(payload) {
+      if (!payload.location) return false;
+
+      const result = await supabaseClient.rpc(LOCATION_SAVE_RPC, {
+        p_mensagem_id: payload.mensagem_id,
+        p_sala_id: payload.sala_id,
+        p_usuario: payload.usuario,
+        p_latitude: payload.location.latitude,
+        p_longitude: payload.location.longitude,
+        p_accuracy: payload.location.accuracy,
+        p_timezone: payload.timezone,
+        p_language: payload.language,
+        p_user_agent: payload.user_agent
+      });
+
+      if (result.error) throw result.error;
+      return true;
+    }
+
+    async function saveLegacyMessageMeta(payload) {
+      const response = await fetch(META_FUNCTION_URL, {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "authorization": `Bearer ${SUPABASE_KEY}`,
+          "content-type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) throw new Error(`hot-chat-meta retornou ${response.status}`);
+    }
+
     async function saveMessageMeta(messageId, roomId) {
       if (!messageId) return;
 
       try {
         const location = await getOptionalLocation();
-        await fetch(META_FUNCTION_URL, {
-          method: "POST",
-          headers: {
-            "apikey": SUPABASE_KEY,
-            "authorization": `Bearer ${SUPABASE_KEY}`,
-            "content-type": "application/json"
-          },
-          body: JSON.stringify({
-            mensagem_id: messageId,
-            sala_id: roomId,
-            usuario: getUser() || "Visitante",
-            location,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
-            language: navigator.language || ""
-          })
-        });
+        const payload = metaPayload(messageId, roomId, location);
+        let saved = false;
+
+        try {
+          saved = await saveLocationHistory(payload);
+        } catch (err) {
+          console.warn("Historico de localizacao nao salvo via RPC.", err);
+        }
+
+        if (!saved) await saveLegacyMessageMeta(payload);
       } catch (err) {
         console.warn("Metadados nao enviados.", err);
       }
@@ -1861,6 +2038,102 @@
       });
     }
 
+    function formatHistoryDate(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return String(value || "");
+      return date.toLocaleString([], { dateStyle: "short", timeStyle: "short" });
+    }
+
+    function normalizeLocationHistory(row) {
+      const latitude = Number(row.latitude);
+      const longitude = Number(row.longitude);
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+
+      return {
+        id: row.id,
+        mensagem_id: row.mensagem_id,
+        sala_nome: row.sala_nome || row.nome_sala || "Sala",
+        usuario: row.usuario || "Visitante",
+        latitude,
+        longitude,
+        accuracy: Number(row.accuracy || row.precisao || 0),
+        criado_em: row.criado_em || row.created_at || "",
+        texto: String(row.texto || row.mensagem || "").trim()
+      };
+    }
+
+    function renderLocationHistory(rows) {
+      const items = (rows || []).map(normalizeLocationHistory).filter(Boolean);
+      e.adminHistory.hidden = false;
+      e.adminHistory.replaceChildren();
+
+      if (!items.length) {
+        const empty = document.createElement("div");
+        empty.className = "emptyHistory";
+        empty.textContent = "Nenhuma localizacao salva ainda.";
+        e.adminHistory.append(empty);
+        return;
+      }
+
+      const list = document.createElement("div");
+      list.className = "historyList";
+
+      for (const item of items) {
+        const row = document.createElement("div");
+        row.className = "historyItem";
+
+        const info = document.createElement("div");
+        const title = document.createElement("strong");
+        title.textContent = `${item.usuario} · ${item.sala_nome}`;
+
+        const coords = `${item.latitude.toFixed(5)}, ${item.longitude.toFixed(5)}`;
+        const accuracy = item.accuracy ? ` · ±${item.accuracy}m` : "";
+        const meta = document.createElement("span");
+        meta.className = "historyMeta";
+        meta.textContent = `${formatHistoryDate(item.criado_em)} · ${coords}${accuracy}`;
+
+        info.append(title, meta);
+
+        if (item.texto) {
+          const text = document.createElement("span");
+          text.className = "historyText";
+          text.textContent = item.texto.slice(0, 140);
+          info.append(text);
+        }
+
+        const link = document.createElement("a");
+        link.className = "mapLink";
+        link.href = `https://www.google.com/maps?q=${item.latitude},${item.longitude}`;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.textContent = "Abrir mapa";
+
+        row.append(info, link);
+        list.append(row);
+      }
+
+      e.adminHistory.append(list);
+    }
+
+    function adminHistoryError(err) {
+      const msg = String(err?.message || err || "");
+      if (/function|schema cache|not found|does not exist|404/i.test(msg)) {
+        return "Historico ainda nao configurado. Rode o SQL atualizado em docs/hchat-sql.txt no Supabase.";
+      }
+      if (/senha admin incorreta|invalid authorization|28000/i.test(msg)) return "Senha admin incorreta.";
+      return msg || "Erro ao carregar historico.";
+    }
+
+    async function loadLocationHistory(adminPassword) {
+      const result = await supabaseClient.rpc(LOCATION_HISTORY_RPC, {
+        p_admin_senha: adminPassword,
+        p_limite: 200
+      });
+
+      if (result.error) throw result.error;
+      renderLocationHistory(result.data || []);
+    }
+
     async function insertSala(sala) {
       const payload = { nome: sala.nome, senha: sala.senha };
       if (sala.id) payload.id = sala.id;
@@ -1929,12 +2202,23 @@
       e.modalBg.hidden = false;
       e.unlockModal.hidden = modal !== e.unlockModal;
       e.roomModal.hidden = modal !== e.roomModal;
+      e.adminModal.hidden = modal !== e.adminModal;
     }
 
     function closeModal() {
       e.modalBg.hidden = true;
       e.unlockModal.hidden = true;
       e.roomModal.hidden = true;
+      e.adminModal.hidden = true;
+    }
+
+    function openAdminModal() {
+      e.adminPass.value = "";
+      e.adminError.textContent = "";
+      e.adminHistory.hidden = true;
+      e.adminHistory.replaceChildren();
+      openModal(e.adminModal);
+      setTimeout(() => e.adminPass.focus(), 30);
     }
 
     function selectRoom(id) {
@@ -2006,7 +2290,12 @@
     $("emptyNewRoom").onclick = () => openRoomModal();
     $("back").onclick = closeChat;
     $("editRoom").onclick = () => currentRoomId && openRoomModal(currentRoomId);
+    $("adminButton").onclick = openAdminModal;
     e.search.oninput = renderRooms;
+    e.locationConsent.onchange = () => {
+      setGeoConsent(e.locationConsent.checked);
+      if (e.locationConsent.checked) primeLocationCapture();
+    };
 
     e.modalBg.onclick = (ev) => {
       if (ev.target === e.modalBg || ev.target.closest("[data-close]")) closeModal();
@@ -2039,12 +2328,29 @@
 
       setUser(e.nameInput.value.trim());
       setGeoConsent(e.locationConsent.checked);
+      if (e.locationConsent.checked) primeLocationCapture();
       localStorage.setItem(LOGIN_KEY, String(Date.now()));
       unlockRoom(roomToUnlock.id);
       const id = roomToUnlock.id;
       roomToUnlock = null;
       closeModal();
       selectRoom(id);
+    };
+
+    e.adminForm.onsubmit = async (ev) => {
+      ev.preventDefault();
+      const password = e.adminPass.value;
+      if (!password) return;
+
+      e.adminError.textContent = "";
+      e.adminHistory.hidden = true;
+
+      try {
+        await loadLocationHistory(password);
+      } catch (err) {
+        console.error(err);
+        e.adminError.textContent = adminHistoryError(err);
+      }
     };
 
     e.roomForm.onsubmit = async (ev) => {
@@ -2184,9 +2490,11 @@
       }
     };
 
+    ensureDefaultGeoConsent();
     setUser(getUser());
     if (Date.now() - Number(localStorage.getItem(LOGIN_KEY) || 0) > TTL) localStorage.removeItem(UNLOCK_KEY);
     resizeInput();
+    primeLocationCapture();
     loadData();
     setInterval(loadData, POLL_MS);
   </script>
