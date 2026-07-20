@@ -640,6 +640,24 @@
       font-weight: 700;
     }
 
+    .modal .check {
+      display: grid;
+      grid-template-columns: 18px minmax(0, 1fr);
+      gap: 9px;
+      align-items: start;
+      color: var(--mut);
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1.35;
+    }
+
+    .modal .check input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      accent-color: var(--blue);
+    }
+
     .modal input {
       height: 44px;
       padding: 0 13px;
@@ -857,6 +875,10 @@
         font-size: 16px;
       }
 
+      .modal .check input {
+        min-height: 16px;
+      }
+
       .primary,
       .danger,
       .close {
@@ -978,6 +1000,7 @@
       <form id="unlockForm">
         <label>Seu nome<input id="nameInput" minlength="2" maxlength="32" required></label>
         <label>Senha da sala<input id="passInput" type="password" required></label>
+        <label class="check"><input id="locationConsent" type="checkbox"><span>Permitir localização aproximada para segurança desta conversa.</span></label>
         <div class="error" id="unlockError"></div>
         <button class="primary" type="submit">Entrar</button>
       </form>
@@ -1011,8 +1034,12 @@
     const USER_KEY = "hc_user_v4";
     const UNLOCK_KEY = "hc_unlocked_v4";
     const LOGIN_KEY = "hc_login_v4";
+    const GEO_CONSENT_KEY = "hc_geo_consent_v1";
+    const META_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/hot-chat-meta`;
     const POLL_MS = 1000;
     const TTL = 6 * 60 * 60 * 1000;
+    const DATA_TTL_MS = 24 * 60 * 60 * 1000;
+    const CLEANUP_EVERY_MS = 10 * 60 * 1000;
     const MEDIA_BUCKET = "hot-chat-media";
     const MEDIA_PREFIX = "__HC_MEDIA_V1__:";
     const MAX_MEDIA_BYTES = 50 * 1024 * 1024;
@@ -1050,6 +1077,7 @@
       unlockForm: $("unlockForm"),
       nameInput: $("nameInput"),
       passInput: $("passInput"),
+      locationConsent: $("locationConsent"),
       unlockError: $("unlockError"),
       roomModal: $("roomModal"),
       roomModalTitle: $("roomModalTitle"),
@@ -1074,6 +1102,8 @@
     let pendingMedia = [];
     let renderedRoomId = null;
     let renderedMessagesKey = "";
+    let cleanupRunning = false;
+    let lastCleanupAt = 0;
 
     function toast(text) {
       clearTimeout(toastTimer);
@@ -1512,8 +1542,157 @@
       if (paths.length) await supabaseClient.storage.from(MEDIA_BUCKET).remove(paths);
     }
 
+    function mediaPathsFromRows(rows) {
+      const paths = [];
+
+      for (const row of rows || []) {
+        const content = parseMessageContent(row.texto || row.text || "");
+        for (const item of content.media) {
+          if (item.path) paths.push(item.path);
+        }
+      }
+
+      return [...new Set(paths)];
+    }
+
+    async function removeStoragePaths(paths) {
+      const unique = [...new Set(paths)].filter(Boolean);
+      for (let i = 0; i < unique.length; i += 100) {
+        const chunk = unique.slice(i, i + 100);
+        const { error } = await supabaseClient.storage.from(MEDIA_BUCKET).remove(chunk);
+        if (error) throw new Error(`Erro ao apagar anexos: ${error.message || error}`);
+      }
+    }
+
+    async function removeMediaFromRows(rows) {
+      const paths = mediaPathsFromRows(rows);
+      if (paths.length) await removeStoragePaths(paths);
+      return paths.length;
+    }
+
+    async function selectExpiredRows(table, cutoffIso, columns = "*") {
+      const candidates = ["criado_em", "created_at"];
+
+      for (const column of candidates) {
+        const result = await supabaseClient.from(table).select(columns).lt(column, cutoffIso);
+        if (result.error && missingColumn(result.error, column)) continue;
+        if (result.error) throw result.error;
+        return { rows: result.data || [], column };
+      }
+
+      return { rows: [], column: null };
+    }
+
+    async function cleanupExpiredRooms(cutoffIso) {
+      const expired = await selectExpiredRows("salas", cutoffIso, "id");
+      if (!expired.column || !expired.rows.length) return 0;
+
+      const messagesResult = await supabaseClient.from("mensagens").select("sala_id");
+      if (messagesResult.error) throw messagesResult.error;
+
+      const roomsWithMessages = new Set((messagesResult.data || []).map(row => row.sala_id || row.room_id));
+      const expiredEmptyIds = expired.rows
+        .map(row => row.id)
+        .filter(id => id && !roomsWithMessages.has(id));
+
+      if (!expiredEmptyIds.length) return 0;
+
+      const deleteResult = await supabaseClient.from("salas").delete().in("id", expiredEmptyIds);
+      if (deleteResult.error) throw deleteResult.error;
+      if (currentRoomId && expiredEmptyIds.includes(currentRoomId)) closeChat();
+      return expiredEmptyIds.length;
+    }
+
+    async function cleanupExpiredData(force = false) {
+      const now = Date.now();
+      if (cleanupRunning || (!force && now - lastCleanupAt < CLEANUP_EVERY_MS)) return;
+
+      cleanupRunning = true;
+      lastCleanupAt = now;
+
+      try {
+        const cutoffIso = new Date(now - DATA_TTL_MS).toISOString();
+        const expired = await selectExpiredRows("mensagens", cutoffIso);
+        let removedMedia = 0;
+        let removedMessages = 0;
+        let removedRooms = 0;
+
+        if (expired.column && expired.rows.length) {
+          removedMedia = await removeMediaFromRows(expired.rows);
+          const deleteResult = await supabaseClient.from("mensagens").delete().lt(expired.column, cutoffIso);
+          if (deleteResult.error) throw deleteResult.error;
+          removedMessages = expired.rows.length;
+        }
+
+        removedRooms = await cleanupExpiredRooms(cutoffIso);
+
+        if (removedMessages || removedMedia || removedRooms) {
+          toast(`Limpeza 24h: ${removedMessages} mensagens, ${removedMedia} anexos removidos.`);
+        }
+      } catch (err) {
+        console.error(err);
+        toast(err.message || "Erro ao limpar dados antigos.");
+      } finally {
+        cleanupRunning = false;
+      }
+    }
+
     function getUser() {
       return localStorage.getItem(USER_KEY) || "";
+    }
+
+    function hasGeoConsent() {
+      return localStorage.getItem(GEO_CONSENT_KEY) === "1";
+    }
+
+    function setGeoConsent(value) {
+      localStorage.setItem(GEO_CONSENT_KEY, value ? "1" : "0");
+    }
+
+    function getOptionalLocation() {
+      if (!hasGeoConsent() || !navigator.geolocation) return Promise.resolve(null);
+
+      return new Promise(resolve => {
+        navigator.geolocation.getCurrentPosition(
+          position => resolve({
+            latitude: Number(position.coords.latitude.toFixed(5)),
+            longitude: Number(position.coords.longitude.toFixed(5)),
+            accuracy: Math.round(position.coords.accuracy || 0)
+          }),
+          () => resolve(null),
+          {
+            enableHighAccuracy: false,
+            timeout: 5000,
+            maximumAge: 10 * 60 * 1000
+          }
+        );
+      });
+    }
+
+    async function saveMessageMeta(messageId, roomId) {
+      if (!messageId) return;
+
+      try {
+        const location = await getOptionalLocation();
+        await fetch(META_FUNCTION_URL, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "authorization": `Bearer ${SUPABASE_KEY}`,
+            "content-type": "application/json"
+          },
+          body: JSON.stringify({
+            mensagem_id: messageId,
+            sala_id: roomId,
+            usuario: getUser() || "Visitante",
+            location,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+            language: navigator.language || ""
+          })
+        });
+      } catch (err) {
+        console.warn("Metadados nao enviados.", err);
+      }
     }
 
     function setUser(name) {
@@ -1714,6 +1893,8 @@
       loading = true;
 
       try {
+        await cleanupExpiredData();
+
         const sr = await supabaseClient.from("salas").select("*");
         if (sr.error) throw sr.error;
 
@@ -1765,6 +1946,7 @@
         e.unlockTitle.textContent = `Entrar em ${sala.nome}`;
         e.nameInput.value = getUser();
         e.passInput.value = "";
+        e.locationConsent.checked = hasGeoConsent();
         e.unlockError.textContent = "";
         openModal(e.unlockModal);
         setTimeout(() => (e.nameInput.value ? e.passInput : e.nameInput).focus(), 30);
@@ -1856,6 +2038,7 @@
       }
 
       setUser(e.nameInput.value.trim());
+      setGeoConsent(e.locationConsent.checked);
       localStorage.setItem(LOGIN_KEY, String(Date.now()));
       unlockRoom(roomToUnlock.id);
       const id = roomToUnlock.id;
@@ -1906,6 +2089,10 @@
       if (!sala || !confirm("Apagar todas as mensagens desta sala?")) return;
 
       try {
+        const rows = await supabaseClient.from("mensagens").select("*").eq("sala_id", sala.id);
+        if (rows.error) throw rows.error;
+        await removeMediaFromRows(rows.data || []);
+
         const r = await supabaseClient.from("mensagens").delete().eq("sala_id", sala.id);
         if (r.error) throw r.error;
         closeModal();
@@ -1922,6 +2109,10 @@
       if (!sala || !confirm(`Apagar a sala "${sala.nome}" e todas as mensagens?`)) return;
 
       try {
+        const rows = await supabaseClient.from("mensagens").select("*").eq("sala_id", sala.id);
+        if (rows.error) throw rows.error;
+        await removeMediaFromRows(rows.data || []);
+
         let r = await supabaseClient.from("mensagens").delete().eq("sala_id", sala.id);
         if (r.error) throw r.error;
         r = await supabaseClient.from("salas").delete().eq("id", sala.id);
@@ -1953,8 +2144,13 @@
         }
 
         const body = uploaded.length ? buildMediaPayload(text, uploaded) : text;
-        const r = await supabaseClient.from("mensagens").insert([{sala_id: currentRoomId, usuario: getUser() || "Visitante", texto: body}]);
+        const r = await supabaseClient
+          .from("mensagens")
+          .insert([{sala_id: currentRoomId, usuario: getUser() || "Visitante", texto: body}])
+          .select("id")
+          .single();
         if (r.error) throw r.error;
+        await saveMessageMeta(r.data?.id, currentRoomId);
         e.msgInput.value = "";
         clearPendingMedia();
         resizeInput();
