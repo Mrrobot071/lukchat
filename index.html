@@ -1016,6 +1016,12 @@
     const MEDIA_BUCKET = "hot-chat-media";
     const MEDIA_PREFIX = "__HC_MEDIA_V1__:";
     const MAX_MEDIA_BYTES = 50 * 1024 * 1024;
+    const VIDEO_TARGET_BYTES = 45 * 1024 * 1024;
+    const VIDEO_MAX_DIMENSION = 720;
+    const VIDEO_FPS = 24;
+    const VIDEO_AUDIO_BPS = 96_000;
+    const VIDEO_MIN_BPS = 450_000;
+    const VIDEO_MAX_BPS = 2_400_000;
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const $ = (id) => document.getElementById(id);
     const e = {
@@ -1200,12 +1206,147 @@
       return `${bytes} B`;
     }
 
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
     function acceptedMedia(file) {
       return /^image\//.test(file.type) || /^video\//.test(file.type) || /\.(png|jpe?g|gif|webp|heic|heif|mp4|mov|m4v|webm)$/i.test(file.name);
     }
 
     function mediaKind(file) {
       return /^video\//.test(file.type) || /\.(mp4|mov|m4v|webm)$/i.test(file.name) ? "video" : "image";
+    }
+
+    function supportedVideoMime() {
+      if (!window.MediaRecorder) return "";
+      const types = [
+        "video/mp4;codecs=h264,aac",
+        "video/mp4",
+        "video/webm;codecs=vp9,opus",
+        "video/webm;codecs=vp8,opus",
+        "video/webm"
+      ];
+      return types.find(type => MediaRecorder.isTypeSupported(type)) || "";
+    }
+
+    function extensionForMime(mime) {
+      return /mp4/i.test(mime) ? "mp4" : "webm";
+    }
+
+    function compactVideoName(name, mime) {
+      const base = String(name || "video").replace(/\.[^.]+$/, "") || "video";
+      return `${base}-compactado.${extensionForMime(mime)}`;
+    }
+
+    function waitForMediaEvent(target, eventName) {
+      return new Promise((resolve, reject) => {
+        const cleanup = () => {
+          target.removeEventListener(eventName, done);
+          target.removeEventListener("error", fail);
+        };
+        const done = () => {
+          cleanup();
+          resolve();
+        };
+        const fail = () => {
+          cleanup();
+          reject(new Error("Nao foi possivel ler o video."));
+        };
+        target.addEventListener(eventName, done, { once: true });
+        target.addEventListener("error", fail, { once: true });
+      });
+    }
+
+    async function compressVideoFile(file) {
+      const mime = supportedVideoMime();
+      if (!mime) {
+        throw new Error("Seu navegador nao conseguiu compactar este video. Envie um arquivo menor.");
+      }
+
+      const url = URL.createObjectURL(file);
+      const video = document.createElement("video");
+      const canvas = document.createElement("canvas");
+      const chunks = [];
+      let recorder = null;
+      let outputStream = null;
+
+      try {
+        video.src = url;
+        video.muted = true;
+        video.playsInline = true;
+        video.preload = "metadata";
+        await waitForMediaEvent(video, "loadedmetadata");
+
+        const duration = Number.isFinite(video.duration) ? video.duration : 0;
+        if (!duration || duration <= 0) {
+          throw new Error("Nao consegui medir a duracao do video para compactar.");
+        }
+
+        const sourceWidth = video.videoWidth || 1280;
+        const sourceHeight = video.videoHeight || 720;
+        const scale = Math.min(1, VIDEO_MAX_DIMENSION / Math.max(sourceWidth, sourceHeight));
+        canvas.width = Math.max(2, Math.round(sourceWidth * scale));
+        canvas.height = Math.max(2, Math.round(sourceHeight * scale));
+
+        const context = canvas.getContext("2d", { alpha: false });
+        if (!context || !canvas.captureStream) {
+          throw new Error("Este navegador nao permite compactar video aqui.");
+        }
+
+        const canvasStream = canvas.captureStream(VIDEO_FPS);
+        const capture = video.captureStream || video.mozCaptureStream;
+        const sourceStream = capture ? capture.call(video) : null;
+        const audioTracks = sourceStream?.getAudioTracks?.() || [];
+        outputStream = new MediaStream([...canvasStream.getVideoTracks(), ...audioTracks]);
+
+        const videoBps = clamp(Math.floor((VIDEO_TARGET_BYTES * 8 / duration) - VIDEO_AUDIO_BPS), VIDEO_MIN_BPS, VIDEO_MAX_BPS);
+        recorder = new MediaRecorder(outputStream, {
+          mimeType: mime,
+          videoBitsPerSecond: videoBps,
+          audioBitsPerSecond: audioTracks.length ? VIDEO_AUDIO_BPS : undefined
+        });
+
+        const finished = new Promise((resolve, reject) => {
+          recorder.ondataavailable = (event) => {
+            if (event.data?.size) chunks.push(event.data);
+          };
+          recorder.onerror = () => reject(new Error("Erro ao compactar o video."));
+          recorder.onstop = resolve;
+        });
+
+        function drawFrame() {
+          if (video.ended || video.paused) return;
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          requestAnimationFrame(drawFrame);
+        }
+
+        await waitForMediaEvent(video, "canplay");
+        recorder.start(1000);
+        const ended = waitForMediaEvent(video, "ended");
+        await video.play();
+        drawFrame();
+        await ended;
+        if (recorder.state !== "inactive") recorder.stop();
+        await finished;
+
+        const blob = new Blob(chunks, { type: mime });
+        if (!blob.size) throw new Error("A compactacao nao gerou um video valido.");
+        if (blob.size > MAX_MEDIA_BYTES) {
+          throw new Error(`Mesmo compactado, o video ficou com ${formatBytes(blob.size)}. Tente cortar ou reduzir mais antes de enviar.`);
+        }
+
+        return new File([blob], compactVideoName(file.name, mime), {
+          type: mime,
+          lastModified: Date.now()
+        });
+      } finally {
+        if (recorder && recorder.state !== "inactive") recorder.stop();
+        outputStream?.getTracks?.().forEach(track => track.stop());
+        URL.revokeObjectURL(url);
+        video.removeAttribute("src");
+        video.load();
+      }
     }
 
     function cleanFileName(name) {
@@ -1264,7 +1405,7 @@
 
         const info = document.createElement("span");
         info.className = "attachmentInfo";
-        info.textContent = item.kind === "video" ? "Video" : "Foto";
+        info.textContent = item.shouldCompress ? "Compactar" : (item.kind === "video" ? "Video" : "Foto");
         wrap.append(preview, remove, info);
         e.attachmentTray.append(wrap);
       }
@@ -1283,21 +1424,27 @@
       let added = 0;
       let invalid = 0;
       let tooLarge = 0;
+      let compressCount = 0;
 
       for (const file of files) {
         if (!acceptedMedia(file)) {
           invalid++;
           continue;
         }
-        if (file.size > MAX_MEDIA_BYTES) {
+        const kind = mediaKind(file);
+        if (file.size > MAX_MEDIA_BYTES && kind !== "video") {
           tooLarge++;
           continue;
         }
 
+        const shouldCompress = kind === "video" && file.size > MAX_MEDIA_BYTES;
+        if (shouldCompress) compressCount++;
+
         pendingMedia.push({
           id: randomId(),
           file,
-          kind: mediaKind(file),
+          kind,
+          shouldCompress,
           previewUrl: URL.createObjectURL(file)
         });
         added++;
@@ -1305,7 +1452,8 @@
 
       renderAttachments();
       if (invalid) notices.push("Apenas fotos e videos sao aceitos.");
-      if (tooLarge) notices.push(`Cada arquivo pode ter ate ${formatBytes(MAX_MEDIA_BYTES)}.`);
+      if (tooLarge) notices.push(`Fotos podem ter ate ${formatBytes(MAX_MEDIA_BYTES)}.`);
+      if (compressCount) notices.push(`${compressCount} ${compressCount === 1 ? "video sera compactado" : "videos serao compactados"} ao enviar.`);
       if (notices.length) toast(notices.join(" "));
       if (added) resizeInput();
     }
@@ -1324,10 +1472,23 @@
       const uploaded = [];
 
       for (const item of items) {
-        const path = storagePathFor(item.file);
-        const result = await supabaseClient.storage.from(MEDIA_BUCKET).upload(path, item.file, {
+        let uploadFile = item.file;
+        let compressed = false;
+
+        if (item.kind === "video" && item.file.size > MAX_MEDIA_BYTES) {
+          toast(`Compactando ${item.file.name}...`);
+          uploadFile = await compressVideoFile(item.file);
+          compressed = true;
+        }
+
+        if (uploadFile.size > MAX_MEDIA_BYTES) {
+          throw new Error(`${uploadFile.name} tem ${formatBytes(uploadFile.size)}. O limite e ${formatBytes(MAX_MEDIA_BYTES)}.`);
+        }
+
+        const path = storagePathFor(uploadFile);
+        const result = await supabaseClient.storage.from(MEDIA_BUCKET).upload(path, uploadFile, {
           cacheControl: "3600",
-          contentType: item.file.type || (item.kind === "video" ? "video/mp4" : "image/jpeg"),
+          contentType: uploadFile.type || (item.kind === "video" ? "video/mp4" : "image/jpeg"),
           upsert: false
         });
 
@@ -1337,9 +1498,9 @@
           type: item.kind,
           url: publicUrl,
           path,
-          name: item.file.name,
-          mime: item.file.type,
-          size: item.file.size
+          name: compressed ? `${item.file.name} (compactado)` : uploadFile.name,
+          mime: uploadFile.type,
+          size: uploadFile.size
         });
       }
 
