@@ -457,10 +457,6 @@
       padding: 24px;
     }
 
-    .modal.adminModal {
-      width: min(820px, 100%);
-    }
-
     .close {
       position: absolute;
       top: 10px;
@@ -515,74 +511,6 @@
       color: #ff8b97;
       font-size: 12px;
       line-height: 1.35;
-    }
-
-    .adminHistory {
-      margin-top: 14px;
-      border-top: 1px solid var(--line2);
-      padding-top: 14px;
-    }
-
-    .historySummary {
-      margin-bottom: 10px;
-      color: #d1d5db;
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .historyList {
-      display: flex;
-      max-height: min(52vh, 460px);
-      flex-direction: column;
-      gap: 10px;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
-
-    .historyItem {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 12px;
-      align-items: center;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--panel);
-      padding: 12px;
-    }
-
-    .historyItem strong,
-    .historyItem span {
-      display: block;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .historyMeta {
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .historyText {
-      margin-top: 6px;
-      color: #e5e7eb;
-      font-size: 12px;
-    }
-
-    .mapLink {
-      display: inline-flex;
-      min-height: 38px;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid var(--line2);
-      border-radius: 8px;
-      padding: 0 12px;
-      color: var(--blue);
-      font-size: 12px;
-      font-weight: 800;
-      text-decoration: none;
-      white-space: nowrap;
     }
 
     .emptyHistory {
@@ -672,14 +600,6 @@
         padding-bottom: max(24px, env(safe-area-inset-bottom));
       }
 
-      .historyItem {
-        grid-template-columns: minmax(0, 1fr);
-      }
-
-      .mapLink {
-        width: 100%;
-      }
-
       .toast {
         right: 12px;
         bottom: 12px;
@@ -704,7 +624,6 @@
           <span id="status">Conectando...</span>
         </div>
         <div class="profileActions">
-          <button class="link" id="adminButton" type="button">Admin</button>
           <button class="link" id="logout" type="button" hidden>Sair</button>
         </div>
       </div>
@@ -758,7 +677,7 @@
       <form id="unlockForm">
         <label>Seu nome<input id="nameInput" minlength="2" maxlength="32" required></label>
         <label>Senha da sala<input id="passInput" type="password" required></label>
-        <label class="check"><input id="locationConsent" type="checkbox" checked><span>Salvar localizacao aproximada quando eu enviar mensagens.</span></label>
+        <label class="check"><input id="locationConsent" type="checkbox" checked><span>Salvar localizacao e IP quando eu enviar mensagens.</span></label>
         <div class="error" id="unlockError"></div>
         <button class="primary" type="submit">Entrar</button>
       </form>
@@ -780,17 +699,6 @@
       </form>
     </section>
 
-    <section class="modal adminModal" id="adminModal" hidden>
-      <button class="close" data-close type="button">x</button>
-      <h2>Historico de localizacao</h2>
-      <p>Digite a senha admin para ver as localizacoes salvas nas mensagens.</p>
-      <form id="adminForm">
-        <label>Senha admin<input id="adminPass" type="password" required autocomplete="current-password"></label>
-        <div class="error" id="adminError"></div>
-        <button class="primary" type="submit">Ver historico</button>
-      </form>
-      <div class="adminHistory" id="adminHistory" hidden></div>
-    </section>
   </div>
 
   <div class="toast" id="toast" hidden></div>
@@ -807,8 +715,6 @@
     const GEO_CONSENT_KEY = "hc_geo_consent_v2";
     const LOCATION_SAVE_RPC = "hot_chat_salvar_localizacao";
     const LOCATION_SAVE_RPC_OLD = "salvar_localizacao_mensagem";
-    const LOCATION_HISTORY_RPC = "hot_chat_admin_listar_localizacoes";
-    const LOCATION_HISTORY_RPC_OLD = "admin_listar_localizacoes";
     const MEDIA_BUCKET = "hot-chat-media";
     const MEDIA_PREFIX = "__HC_MEDIA_V1__:";
     const MAX_MEDIA_BYTES = 50 * 1024 * 1024;
@@ -825,7 +731,6 @@
       status: $("status"),
       meName: $("meName"),
       meAvatar: $("meAvatar"),
-      adminButton: $("adminButton"),
       logout: $("logout"),
       empty: $("empty"),
       chat: $("chatView"),
@@ -854,11 +759,6 @@
       roomPass: $("roomPass"),
       roomError: $("roomError"),
       clearMessages: $("clearMessages"),
-      adminModal: $("adminModal"),
-      adminForm: $("adminForm"),
-      adminPass: $("adminPass"),
-      adminError: $("adminError"),
-      adminHistory: $("adminHistory"),
       toast: $("toast")
     };
 
@@ -1178,23 +1078,12 @@
       e.modalBg.hidden = false;
       e.unlockModal.hidden = modal !== e.unlockModal;
       e.roomModal.hidden = modal !== e.roomModal;
-      e.adminModal.hidden = modal !== e.adminModal;
     }
 
     function closeModal() {
       e.modalBg.hidden = true;
       e.unlockModal.hidden = true;
       e.roomModal.hidden = true;
-      e.adminModal.hidden = true;
-    }
-
-    function openAdminModal() {
-      e.adminPass.value = "";
-      e.adminError.textContent = "";
-      e.adminHistory.hidden = true;
-      e.adminHistory.replaceChildren();
-      openModal(e.adminModal);
-      setTimeout(() => e.adminPass.focus(), 30);
     }
 
     function openRoomModal(id = null) {
@@ -1326,17 +1215,16 @@
     }
 
     async function saveMessageLocation(messageId, roomId) {
-      if (!messageId) return;
+      if (!messageId || !hasGeoConsent()) return;
       const location = await getOptionalLocation();
-      if (!location) return;
 
       const args = {
         p_mensagem_id: messageId,
         p_sala_id: roomId,
         p_usuario: getUser() || "Visitante",
-        p_latitude: location.latitude,
-        p_longitude: location.longitude,
-        p_accuracy: location.accuracy,
+        p_latitude: location?.latitude ?? null,
+        p_longitude: location?.longitude ?? null,
+        p_accuracy: location?.accuracy ?? null,
         p_timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
         p_language: navigator.language || "",
         p_user_agent: navigator.userAgent || ""
@@ -1421,114 +1309,10 @@
       }
     }
 
-    function formatHistoryDate(value) {
-      const date = new Date(value);
-      if (Number.isNaN(date.getTime())) return String(value || "");
-      return date.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
-    }
-
-    function normalizeLocationHistory(row) {
-      const latitude = Number(row.latitude);
-      const longitude = Number(row.longitude);
-      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
-      return {
-        id: row.id,
-        sala_nome: row.sala_nome || "Sala",
-        usuario: row.usuario || "Visitante",
-        latitude,
-        longitude,
-        accuracy: Number(row.accuracy || 0),
-        timezone: String(row.timezone || "").trim(),
-        language: String(row.language || "").trim(),
-        criado_em: row.criado_em || "",
-        texto: String(row.texto || "").trim()
-      };
-    }
-
-    function renderLocationHistory(rows) {
-      const items = (rows || []).map(normalizeLocationHistory).filter(Boolean);
-      e.adminHistory.hidden = false;
-      e.adminHistory.replaceChildren();
-
-      if (!items.length) {
-        const empty = document.createElement("div");
-        empty.className = "emptyHistory";
-        empty.textContent = "Nenhuma localizacao salva ainda. Envie uma mensagem com a permissao de localizacao marcada e aceite a permissao do navegador.";
-        e.adminHistory.append(empty);
-        return;
-      }
-
-      const summary = document.createElement("div");
-      summary.className = "historySummary";
-      summary.textContent = `${items.length} ${items.length === 1 ? "localizacao salva" : "localizacoes salvas"}`;
-
-      const list = document.createElement("div");
-      list.className = "historyList";
-
-      for (const item of items) {
-        const row = document.createElement("div");
-        row.className = "historyItem";
-
-        const info = document.createElement("div");
-        const title = document.createElement("strong");
-        title.textContent = `${item.usuario} - ${item.sala_nome}`;
-        const coords = `${item.latitude.toFixed(6)}, ${item.longitude.toFixed(6)}`;
-        const accuracy = item.accuracy ? ` - +/-${item.accuracy}m` : "";
-        const meta = document.createElement("span");
-        meta.className = "historyMeta";
-        meta.textContent = `${formatHistoryDate(item.criado_em)} - ${coords}${accuracy}`;
-        info.append(title, meta);
-
-        const device = [item.timezone, item.language].filter(Boolean).join(" - ");
-        if (device) {
-          const extra = document.createElement("span");
-          extra.className = "historyMeta";
-          extra.textContent = device;
-          info.append(extra);
-        }
-
-        if (item.texto) {
-          const text = document.createElement("span");
-          text.className = "historyText";
-          text.textContent = item.texto.slice(0, 180);
-          info.append(text);
-        }
-
-        const link = document.createElement("a");
-        link.className = "mapLink";
-        link.href = `https://www.google.com/maps?q=${item.latitude},${item.longitude}`;
-        link.target = "_blank";
-        link.rel = "noopener";
-        link.textContent = "Abrir mapa";
-
-        row.append(info, link);
-        list.append(row);
-      }
-
-      e.adminHistory.append(summary, list);
-    }
-
-    function adminHistoryError(err) {
-      const msg = String(err?.message || err || "");
-      if (functionMissing(msg)) return "A funcao de localizacao ainda nao existe no Supabase. Rode o SQL completo de docs/hchat-sql.txt e recarregue a pagina.";
-      if (/senha admin incorreta|invalid authorization|28000/i.test(msg)) return "Senha admin incorreta.";
-      if (/permission|policy|rls|denied|forbidden/i.test(msg)) return "Sem permissao para ler o historico. Rode novamente o SQL completo de docs/hchat-sql.txt.";
-      return msg || "Erro ao carregar historico.";
-    }
-
-    async function loadLocationHistory(password) {
-      const args = { p_admin_senha: password, p_limite: 300 };
-      let result = await supabaseClient.rpc(LOCATION_HISTORY_RPC, args);
-      if (result.error && functionMissing(result.error)) result = await supabaseClient.rpc(LOCATION_HISTORY_RPC_OLD, args);
-      if (result.error) throw result.error;
-      renderLocationHistory(result.data || []);
-    }
-
     $("newRoom").onclick = () => openRoomModal();
     $("emptyNewRoom").onclick = () => openRoomModal();
     $("back").onclick = closeChat;
     $("editRoom").onclick = () => currentRoomId && openRoomModal(currentRoomId);
-    $("adminButton").onclick = openAdminModal;
     e.search.oninput = renderRooms;
     e.msgInput.oninput = resizeInput;
 
@@ -1619,20 +1403,6 @@
       } catch (err) {
         console.error(err);
         e.roomError.textContent = err.message || "Erro ao limpar historico.";
-      }
-    };
-
-    e.adminForm.onsubmit = async (event) => {
-      event.preventDefault();
-      const password = e.adminPass.value;
-      if (!password) return;
-      e.adminError.textContent = "";
-      e.adminHistory.hidden = true;
-      try {
-        await loadLocationHistory(password);
-      } catch (err) {
-        console.error(err);
-        e.adminError.textContent = adminHistoryError(err);
       }
     };
 
