@@ -1,24 +1,23 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>HChat</title>
   <style>
     :root {
-      --bg: #000;
-      --line: #262626;
-      --line2: #3a3a3a;
-      --card: #101010;
-      --card2: #181818;
-      --txt: #f5f5f5;
-      --mut: #8e8e93;
-      --blue: #3797f0;
-      --red: #ff3040;
-      --pink: #fd1d6b;
-      --orange: #ff8a35;
-      --grad: linear-gradient(135deg, var(--red), var(--pink) 55%, var(--orange));
-      --side: 390px;
+      --bg: #050505;
+      --panel: #111;
+      --panel2: #181818;
+      --line: #292929;
+      --line2: #3c3c3c;
+      --text: #f4f4f5;
+      --muted: #9ca3af;
+      --blue: #2f8cff;
+      --blue2: #1769d6;
+      --red: #ff4d5e;
+      --green: #28c76f;
+      --side: 360px;
     }
 
     * { box-sizing: border-box; }
@@ -27,19 +26,11 @@
     body {
       width: 100%;
       height: 100%;
-      min-width: 0;
       margin: 0;
       overflow: hidden;
-      overscroll-behavior: none;
-    }
-
-    body {
       background: var(--bg);
-      color: var(--txt);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      -webkit-font-smoothing: antialiased;
-      -webkit-text-size-adjust: 100%;
-      text-size-adjust: 100%;
+      color: var(--text);
+      font-family: Arial, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     button,
@@ -49,28 +40,38 @@
       font: inherit;
     }
 
+    button {
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     input,
-    textarea,
-    select {
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line2);
+      border-radius: 8px;
+      outline: 0;
+      background: var(--panel2);
+      color: var(--text);
       font-size: 16px;
     }
 
-    button {
-      cursor: pointer;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
+    input { height: 44px; padding: 0 12px; }
+    textarea { min-height: 42px; max-height: 130px; resize: none; padding: 10px 12px; }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--blue);
     }
+
+    [hidden] { display: none !important; }
 
     .app {
       display: grid;
       width: 100vw;
-      height: 100vh;
-      min-height: 100svh;
       height: 100dvh;
       grid-template-columns: var(--side) minmax(0, 1fr);
       overflow: hidden;
-      background: #000;
-      isolation: isolate;
     }
 
     .side {
@@ -79,25 +80,24 @@
       min-height: 0;
       flex-direction: column;
       border-right: 1px solid var(--line);
+      background: #080808;
     }
 
     .top,
     .head {
       display: flex;
-      min-height: 72px;
-      flex: 0 0 auto;
+      min-height: 68px;
       align-items: center;
       gap: 12px;
-      padding: 0 18px;
+      padding: 0 16px;
       border-bottom: 1px solid var(--line);
     }
 
     .top { justify-content: space-between; }
 
     .brand {
-      min-width: 0;
       overflow: hidden;
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 800;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -110,44 +110,40 @@
       flex: 0 0 42px;
       place-items: center;
       border: 1px solid var(--line2);
-      border-radius: 50%;
+      border-radius: 999px;
       background: transparent;
-      line-height: 1;
+      color: var(--text);
+      font-weight: 800;
     }
 
     .profile {
       display: grid;
-      grid-template-columns: 42px minmax(0, 1fr) auto;
-      gap: 12px;
+      grid-template-columns: 44px minmax(0, 1fr) auto;
+      gap: 10px;
       align-items: center;
-      margin: 16px;
+      margin: 14px;
       padding: 12px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: var(--card);
+      background: var(--panel);
     }
 
     .avatar {
       display: grid;
-      width: 48px;
-      height: 48px;
-      flex: 0 0 auto;
+      width: 44px;
+      height: 44px;
+      flex: 0 0 44px;
       place-items: center;
-      border-radius: 50%;
-      background: var(--grad);
-      color: #fff;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #ff4155, #fb2978 55%, #ff9a3d);
+      color: white;
       font-weight: 800;
       text-transform: uppercase;
     }
 
-    .profile .avatar {
-      width: 42px;
-      height: 42px;
-    }
-
     .profile strong,
-    .title strong,
-    .roomName {
+    .roomName,
+    .title strong {
       display: block;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -155,23 +151,15 @@
     }
 
     .profile span,
-    .title span,
-    .roomPrev {
+    .roomPreview,
+    .title span {
       display: block;
       margin-top: 3px;
       overflow: hidden;
-      color: var(--mut);
+      color: var(--muted);
       font-size: 12px;
       text-overflow: ellipsis;
       white-space: nowrap;
-    }
-
-    .link {
-      border: 0;
-      background: transparent;
-      color: #ff6a8a;
-      font-size: 12px;
-      font-weight: 700;
     }
 
     .profileActions {
@@ -181,66 +169,69 @@
       align-items: flex-end;
     }
 
-    .profileActions .link {
+    .link {
+      border: 0;
+      background: transparent;
+      color: #ff7a92;
+      font-size: 12px;
+      font-weight: 800;
       padding: 0;
-      text-align: right;
     }
 
     .search {
       width: auto;
-      height: 42px;
-      margin: 0 16px 14px;
-      padding: 0 14px;
-      border: 1px solid transparent;
-      border-radius: 8px;
-      outline: 0;
-      background: var(--card2);
+      margin: 0 14px 10px;
     }
 
-    .search:focus { border-color: var(--line2); }
-
     .count {
-      padding: 0 20px 8px;
-      color: var(--mut);
-      font-size: 13px;
+      padding: 0 18px 8px;
+      color: var(--muted);
+      font-size: 12px;
       text-align: right;
     }
 
     .rooms {
       min-height: 0;
       flex: 1;
-      overflow-x: hidden;
       overflow-y: auto;
-      padding: 0 10px 12px;
+      padding: 0 8px 12px;
     }
 
     .room {
       display: grid;
       width: 100%;
-      grid-template-columns: 56px minmax(0, 1fr) auto;
-      gap: 12px;
+      grid-template-columns: 50px minmax(0, 1fr) auto;
+      gap: 10px;
       align-items: center;
-      padding: 10px 12px;
+      min-height: 64px;
+      padding: 8px 10px;
       border: 0;
       border-radius: 8px;
       background: transparent;
       text-align: left;
     }
 
-    .room.active { background: var(--card2); }
-
-    @media (hover: hover) and (pointer: fine) {
-      .room:hover { background: var(--card2); }
+    .room:hover,
+    .room.active {
+      background: var(--panel2);
     }
 
-    .roomName { font-weight: 750; }
-    .roomPrev { font-size: 13px; }
-    .lock { color: #ff6a8a; font-size: 14px; }
+    .room .avatar {
+      width: 46px;
+      height: 46px;
+    }
+
+    .roomBadge {
+      color: #ff7a92;
+      font-size: 12px;
+      font-weight: 800;
+    }
 
     .main {
       min-width: 0;
       min-height: 0;
       overflow: hidden;
+      background: #020202;
     }
 
     .empty,
@@ -252,68 +243,39 @@
     .empty {
       display: grid;
       place-items: center;
-      padding: 28px;
+      padding: 24px;
       text-align: center;
+    }
+
+    .emptyInner {
+      max-width: 360px;
     }
 
     .emptyIcon {
       display: grid;
-      width: 92px;
-      height: 92px;
-      margin: auto;
+      width: 86px;
+      height: 86px;
+      margin: 0 auto 14px;
       place-items: center;
       border: 2px solid var(--line2);
-      border-radius: 50%;
-      font-size: 38px;
+      border-radius: 999px;
+      font-size: 34px;
+      font-weight: 800;
     }
 
     .empty p {
-      max-width: 340px;
-      color: var(--mut);
+      color: var(--muted);
       line-height: 1.45;
-    }
-
-    .primary {
-      min-height: 42px;
-      padding: 0 16px;
-      border: 0;
-      border-radius: 8px;
-      background: var(--blue);
-      color: #fff;
-      font-weight: 750;
-    }
-
-    .danger {
-      min-height: 42px;
-      padding: 0 14px;
-      border: 1px solid rgba(255, 91, 101, .35);
-      border-radius: 8px;
-      background: rgba(255, 91, 101, .08);
-      color: #ff7b85;
-      font-weight: 750;
-    }
-
-    .danger.solid {
-      border-color: #c92f3d;
-      background: #c92f3d;
-      color: #fff;
     }
 
     .chat {
       display: flex;
       flex-direction: column;
-      overflow: hidden;
     }
-
-    .chat[hidden],
-    .empty[hidden],
-    .modalBg[hidden],
-    .modal[hidden],
-    .toast[hidden] { display: none; }
 
     .back {
       display: none;
-      font-size: 28px;
+      font-size: 24px;
     }
 
     .title {
@@ -324,19 +286,16 @@
     .messages {
       display: flex;
       min-height: 0;
-      flex: 1 1 auto;
+      flex: 1;
       flex-direction: column;
-      gap: 6px;
-      overflow-x: hidden;
+      gap: 8px;
       overflow-y: auto;
-      padding: 22px clamp(14px, 5vw, 72px) 14px;
-      overscroll-behavior: contain;
-      -webkit-overflow-scrolling: touch;
+      padding: 18px clamp(12px, 4vw, 52px);
     }
 
     .welcome {
       margin: auto;
-      color: var(--mut);
+      color: var(--muted);
       text-align: center;
     }
 
@@ -345,367 +304,235 @@
       width: 100%;
     }
 
-    .row.mine { justify-content: flex-end; }
-
-    .bubble {
-      max-width: min(68%, 560px);
-      padding: 9px 13px;
-      border: 1px solid var(--line2);
-      border-radius: 18px;
-      background: var(--card2);
-      line-height: 1.42;
-      overflow-wrap: anywhere;
-      white-space: pre-wrap;
+    .row.mine {
+      justify-content: flex-end;
     }
 
-    .bubble.hasMedia {
-      padding: 5px;
-      white-space: normal;
+    .bubble {
+      max-width: min(72%, 620px);
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+      border: 1px solid var(--line2);
+      border-radius: 18px;
+      background: var(--panel2);
+      padding: 10px 13px;
+      line-height: 1.4;
     }
 
     .mine .bubble {
-      border-color: var(--blue);
-      background: var(--blue);
+      border-color: var(--blue2);
+      background: var(--blue2);
+    }
+
+    .meta {
+      display: block;
+      margin-top: 6px;
+      color: rgba(255, 255, 255, .65);
+      font-size: 10px;
     }
 
     .mediaStack {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-    }
-
-    .mediaLink {
-      display: block;
-      color: inherit;
+      gap: 8px;
+      margin-bottom: 8px;
     }
 
     .mediaItem {
       display: block;
-      width: min(70vw, 360px);
+      width: min(68vw, 380px);
       max-width: 100%;
-      max-height: 380px;
-      border-radius: 14px;
-      background: #050505;
-      object-fit: cover;
-      touch-action: pan-y;
-    }
-
-    video.mediaItem {
+      max-height: 430px;
+      border-radius: 12px;
+      background: black;
       object-fit: contain;
     }
 
-    .videoOpen {
-      display: flex;
-      width: min(70vw, 360px);
-      max-width: 100%;
-      min-height: 92px;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      border: 0;
-      border-radius: 14px;
-      background: #050505;
-      color: #fff;
-      text-align: left;
-      touch-action: pan-y;
-    }
-
-    .videoOpenIcon {
-      display: grid;
-      width: 46px;
-      height: 46px;
-      flex: 0 0 46px;
-      place-items: center;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, .16);
-      color: #fff;
-      font-size: 20px;
-      line-height: 1;
-    }
-
-    .videoOpenText {
-      min-width: 0;
-    }
-
-    .videoOpenText strong,
-    .videoOpenText span {
-      display: block;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .videoOpenText strong {
-      font-size: 13px;
-    }
-
-    .videoOpenText span {
-      margin-top: 4px;
-      color: rgba(255, 255, 255, .68);
-      font-size: 11px;
-    }
-
-    .mediaCaption {
-      padding: 5px 8px 0;
-      overflow-wrap: anywhere;
-      white-space: pre-wrap;
-    }
-
-    .hasMedia .meta {
-      margin: 6px 8px 3px;
-    }
-
-    .meta {
-      display: block;
-      margin-top: 5px;
-      color: rgba(255, 255, 255, .62);
-      font-size: 10px;
-    }
-
-    .composer {
-      display: flex;
-      width: calc(100% - clamp(20px, 6vw, 48px));
-      max-width: 980px;
-      min-height: 54px;
+    .composerWrap {
       flex: 0 0 auto;
-      align-items: flex-end;
-      gap: 8px;
-      margin: 0 auto calc(12px + env(safe-area-inset-bottom));
-      padding: 7px 8px;
-      border: 1px solid var(--line2);
-      border-radius: 28px;
-      background: #000;
-    }
-
-    .composerMain {
-      display: flex;
-      min-width: 0;
-      flex: 1 1 auto;
-      flex-direction: column;
+      padding: 0 clamp(10px, 4vw, 36px) calc(12px + env(safe-area-inset-bottom));
     }
 
     .attachmentTray {
       display: flex;
-      max-width: 100%;
       gap: 8px;
+      max-width: 980px;
+      margin: 0 auto 8px;
       overflow-x: auto;
-      padding: 3px 4px 8px;
-      scrollbar-width: thin;
     }
 
-    .attachmentTray[hidden] {
-      display: none;
-    }
-
-    .attachment {
-      position: relative;
-      width: 76px;
-      height: 76px;
-      flex: 0 0 76px;
-      overflow: hidden;
+    .pending {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 220px;
+      padding: 8px 10px;
       border: 1px solid var(--line2);
       border-radius: 8px;
-      background: var(--card2);
-    }
-
-    .attachment img,
-    .attachment video {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .attachmentInfo {
-      position: absolute;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      overflow: hidden;
-      padding: 18px 6px 5px;
-      background: linear-gradient(to top, rgba(0, 0, 0, .78), transparent);
-      font-size: 10px;
-      font-weight: 750;
-      text-overflow: ellipsis;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, .8);
+      background: var(--panel);
+      color: var(--muted);
+      font-size: 12px;
       white-space: nowrap;
     }
 
-    .attachmentRemove {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      display: grid;
-      width: 22px;
-      height: 22px;
-      place-items: center;
-      border: 0;
-      border-radius: 50%;
-      background: rgba(0, 0, 0, .72);
-      color: #fff;
-      font-size: 16px;
-      line-height: 1;
+    .pending span {
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .composer textarea {
-      display: block;
-      width: 100%;
-      min-width: 0;
-      height: 40px;
-      min-height: 40px;
-      max-height: 116px;
-      flex: 1 1 auto;
-      resize: none;
-      overflow-y: hidden;
-      padding: 10px 8px;
+    .pending button {
       border: 0;
-      outline: 0;
       background: transparent;
-      line-height: 20px;
-      scrollbar-width: thin;
+      color: var(--red);
+      font-weight: 900;
     }
 
-    .composer textarea:focus { outline: 0; }
-
-    .composer > button {
+    .composer {
       display: grid;
-      width: 40px;
-      height: 40px;
-      flex: 0 0 40px;
-      place-items: center;
-      align-self: flex-end;
+      grid-template-columns: 42px minmax(0, 1fr) 48px;
+      gap: 8px;
+      align-items: end;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 7px;
+      border: 1px solid var(--line2);
+      border-radius: 24px;
+      background: #050505;
+    }
+
+    .composer button {
+      height: 42px;
       border: 0;
-      border-radius: 50%;
+      border-radius: 999px;
       background: transparent;
       color: var(--blue);
-      font-size: 20px;
-      line-height: 1;
+      font-weight: 900;
     }
 
-    .composer > button:disabled,
-    .attachmentRemove:disabled {
-      opacity: .45;
-      cursor: wait;
+    .composer .send {
+      background: var(--blue);
+      color: white;
     }
 
-    .composer svg {
-      width: 21px;
-      height: 21px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
+    .primary,
+    .danger {
+      min-height: 42px;
+      border: 0;
+      border-radius: 8px;
+      padding: 0 14px;
+      font-weight: 800;
+    }
+
+    .primary {
+      background: var(--blue);
+      color: white;
+    }
+
+    .primary:hover { background: var(--blue2); }
+
+    .danger {
+      border: 1px solid rgba(255, 77, 94, .45);
+      background: rgba(255, 77, 94, .08);
+      color: #ff8b97;
     }
 
     .modalBg {
       position: fixed;
-      z-index: 20;
+      z-index: 10;
       inset: 0;
       display: grid;
       place-items: center;
       padding: 20px;
-      background: rgba(0, 0, 0, .74);
-      overscroll-behavior: contain;
+      background: rgba(0, 0, 0, .75);
     }
 
     .modal {
       position: relative;
-      width: min(430px, 100%);
-      padding: 28px;
+      width: min(450px, 100%);
+      max-height: calc(100dvh - 40px);
+      overflow: auto;
       border: 1px solid var(--line2);
-      border-radius: 8px;
-      background: #161616;
+      border-radius: 10px;
+      background: #151515;
+      padding: 24px;
     }
 
-    .modal p {
-      color: var(--mut);
-      font-size: 13px;
-      line-height: 1.45;
+    .modal.adminModal {
+      width: min(820px, 100%);
     }
 
     .close {
       position: absolute;
-      top: 12px;
-      right: 12px;
+      top: 10px;
+      right: 10px;
       width: 34px;
       height: 34px;
       border: 1px solid var(--line2);
-      border-radius: 50%;
+      border-radius: 999px;
       background: transparent;
-      font-size: 22px;
-      line-height: 1;
+      color: var(--text);
+      font-size: 18px;
     }
 
     .modal form {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
     }
 
     .modal label {
       display: flex;
       flex-direction: column;
-      gap: 7px;
-      color: #cfcfcf;
+      gap: 6px;
+      color: #d1d5db;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 800;
     }
 
-    .modal .check {
-      display: grid;
+    .check {
+      display: grid !important;
       grid-template-columns: 18px minmax(0, 1fr);
-      gap: 9px;
       align-items: start;
-      color: var(--mut);
-      font-size: 11px;
-      font-weight: 500;
+      color: var(--muted) !important;
+      font-weight: 500 !important;
       line-height: 1.35;
     }
 
-    .modal .check input {
+    .check input {
       width: 16px;
       height: 16px;
       margin: 0;
       accent-color: var(--blue);
     }
 
-    .modal input {
-      height: 44px;
-      padding: 0 13px;
-      border: 1px solid var(--line2);
-      border-radius: 6px;
-      outline: 0;
-      background: var(--card2);
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 8px;
     }
 
     .error {
-      color: #ff7b85;
+      color: #ff8b97;
       font-size: 12px;
       line-height: 1.35;
     }
 
-    .error:empty { display: none; }
-
-    .actions {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 9px;
-    }
-
-    .adminModal {
-      width: min(760px, 100%);
-    }
-
     .adminHistory {
-      margin-top: 16px;
+      margin-top: 14px;
       border-top: 1px solid var(--line2);
       padding-top: 14px;
     }
 
+    .historySummary {
+      margin-bottom: 10px;
+      color: #d1d5db;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
     .historyList {
       display: flex;
-      max-height: min(52vh, 440px);
+      max-height: min(52vh, 460px);
       flex-direction: column;
       gap: 10px;
       overflow-y: auto;
@@ -717,34 +544,29 @@
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 12px;
       align-items: center;
-      padding: 12px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: var(--card);
+      background: var(--panel);
+      padding: 12px;
     }
 
     .historyItem strong,
     .historyItem span {
       display: block;
-      min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    .historyItem strong {
-      font-size: 13px;
-    }
-
     .historyMeta {
       margin-top: 4px;
-      color: var(--mut);
+      color: var(--muted);
       font-size: 12px;
     }
 
     .historyText {
       margin-top: 6px;
-      color: #d7d7d7;
+      color: #e5e7eb;
       font-size: 12px;
     }
 
@@ -753,59 +575,41 @@
       min-height: 38px;
       align-items: center;
       justify-content: center;
-      padding: 0 12px;
       border: 1px solid var(--line2);
       border-radius: 8px;
+      padding: 0 12px;
       color: var(--blue);
       font-size: 12px;
-      font-weight: 750;
+      font-weight: 800;
       text-decoration: none;
       white-space: nowrap;
     }
 
     .emptyHistory {
-      padding: 22px 12px;
-      color: var(--mut);
+      color: var(--muted);
+      padding: 22px 10px;
       text-align: center;
+      line-height: 1.45;
     }
 
     .toast {
       position: fixed;
-      z-index: 30;
+      z-index: 20;
       right: 18px;
       bottom: 18px;
-      max-width: min(480px, calc(100vw - 32px));
-      padding: 12px 16px;
+      max-width: min(520px, calc(100vw - 28px));
       border: 1px solid var(--line2);
       border-radius: 8px;
       background: #262626;
+      padding: 12px 14px;
       font-size: 13px;
       line-height: 1.4;
     }
 
-    @media (max-width: 900px) {
-      :root { --side: 340px; }
-      .bubble { max-width: 76%; }
-    }
-
     @media (max-width: 760px) {
-      html,
-      body {
-        position: fixed;
-        inset: 0;
-      }
-
-      input,
-      textarea,
-      select {
-        font-size: 16px !important;
-      }
-
       .app {
-        position: relative;
         display: block;
-        height: 100svh;
-        height: 100dvh;
+        position: relative;
       }
 
       .side,
@@ -814,135 +618,58 @@
         inset: 0;
         width: 100%;
         height: 100%;
-        overflow: hidden;
-        transition: transform .22s cubic-bezier(.22, .7, .3, 1);
-        will-change: transform;
+        transition: transform .2s ease;
       }
 
       .main {
-        z-index: 2;
         transform: translateX(100%);
-        background: #000;
-        visibility: hidden;
-        pointer-events: none;
+        background: #020202;
       }
 
       .app.open .side {
         transform: translateX(-18%);
-        pointer-events: none;
       }
 
       .app.open .main {
         transform: translateX(0);
-        visibility: visible;
-        pointer-events: auto;
-      }
-
-      .top,
-      .head {
-        min-height: calc(60px + env(safe-area-inset-top));
-        padding: env(safe-area-inset-top) max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left));
-      }
-
-      .brand {
-        font-size: 21px;
-      }
-
-      .profile {
-        margin: 10px 12px;
-        padding: 10px;
-      }
-
-      .search {
-        height: 44px;
-        margin: 0 12px 10px;
-        font-size: 16px;
-      }
-
-      .count {
-        padding: 0 16px 6px;
-      }
-
-      .head .avatar {
-        width: 38px;
-        height: 38px;
       }
 
       .back { display: grid; }
       .empty { display: none; }
 
-      .rooms {
-        padding-right: max(10px, env(safe-area-inset-right));
-        padding-bottom: max(12px, env(safe-area-inset-bottom));
-        padding-left: max(10px, env(safe-area-inset-left));
-        -webkit-overflow-scrolling: touch;
-      }
-
-      .messages {
-        gap: 5px;
-        padding: 12px max(9px, env(safe-area-inset-right)) 8px max(9px, env(safe-area-inset-left));
+      .top,
+      .head {
+        min-height: calc(58px + env(safe-area-inset-top));
+        padding-top: env(safe-area-inset-top);
       }
 
       .bubble {
-        max-width: min(88%, 42rem);
-        padding: 8px 11px;
-        border-radius: 17px;
+        max-width: 88%;
         font-size: 14px;
       }
 
-      .composer {
-        width: auto;
-        min-height: 50px;
-        gap: 4px;
-        margin: 0 max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left));
-        padding: 5px;
-        border-radius: 25px;
+      .messages {
+        padding: 12px 10px;
       }
 
-      .composer textarea {
-        height: 44px;
-        min-height: 44px;
-        max-height: 98px;
-        padding: 12px 7px;
-        font-size: 16px;
-        line-height: 20px;
-        transform: translateZ(0);
+      .composerWrap {
+        padding-right: 6px;
+        padding-left: 6px;
       }
 
-      .composer > button {
-        width: 44px;
-        height: 44px;
-        flex-basis: 44px;
-        font-size: 18px;
+      .modalBg {
+        align-items: end;
+        padding: env(safe-area-inset-top) 0 0;
       }
 
-      .attachment {
-        width: 64px;
-        height: 64px;
-        flex-basis: 64px;
-      }
-
-      .icon {
-        width: 44px;
-        height: 44px;
-        flex-basis: 44px;
-      }
-
-      .room {
-        min-height: 66px;
-        grid-template-columns: 50px minmax(0, 1fr) auto;
-        padding: 8px 10px;
-      }
-
-      .room .avatar {
-        width: 48px;
-        height: 48px;
-      }
-
-      .actions { grid-template-columns: 1fr; }
-
-      .historyList {
-        max-height: 42vh;
+      .modal {
+        width: 100%;
+        max-height: calc(100dvh - env(safe-area-inset-top));
+        border-right: 0;
+        border-bottom: 0;
+        border-left: 0;
+        border-radius: 12px 12px 0 0;
+        padding-bottom: max(24px, env(safe-area-inset-bottom));
       }
 
       .historyItem {
@@ -953,82 +680,11 @@
         width: 100%;
       }
 
-      .modalBg {
-        padding: env(safe-area-inset-top) 0 0;
-        place-items: end center;
-      }
-
-      .modal {
-        width: 100%;
-        max-height: calc(100dvh - env(safe-area-inset-top));
-        overflow: auto;
-        padding: 24px max(20px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
-        border-right: 0;
-        border-bottom: 0;
-        border-left: 0;
-        border-radius: 12px 12px 0 0;
-        overscroll-behavior: contain;
-        -webkit-overflow-scrolling: touch;
-      }
-
-      .modal input {
-        min-height: 48px;
-        font-size: 16px;
-      }
-
-      .modal .check input {
-        min-height: 16px;
-      }
-
-      .primary,
-      .danger,
-      .close {
-        min-height: 44px;
-      }
-
       .toast {
-        right: max(12px, env(safe-area-inset-right));
-        bottom: max(12px, env(safe-area-inset-bottom));
-        left: max(12px, env(safe-area-inset-left));
+        right: 12px;
+        bottom: 12px;
+        left: 12px;
         max-width: none;
-      }
-    }
-
-    @media (max-width: 380px) {
-      .brand { font-size: 20px; }
-      .room {
-        grid-template-columns: 46px minmax(0, 1fr) auto;
-        gap: 10px;
-        padding-right: 8px;
-        padding-left: 8px;
-      }
-      .room .avatar { width: 46px; height: 46px; }
-      .icon { width: 38px; height: 38px; flex-basis: 38px; }
-      .composer {
-        width: auto;
-        margin-right: max(4px, env(safe-area-inset-right));
-        margin-left: max(4px, env(safe-area-inset-left));
-      }
-      .bubble { max-width: 90%; }
-    }
-
-    @media (max-height: 620px) and (max-width: 760px) {
-      .top,
-      .head {
-        min-height: 54px;
-      }
-
-      .profile {
-        margin-top: 8px;
-        margin-bottom: 8px;
-      }
-
-      .messages {
-        padding-top: 8px;
-      }
-
-      .composer textarea {
-        max-height: 78px;
       }
     }
   </style>
@@ -1045,7 +701,7 @@
         <div class="avatar" id="meAvatar">?</div>
         <div>
           <strong id="meName">Visitante</strong>
-          <span id="status">Carregando Supabase...</span>
+          <span id="status">Conectando...</span>
         </div>
         <div class="profileActions">
           <button class="link" id="adminButton" type="button">Admin</button>
@@ -1060,63 +716,61 @@
 
     <main class="main">
       <section class="empty" id="empty">
-        <div>
-          <div class="emptyIcon">💬</div>
+        <div class="emptyInner">
+          <div class="emptyIcon">HC</div>
           <h1>Suas conversas</h1>
-          <p>Crie ou escolha uma sala. Tudo fica salvo no Supabase e atualiza a cada 1 segundo.</p>
+          <p>Escolha uma sala ou crie uma nova para conversar.</p>
           <button class="primary" id="emptyNewRoom" type="button">Criar sala</button>
         </div>
       </section>
 
       <section class="chat" id="chatView" hidden>
         <header class="head">
-          <button class="icon back" id="back" type="button" aria-label="Voltar">‹</button>
+          <button class="icon back" id="back" type="button" aria-label="Voltar">&lt;</button>
           <div class="avatar" id="roomAvatar">?</div>
           <div class="title">
             <strong id="roomTitle">Sala</strong>
             <span>Sala liberada</span>
           </div>
-          <button class="icon" id="editRoom" type="button" aria-label="Configurar sala">⚙</button>
+          <button class="icon" id="editRoom" type="button" aria-label="Editar sala">...</button>
         </header>
 
         <div class="messages" id="messages"></div>
 
-        <form class="composer" id="msgForm">
-          <button class="mediaButton" id="mediaButton" type="button" aria-label="Anexar foto ou video" title="Anexar foto ou video">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-          </button>
-          <input id="mediaInput" type="file" accept="image/*,video/*" multiple hidden>
-          <div class="composerMain">
-            <div class="attachmentTray" id="attachmentTray" hidden></div>
-            <textarea id="msgInput" rows="1" maxlength="2000" placeholder="Mensagem..." autocomplete="off" autocorrect="on" autocapitalize="sentences" spellcheck="true"></textarea>
-          </div>
-          <button id="sendMessage" type="submit" aria-label="Enviar mensagem">➤</button>
-        </form>
+        <div class="composerWrap">
+          <div class="attachmentTray" id="attachmentTray" hidden></div>
+          <form class="composer" id="msgForm">
+            <button id="mediaButton" type="button" aria-label="Anexar arquivo">+</button>
+            <textarea id="msgInput" rows="1" maxlength="2000" placeholder="Mensagem..." autocomplete="off"></textarea>
+            <button class="send" id="sendMessage" type="submit" aria-label="Enviar">Enviar</button>
+            <input id="mediaInput" type="file" accept="image/*,video/*" multiple hidden>
+          </form>
+        </div>
       </section>
     </main>
   </div>
 
   <div class="modalBg" id="modalBg" hidden>
     <section class="modal" id="unlockModal" hidden>
-      <button class="close" data-close type="button">×</button>
+      <button class="close" data-close type="button">x</button>
       <h2 id="unlockTitle">Entrar na sala</h2>
       <p>Digite seu nome e a senha da sala.</p>
       <form id="unlockForm">
         <label>Seu nome<input id="nameInput" minlength="2" maxlength="32" required></label>
         <label>Senha da sala<input id="passInput" type="password" required></label>
-        <label class="check"><input id="locationConsent" type="checkbox" checked><span>Permitir localização aproximada para segurança desta conversa.</span></label>
+        <label class="check"><input id="locationConsent" type="checkbox" checked><span>Salvar localizacao aproximada quando eu enviar mensagens.</span></label>
         <div class="error" id="unlockError"></div>
         <button class="primary" type="submit">Entrar</button>
       </form>
     </section>
 
     <section class="modal" id="roomModal" hidden>
-      <button class="close" data-close type="button">×</button>
+      <button class="close" data-close type="button">x</button>
       <h2 id="roomModalTitle">Criar sala</h2>
-      <p>Descrição é opcional. Ao editar, deixe a senha vazia para manter.</p>
+      <p>Descricao e opcional. Ao editar, deixe a senha vazia para manter.</p>
       <form id="roomForm">
         <label>Nome da sala<input id="roomName" minlength="2" maxlength="40" required></label>
-        <label>Descrição opcional<input id="roomDesc" maxlength="90" placeholder="Pode deixar em branco"></label>
+        <label>Descricao opcional<input id="roomDesc" maxlength="90" placeholder="Pode deixar em branco"></label>
         <label>Senha da sala<input id="roomPass" type="password" minlength="3" maxlength="128"></label>
         <div class="error" id="roomError"></div>
         <div class="actions">
@@ -1127,7 +781,7 @@
     </section>
 
     <section class="modal adminModal" id="adminModal" hidden>
-      <button class="close" data-close type="button">×</button>
+      <button class="close" data-close type="button">x</button>
       <h2>Historico de localizacao</h2>
       <p>Digite a senha admin para ver as localizacoes salvas nas mensagens.</p>
       <form id="adminForm">
@@ -1140,33 +794,27 @@
   </div>
 
   <div class="toast" id="toast" hidden></div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     "use strict";
 
     const SUPABASE_URL = "https://xpfzqbjyizftllasvbll.supabase.co";
     const SUPABASE_KEY = "sb_publishable_uBA1jMvY7JwZhqEkUpMRlg_W_HBwEZU";
-    const USER_KEY = "hc_user_v4";
-    const UNLOCK_KEY = "hc_unlocked_v4";
-    const LOGIN_KEY = "hc_login_v4";
-    const GEO_CONSENT_KEY = "hc_geo_consent_v1";
-    const GEO_DEFAULT_CONSENT = true;
-    const META_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/hot-chat-meta`;
-    const LOCATION_SAVE_RPC = "salvar_localizacao_mensagem";
-    const LOCATION_HISTORY_RPC = "admin_listar_localizacoes";
-    const POLL_MS = 1000;
-    const TTL = 6 * 60 * 60 * 1000;
-    const DATA_TTL_MS = 24 * 60 * 60 * 1000;
-    const CLEANUP_EVERY_MS = 10 * 60 * 1000;
+    const USER_KEY = "hc_user_v5";
+    const UNLOCK_KEY = "hc_unlocked_v5";
+    const LOGIN_KEY = "hc_login_v5";
+    const GEO_CONSENT_KEY = "hc_geo_consent_v2";
+    const LOCATION_SAVE_RPC = "hot_chat_salvar_localizacao";
+    const LOCATION_SAVE_RPC_OLD = "salvar_localizacao_mensagem";
+    const LOCATION_HISTORY_RPC = "hot_chat_admin_listar_localizacoes";
+    const LOCATION_HISTORY_RPC_OLD = "admin_listar_localizacoes";
     const MEDIA_BUCKET = "hot-chat-media";
     const MEDIA_PREFIX = "__HC_MEDIA_V1__:";
     const MAX_MEDIA_BYTES = 50 * 1024 * 1024;
-    const VIDEO_TARGET_BYTES = 45 * 1024 * 1024;
-    const VIDEO_MAX_DIMENSION = 720;
-    const VIDEO_FPS = 24;
-    const VIDEO_AUDIO_BPS = 96_000;
-    const VIDEO_MIN_BPS = 450_000;
-    const VIDEO_MAX_BPS = 2_400_000;
+    const POLL_MS = 1500;
+    const LOGIN_TTL = 6 * 60 * 60 * 1000;
+
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const $ = (id) => document.getElementById(id);
     const e = {
@@ -1219,15 +867,12 @@
     let currentRoomId = null;
     let roomToUnlock = null;
     let editingRoomId = null;
+    let pendingMedia = [];
     let salasHasDescricao = true;
     let loading = false;
     let toastTimer = null;
-    let pendingMedia = [];
     let renderedRoomId = null;
-    let renderedMessagesKey = "";
-    let cleanupRunning = false;
-    let lastCleanupAt = 0;
-    let locationWarmupPromise = null;
+    let renderedKey = "";
 
     function toast(text) {
       clearTimeout(toastTimer);
@@ -1236,271 +881,31 @@
       toastTimer = setTimeout(() => e.toast.hidden = true, 5000);
     }
 
-    function missingColumn(err, col) {
-      return new RegExp(col, "i").test(String(err?.message || "")) && /schema cache|column|could not find/i.test(String(err?.message || ""));
+    function missingColumn(err, column) {
+      const msg = String(err?.message || "");
+      return new RegExp(column, "i").test(msg) && /schema cache|column|could not find/i.test(msg);
     }
 
-    function initials(v) {
-      const p = String(v || "?").trim().split(/\s+/).filter(Boolean);
-      return (p.length > 1 ? p[0][0] + p[1][0] : (p[0] || "?").slice(0, 2)).toUpperCase();
+    function functionMissing(err) {
+      return /function|schema cache|not found|does not exist|404/i.test(String(err?.message || err || ""));
     }
 
-    function safeMediaUrl(url) {
-      const value = String(url || "");
-      if (!value) return false;
-
-      try {
-        const parsed = new URL(value, window.location.href);
-        return ["http:", "https:", "data:"].includes(parsed.protocol);
-      } catch {
-        return false;
-      }
-    }
-
-    function normalizeMediaItem(item) {
-      if (!item || !safeMediaUrl(item.url)) return null;
-      const mime = String(item.mime || "");
-      const type = String(item.type || "").toLowerCase().startsWith("video") || mime.startsWith("video/") ? "video" : "image";
-      return {
-        type,
-        url: String(item.url),
-        path: String(item.path || ""),
-        name: String(item.name || (type === "video" ? "Video" : "Foto")),
-        mime,
-        size: Number(item.size) || 0
-      };
-    }
-
-    function parseMessageContent(value) {
-      const raw = String(value || "");
-      if (!raw.startsWith(MEDIA_PREFIX)) return { texto: raw, media: [] };
-
-      try {
-        const payload = JSON.parse(raw.slice(MEDIA_PREFIX.length));
-        const media = Array.isArray(payload.items) ? payload.items.map(normalizeMediaItem).filter(Boolean) : [];
-        return { texto: String(payload.text || ""), media };
-      } catch {
-        return { texto: raw, media: [] };
-      }
-    }
-
-    function buildMediaPayload(text, items) {
-      return MEDIA_PREFIX + JSON.stringify({ text, items });
-    }
-
-    function messagePreview(msg) {
-      if (!msg?.media?.length) return msg?.texto || "";
-      const hasImage = msg.media.some(item => item.type === "image");
-      const hasVideo = msg.media.some(item => item.type === "video");
-      const label = hasImage && hasVideo ? "Midia" : (hasVideo ? "Video" : "Foto");
-      return msg.texto ? `${label}: ${msg.texto}` : label;
-    }
-
-    function createVideoPlayer(item) {
-      const media = document.createElement("video");
-      media.className = "mediaItem";
-      media.src = item.url;
-      media.title = item.name;
-      media.controls = true;
-      media.playsInline = true;
-      media.autoplay = false;
-      media.loop = false;
-      media.preload = "metadata";
-      return media;
-    }
-
-    function createMediaElement(item) {
-      if (item.type === "video") {
-        const button = document.createElement("button");
-        button.className = "videoOpen";
-        button.type = "button";
-        button.setAttribute("aria-label", `Abrir video ${item.name}`);
-
-        const icon = document.createElement("span");
-        icon.className = "videoOpenIcon";
-        icon.textContent = "▶";
-
-        const text = document.createElement("span");
-        text.className = "videoOpenText";
-        const title = document.createElement("strong");
-        title.textContent = item.name || "Video";
-        const detail = document.createElement("span");
-        detail.textContent = item.size ? `Toque para abrir · ${formatBytes(item.size)}` : "Toque para abrir";
-        text.append(title, detail);
-        button.append(icon, text);
-        button.onclick = () => {
-          const player = createVideoPlayer(item);
-          button.replaceWith(player);
-          player.focus();
-        };
-        return button;
-      }
-
-      const media = document.createElement("img");
-      media.className = "mediaItem";
-      media.src = item.url;
-      media.title = item.name;
-      media.alt = item.name || "Foto enviada";
-      const link = document.createElement("a");
-      link.className = "mediaLink";
-      link.href = item.url;
-      link.target = "_blank";
-      link.rel = "noopener";
-      link.append(media);
-      return link;
+    function initials(value) {
+      const parts = String(value || "?").trim().split(/\s+/).filter(Boolean);
+      const text = parts.length > 1 ? parts[0][0] + parts[1][0] : (parts[0] || "?").slice(0, 2);
+      return text.toUpperCase();
     }
 
     function randomId() {
-      return window.crypto?.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      if (crypto.randomUUID) return crypto.randomUUID();
+      return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     }
 
     function formatBytes(bytes) {
-      if (bytes >= 1024 * 1024) return `${Math.round(bytes / 1024 / 1024)} MB`;
-      if (bytes >= 1024) return `${Math.round(bytes / 1024)} KB`;
-      return `${bytes} B`;
-    }
-
-    function clamp(value, min, max) {
-      return Math.max(min, Math.min(max, value));
-    }
-
-    function acceptedMedia(file) {
-      return /^image\//.test(file.type) || /^video\//.test(file.type) || /\.(png|jpe?g|gif|webp|heic|heif|mp4|mov|m4v|webm)$/i.test(file.name);
-    }
-
-    function mediaKind(file) {
-      return /^video\//.test(file.type) || /\.(mp4|mov|m4v|webm)$/i.test(file.name) ? "video" : "image";
-    }
-
-    function supportedVideoMime() {
-      if (!window.MediaRecorder) return "";
-      const types = [
-        "video/mp4;codecs=h264,aac",
-        "video/mp4",
-        "video/webm;codecs=vp9,opus",
-        "video/webm;codecs=vp8,opus",
-        "video/webm"
-      ];
-      return types.find(type => MediaRecorder.isTypeSupported(type)) || "";
-    }
-
-    function extensionForMime(mime) {
-      return /mp4/i.test(mime) ? "mp4" : "webm";
-    }
-
-    function compactVideoName(name, mime) {
-      const base = String(name || "video").replace(/\.[^.]+$/, "") || "video";
-      return `${base}-compactado.${extensionForMime(mime)}`;
-    }
-
-    function waitForMediaEvent(target, eventName) {
-      return new Promise((resolve, reject) => {
-        const cleanup = () => {
-          target.removeEventListener(eventName, done);
-          target.removeEventListener("error", fail);
-        };
-        const done = () => {
-          cleanup();
-          resolve();
-        };
-        const fail = () => {
-          cleanup();
-          reject(new Error("Nao foi possivel ler o video."));
-        };
-        target.addEventListener(eventName, done, { once: true });
-        target.addEventListener("error", fail, { once: true });
-      });
-    }
-
-    async function compressVideoFile(file) {
-      const mime = supportedVideoMime();
-      if (!mime) {
-        throw new Error("Seu navegador nao conseguiu compactar este video. Envie um arquivo menor.");
-      }
-
-      const url = URL.createObjectURL(file);
-      const video = document.createElement("video");
-      const canvas = document.createElement("canvas");
-      const chunks = [];
-      let recorder = null;
-      let outputStream = null;
-
-      try {
-        video.src = url;
-        video.muted = true;
-        video.playsInline = true;
-        video.preload = "metadata";
-        await waitForMediaEvent(video, "loadedmetadata");
-
-        const duration = Number.isFinite(video.duration) ? video.duration : 0;
-        if (!duration || duration <= 0) {
-          throw new Error("Nao consegui medir a duracao do video para compactar.");
-        }
-
-        const sourceWidth = video.videoWidth || 1280;
-        const sourceHeight = video.videoHeight || 720;
-        const scale = Math.min(1, VIDEO_MAX_DIMENSION / Math.max(sourceWidth, sourceHeight));
-        canvas.width = Math.max(2, Math.round(sourceWidth * scale));
-        canvas.height = Math.max(2, Math.round(sourceHeight * scale));
-
-        const context = canvas.getContext("2d", { alpha: false });
-        if (!context || !canvas.captureStream) {
-          throw new Error("Este navegador nao permite compactar video aqui.");
-        }
-
-        const canvasStream = canvas.captureStream(VIDEO_FPS);
-        const capture = video.captureStream || video.mozCaptureStream;
-        const sourceStream = capture ? capture.call(video) : null;
-        const audioTracks = sourceStream?.getAudioTracks?.() || [];
-        outputStream = new MediaStream([...canvasStream.getVideoTracks(), ...audioTracks]);
-
-        const videoBps = clamp(Math.floor((VIDEO_TARGET_BYTES * 8 / duration) - VIDEO_AUDIO_BPS), VIDEO_MIN_BPS, VIDEO_MAX_BPS);
-        recorder = new MediaRecorder(outputStream, {
-          mimeType: mime,
-          videoBitsPerSecond: videoBps,
-          audioBitsPerSecond: audioTracks.length ? VIDEO_AUDIO_BPS : undefined
-        });
-
-        const finished = new Promise((resolve, reject) => {
-          recorder.ondataavailable = (event) => {
-            if (event.data?.size) chunks.push(event.data);
-          };
-          recorder.onerror = () => reject(new Error("Erro ao compactar o video."));
-          recorder.onstop = resolve;
-        });
-
-        function drawFrame() {
-          if (video.ended || video.paused) return;
-          context.drawImage(video, 0, 0, canvas.width, canvas.height);
-          requestAnimationFrame(drawFrame);
-        }
-
-        await waitForMediaEvent(video, "canplay");
-        recorder.start(1000);
-        const ended = waitForMediaEvent(video, "ended");
-        await video.play();
-        drawFrame();
-        await ended;
-        if (recorder.state !== "inactive") recorder.stop();
-        await finished;
-
-        const blob = new Blob(chunks, { type: mime });
-        if (!blob.size) throw new Error("A compactacao nao gerou um video valido.");
-        if (blob.size > MAX_MEDIA_BYTES) {
-          throw new Error(`Mesmo compactado, o video ficou com ${formatBytes(blob.size)}. Tente cortar ou reduzir mais antes de enviar.`);
-        }
-
-        return new File([blob], compactVideoName(file.name, mime), {
-          type: mime,
-          lastModified: Date.now()
-        });
-      } finally {
-        if (recorder && recorder.state !== "inactive") recorder.stop();
-        outputStream?.getTracks?.().forEach(track => track.stop());
-        URL.revokeObjectURL(url);
-        video.removeAttribute("src");
-        video.load();
-      }
+      const size = Number(bytes) || 0;
+      if (size < 1024) return `${size} B`;
+      if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+      return `${(size / 1024 / 1024).toFixed(1)} MB`;
     }
 
     function cleanFileName(name) {
@@ -1512,339 +917,33 @@
         .slice(-90) || "media";
     }
 
-    function storagePathFor(file) {
-      return `${cleanFileName(currentRoomId || "geral")}/${Date.now()}-${randomId()}-${cleanFileName(file.name)}`;
-    }
-
-    function mediaUploadErrorMessage(err) {
-      const msg = String(err?.message || err || "");
-      if (/bucket/i.test(msg) && /not.*found|not exist|does not exist/i.test(msg)) {
-        return `Crie um bucket publico chamado "${MEDIA_BUCKET}" no Supabase Storage.`;
-      }
-      if (/row-level security|policy|permission|unauthorized|not authorized|forbidden/i.test(msg)) {
-        return `Sem permissao para subir arquivos no bucket "${MEDIA_BUCKET}". Ajuste as policies do Storage.`;
-      }
-      return msg || "Erro ao subir arquivo.";
-    }
-
-    function renderAttachments() {
-      e.attachmentTray.replaceChildren();
-      e.attachmentTray.hidden = pendingMedia.length === 0;
-
-      for (const item of pendingMedia) {
-        const wrap = document.createElement("div");
-        wrap.className = "attachment";
-        wrap.title = `${item.file.name} (${formatBytes(item.file.size)})`;
-
-        const preview = document.createElement(item.kind === "video" ? "video" : "img");
-        preview.src = item.previewUrl;
-        if (item.kind === "video") {
-          preview.muted = true;
-          preview.playsInline = true;
-          preview.preload = "metadata";
-        } else {
-          preview.alt = item.file.name;
-        }
-
-        const remove = document.createElement("button");
-        remove.className = "attachmentRemove";
-        remove.type = "button";
-        remove.setAttribute("aria-label", "Remover anexo");
-        remove.textContent = "x";
-        remove.onclick = () => {
-          URL.revokeObjectURL(item.previewUrl);
-          pendingMedia = pendingMedia.filter(file => file.id !== item.id);
-          renderAttachments();
-        };
-
-        const info = document.createElement("span");
-        info.className = "attachmentInfo";
-        info.textContent = item.shouldCompress ? "Compactar" : (item.kind === "video" ? "Video" : "Foto");
-        wrap.append(preview, remove, info);
-        e.attachmentTray.append(wrap);
-      }
-    }
-
-    function clearPendingMedia() {
-      for (const item of pendingMedia) URL.revokeObjectURL(item.previewUrl);
-      pendingMedia = [];
-      e.mediaInput.value = "";
-      renderAttachments();
-    }
-
-    function addPendingFiles(fileList) {
-      const files = Array.from(fileList || []);
-      const notices = [];
-      let added = 0;
-      let invalid = 0;
-      let tooLarge = 0;
-      let compressCount = 0;
-
-      for (const file of files) {
-        if (!acceptedMedia(file)) {
-          invalid++;
-          continue;
-        }
-        const kind = mediaKind(file);
-        if (file.size > MAX_MEDIA_BYTES && kind !== "video") {
-          tooLarge++;
-          continue;
-        }
-
-        const shouldCompress = kind === "video" && file.size > MAX_MEDIA_BYTES;
-        if (shouldCompress) compressCount++;
-
-        pendingMedia.push({
-          id: randomId(),
-          file,
-          kind,
-          shouldCompress,
-          previewUrl: URL.createObjectURL(file)
-        });
-        added++;
-      }
-
-      renderAttachments();
-      if (invalid) notices.push("Apenas fotos e videos sao aceitos.");
-      if (tooLarge) notices.push(`Fotos podem ter ate ${formatBytes(MAX_MEDIA_BYTES)}.`);
-      if (compressCount) notices.push(`${compressCount} ${compressCount === 1 ? "video sera compactado" : "videos serao compactados"} ao enviar.`);
-      if (notices.length) toast(notices.join(" "));
-      if (added) resizeInput();
-    }
-
-    function setComposerBusy(busy) {
-      e.msgInput.disabled = busy;
-      e.mediaButton.disabled = busy;
-      e.mediaInput.disabled = busy;
-      e.sendMessage.disabled = busy;
-      e.attachmentTray.querySelectorAll("button").forEach(button => {
-        button.disabled = busy;
-      });
-    }
-
-    async function uploadMediaFiles(items) {
-      const uploaded = [];
-
-      for (const item of items) {
-        let uploadFile = item.file;
-        let compressed = false;
-
-        if (item.kind === "video" && item.file.size > MAX_MEDIA_BYTES) {
-          toast(`Compactando ${item.file.name}...`);
-          uploadFile = await compressVideoFile(item.file);
-          compressed = true;
-        }
-
-        if (uploadFile.size > MAX_MEDIA_BYTES) {
-          throw new Error(`${uploadFile.name} tem ${formatBytes(uploadFile.size)}. O limite e ${formatBytes(MAX_MEDIA_BYTES)}.`);
-        }
-
-        const path = storagePathFor(uploadFile);
-        const result = await supabaseClient.storage.from(MEDIA_BUCKET).upload(path, uploadFile, {
-          cacheControl: "3600",
-          contentType: uploadFile.type || (item.kind === "video" ? "video/mp4" : "image/jpeg"),
-          upsert: false
-        });
-
-        if (result.error) throw new Error(mediaUploadErrorMessage(result.error));
-        const publicUrl = supabaseClient.storage.from(MEDIA_BUCKET).getPublicUrl(path).data.publicUrl;
-        uploaded.push({
-          type: item.kind,
-          url: publicUrl,
-          path,
-          name: compressed ? `${item.file.name} (compactado)` : uploadFile.name,
-          mime: uploadFile.type,
-          size: uploadFile.size
-        });
-      }
-
-      return uploaded;
-    }
-
-    async function removeUploadedMedia(items) {
-      const paths = items.map(item => item.path).filter(Boolean);
-      if (paths.length) await supabaseClient.storage.from(MEDIA_BUCKET).remove(paths);
-    }
-
-    function mediaPathsFromRows(rows) {
-      const paths = [];
-
-      for (const row of rows || []) {
-        const content = parseMessageContent(row.texto || row.text || "");
-        for (const item of content.media) {
-          if (item.path) paths.push(item.path);
-        }
-      }
-
-      return [...new Set(paths)];
-    }
-
-    async function removeStoragePaths(paths) {
-      const unique = [...new Set(paths)].filter(Boolean);
-      for (let i = 0; i < unique.length; i += 100) {
-        const chunk = unique.slice(i, i + 100);
-        const { error } = await supabaseClient.storage.from(MEDIA_BUCKET).remove(chunk);
-        if (error) throw new Error(`Erro ao apagar anexos: ${error.message || error}`);
-      }
-    }
-
-    async function removeMediaFromRows(rows) {
-      const paths = mediaPathsFromRows(rows);
-      if (paths.length) await removeStoragePaths(paths);
-      return paths.length;
-    }
-
-    async function selectExpiredRows(table, cutoffIso, columns = "*") {
-      const candidates = ["criado_em", "created_at"];
-
-      for (const column of candidates) {
-        const result = await supabaseClient.from(table).select(columns).lt(column, cutoffIso);
-        if (result.error && missingColumn(result.error, column)) continue;
-        if (result.error) throw result.error;
-        return { rows: result.data || [], column };
-      }
-
-      return { rows: [], column: null };
-    }
-
-    async function cleanupExpiredData(force = false) {
-      const now = Date.now();
-      if (cleanupRunning || (!force && now - lastCleanupAt < CLEANUP_EVERY_MS)) return;
-
-      cleanupRunning = true;
-      lastCleanupAt = now;
-
+    function isUnlocked(id) {
       try {
-        const cutoffIso = new Date(now - DATA_TTL_MS).toISOString();
-        const expired = await selectExpiredRows("mensagens", cutoffIso);
-        let removedMedia = 0;
-        let removedMessages = 0;
-
-        if (expired.column && expired.rows.length) {
-          removedMedia = await removeMediaFromRows(expired.rows);
-          const deleteResult = await supabaseClient.from("mensagens").delete().lt(expired.column, cutoffIso);
-          if (deleteResult.error) throw deleteResult.error;
-          removedMessages = expired.rows.length;
-        }
-
-        if (removedMessages || removedMedia) {
-          toast(`Limpeza 24h: ${removedMessages} mensagens, ${removedMedia} anexos removidos.`);
-        }
-      } catch (err) {
-        console.error(err);
-        toast(err.message || "Erro ao limpar dados antigos.");
-      } finally {
-        cleanupRunning = false;
+        return (JSON.parse(localStorage.getItem(UNLOCK_KEY)) || []).includes(id);
+      } catch {
+        return false;
       }
+    }
+
+    function setUnlocked(list) {
+      localStorage.setItem(UNLOCK_KEY, JSON.stringify([...new Set(list)]));
+    }
+
+    function unlockRoom(id) {
+      let list = [];
+      try { list = JSON.parse(localStorage.getItem(UNLOCK_KEY)) || []; } catch {}
+      list.push(id);
+      setUnlocked(list);
+    }
+
+    function lockRoom(id) {
+      let list = [];
+      try { list = JSON.parse(localStorage.getItem(UNLOCK_KEY)) || []; } catch {}
+      setUnlocked(list.filter(item => item !== id));
     }
 
     function getUser() {
       return localStorage.getItem(USER_KEY) || "";
-    }
-
-    function hasGeoConsent() {
-      const saved = localStorage.getItem(GEO_CONSENT_KEY);
-      return saved === null ? GEO_DEFAULT_CONSENT : saved === "1";
-    }
-
-    function setGeoConsent(value) {
-      localStorage.setItem(GEO_CONSENT_KEY, value ? "1" : "0");
-    }
-
-    function ensureDefaultGeoConsent() {
-      if (localStorage.getItem(GEO_CONSENT_KEY) === null) setGeoConsent(GEO_DEFAULT_CONSENT);
-    }
-
-    function getOptionalLocation() {
-      if (!hasGeoConsent() || !navigator.geolocation) return Promise.resolve(null);
-
-      return new Promise(resolve => {
-        navigator.geolocation.getCurrentPosition(
-          position => resolve({
-            latitude: Number(position.coords.latitude.toFixed(5)),
-            longitude: Number(position.coords.longitude.toFixed(5)),
-            accuracy: Math.round(position.coords.accuracy || 0)
-          }),
-          () => resolve(null),
-          {
-            enableHighAccuracy: false,
-            timeout: 5000,
-            maximumAge: 10 * 60 * 1000
-          }
-        );
-      });
-    }
-
-    function primeLocationCapture() {
-      if (!hasGeoConsent() || !navigator.geolocation || locationWarmupPromise) return;
-      locationWarmupPromise = getOptionalLocation().finally(() => {
-        locationWarmupPromise = null;
-      });
-    }
-
-    function metaPayload(messageId, roomId, location) {
-      return {
-        mensagem_id: messageId,
-        sala_id: roomId,
-        usuario: getUser() || "Visitante",
-        location,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
-        language: navigator.language || "",
-        user_agent: navigator.userAgent || ""
-      };
-    }
-
-    async function saveLocationHistory(payload) {
-      if (!payload.location) return false;
-
-      const result = await supabaseClient.rpc(LOCATION_SAVE_RPC, {
-        p_mensagem_id: payload.mensagem_id,
-        p_sala_id: payload.sala_id,
-        p_usuario: payload.usuario,
-        p_latitude: payload.location.latitude,
-        p_longitude: payload.location.longitude,
-        p_accuracy: payload.location.accuracy,
-        p_timezone: payload.timezone,
-        p_language: payload.language,
-        p_user_agent: payload.user_agent
-      });
-
-      if (result.error) throw result.error;
-      return true;
-    }
-
-    async function saveLegacyMessageMeta(payload) {
-      const response = await fetch(META_FUNCTION_URL, {
-        method: "POST",
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "authorization": `Bearer ${SUPABASE_KEY}`,
-          "content-type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) throw new Error(`hot-chat-meta retornou ${response.status}`);
-    }
-
-    async function saveMessageMeta(messageId, roomId) {
-      if (!messageId) return;
-
-      try {
-        const location = await getOptionalLocation();
-        const payload = metaPayload(messageId, roomId, location);
-        let saved = false;
-
-        try {
-          saved = await saveLocationHistory(payload);
-        } catch (err) {
-          console.warn("Historico de localizacao nao salvo via RPC.", err);
-        }
-
-        if (!saved) await saveLegacyMessageMeta(payload);
-      } catch (err) {
-        console.warn("Metadados nao enviados.", err);
-      }
     }
 
     function setUser(name) {
@@ -1854,67 +953,76 @@
       e.logout.hidden = !name;
     }
 
-    function unlocked() {
-      try { return JSON.parse(localStorage.getItem(UNLOCK_KEY)) || []; }
-      catch { return []; }
+    function hasGeoConsent() {
+      const saved = localStorage.getItem(GEO_CONSENT_KEY);
+      return saved === null ? true : saved === "1";
     }
 
-    function setUnlocked(list) {
-      localStorage.setItem(UNLOCK_KEY, JSON.stringify(list));
-    }
-
-    function isUnlocked(id) {
-      return unlocked().includes(id);
-    }
-
-    function unlockRoom(id) {
-      const list = unlocked();
-      if (!list.includes(id)) list.push(id);
-      setUnlocked(list);
-    }
-
-    function lockRoom(id) {
-      setUnlocked(unlocked().filter(x => x !== id));
+    function setGeoConsent(value) {
+      localStorage.setItem(GEO_CONSENT_KEY, value ? "1" : "0");
     }
 
     function roomById(id) {
-      return salas.find(s => s.id === id);
+      return salas.find(sala => sala.id === id);
     }
 
     function roomMessages(id) {
-      return mensagens.filter(m => m.sala_id === id);
-    }
-
-    function messagesKey(id) {
-      return roomMessages(id)
-        .map(msg => [
-          msg.id,
-          msg.usuario,
-          msg.criado_em,
-          msg.texto,
-          (msg.media || []).map(item => `${item.type}:${item.url}:${item.size}`).join(",")
-        ].join("|"))
-        .join(";");
-    }
-
-    function isNearMessagesBottom() {
-      return e.messages.scrollHeight - e.messages.scrollTop - e.messages.clientHeight < 90;
+      return mensagens.filter(msg => msg.sala_id === id);
     }
 
     function normalizeSala(row) {
       return {
         id: row.id,
         nome: row.nome || row.name || "Sala",
-        descricao: row.descricao || row.description || "",
-        senha: row.senha || row.password || ""
+        senha: row.senha || row.password || "",
+        descricao: row.descricao || row.description || ""
       };
+    }
+
+    function safeUrl(url) {
+      try {
+        const parsed = new URL(String(url || ""), window.location.href);
+        return ["http:", "https:", "data:"].includes(parsed.protocol);
+      } catch {
+        return false;
+      }
+    }
+
+    function normalizeMediaItem(item) {
+      if (!item || !safeUrl(item.url)) return null;
+      const mime = String(item.mime || "");
+      const type = String(item.type || "").startsWith("video") || mime.startsWith("video/") ? "video" : "image";
+      return {
+        type,
+        url: String(item.url),
+        path: String(item.path || ""),
+        name: String(item.name || (type === "video" ? "Video" : "Imagem")),
+        mime,
+        size: Number(item.size) || 0
+      };
+    }
+
+    function parseMessageContent(value) {
+      const raw = String(value || "");
+      if (!raw.startsWith(MEDIA_PREFIX)) return { texto: raw, media: [] };
+      try {
+        const payload = JSON.parse(raw.slice(MEDIA_PREFIX.length));
+        const media = Array.isArray(payload.items) ? payload.items.map(normalizeMediaItem).filter(Boolean) : [];
+        return { texto: String(payload.text || ""), media };
+      } catch {
+        return { texto: raw, media: [] };
+      }
+    }
+
+    function buildMediaPayload(text, items) {
+      return `${MEDIA_PREFIX}${JSON.stringify({ text, items })}`;
     }
 
     function normalizeMsg(row) {
       const content = parseMessageContent(row.texto || row.text || "");
       return {
         id: row.id,
-        sala_id: row.sala_id || row.room_id || "geral",
+        sala_id: row.sala_id || row.room_id,
         usuario: row.usuario || row.author || "Visitante",
         texto: content.texto,
         media: content.media,
@@ -1922,50 +1030,108 @@
       };
     }
 
+    function messagePreview(msg) {
+      if (msg.media?.length && msg.texto) return `${msg.texto} (${msg.media.length} anexo)`;
+      if (msg.media?.length) return `${msg.media.length} anexo`;
+      return msg.texto || "";
+    }
+
     function renderRooms() {
       const q = e.search.value.trim().toLowerCase();
-      const list = salas.filter(s => `${s.nome} ${s.descricao}`.toLowerCase().includes(q));
+      const list = salas.filter(sala => `${sala.nome} ${sala.descricao}`.toLowerCase().includes(q));
       e.count.textContent = `${salas.length} ${salas.length === 1 ? "sala" : "salas"}`;
       e.rooms.replaceChildren();
 
       if (!list.length) {
-        e.rooms.innerHTML = `<div style="padding:32px 14px;text-align:center;color:#8e8e93">Nenhuma sala encontrada.</div>`;
+        const empty = document.createElement("div");
+        empty.className = "emptyHistory";
+        empty.textContent = "Nenhuma sala encontrada.";
+        e.rooms.append(empty);
         return;
       }
 
       for (const sala of list) {
         const msgs = roomMessages(sala.id);
         const last = msgs[msgs.length - 1];
-        const ok = isUnlocked(sala.id);
+        const unlocked = isUnlocked(sala.id);
+
         const btn = document.createElement("button");
-        btn.className = `room${currentRoomId === sala.id ? " active" : ""}`;
         btn.type = "button";
-        btn.innerHTML = `<span class="avatar">${initials(sala.nome)}</span><span><span class="roomName"></span><span class="roomPrev"></span></span><span class="lock">${ok ? "aberta" : "senha"}</span>`;
-        btn.querySelector(".roomName").textContent = sala.nome;
-        btn.querySelector(".roomPrev").textContent = ok ? (last ? `${last.usuario}: ${messagePreview(last)}` : "Nenhuma mensagem ainda") : (sala.descricao || "Toque para informar a senha");
+        btn.className = `room${currentRoomId === sala.id ? " active" : ""}`;
+
+        const avatar = document.createElement("span");
+        avatar.className = "avatar";
+        avatar.textContent = initials(sala.nome);
+
+        const body = document.createElement("span");
+        const name = document.createElement("span");
+        name.className = "roomName";
+        name.textContent = sala.nome;
+        const prev = document.createElement("span");
+        prev.className = "roomPreview";
+        prev.textContent = unlocked ? (last ? `${last.usuario}: ${messagePreview(last)}` : "Nenhuma mensagem ainda") : (sala.descricao || "Toque para entrar");
+        body.append(name, prev);
+
+        const badge = document.createElement("span");
+        badge.className = "roomBadge";
+        badge.textContent = unlocked ? "aberta" : "senha";
+
+        btn.append(avatar, body, badge);
         btn.onclick = () => selectRoom(sala.id);
         e.rooms.append(btn);
       }
     }
 
-    function renderMessages(options = {}) {
+    function createMediaElement(item) {
+      const link = document.createElement("a");
+      link.href = item.url;
+      link.target = "_blank";
+      link.rel = "noopener";
+
+      const media = document.createElement(item.type === "video" ? "video" : "img");
+      media.className = "mediaItem";
+      media.src = item.url;
+      if (item.type === "video") {
+        media.controls = true;
+        media.playsInline = true;
+        media.preload = "metadata";
+      } else {
+        media.alt = item.name || "Imagem";
+        media.loading = "lazy";
+      }
+      link.append(media);
+      return link;
+    }
+
+    function messagesKey(id) {
+      return roomMessages(id).map(msg => `${msg.id}|${msg.usuario}|${msg.texto}|${msg.criado_em}|${msg.media.length}`).join(";");
+    }
+
+    function renderMessages(force = false) {
       const sala = roomById(currentRoomId);
       if (!sala) return;
 
       const key = messagesKey(sala.id);
-      if (!options.force && renderedRoomId === sala.id && renderedMessagesKey === key) return;
+      if (!force && renderedRoomId === sala.id && renderedKey === key) return;
 
       const msgs = roomMessages(sala.id);
-      const user = getUser();
-      const wasNearBottom = options.scrollToBottom || isNearMessagesBottom();
-      const previousBottom = e.messages.scrollHeight - e.messages.scrollTop;
+      const user = getUser() || "Visitante";
+      const nearBottom = e.messages.scrollHeight - e.messages.scrollTop - e.messages.clientHeight < 120;
 
       e.messages.replaceChildren();
 
       if (!msgs.length) {
-        e.messages.innerHTML = `<div class="welcome"><div class="avatar" style="width:76px;height:76px;margin:0 auto 12px">${initials(sala.nome)}</div><strong>${sala.nome}</strong><p>${sala.descricao || "Envie a primeira mensagem."}</p></div>`;
+        const welcome = document.createElement("div");
+        welcome.className = "welcome";
+        welcome.innerHTML = `<div class="avatar" style="width:76px;height:76px;margin:0 auto 12px">${initials(sala.nome)}</div>`;
+        const strong = document.createElement("strong");
+        strong.textContent = sala.nome;
+        const p = document.createElement("p");
+        p.textContent = sala.descricao || "Envie a primeira mensagem.";
+        welcome.append(strong, p);
+        e.messages.append(welcome);
         renderedRoomId = sala.id;
-        renderedMessagesKey = key;
+        renderedKey = key;
         return;
       }
 
@@ -1975,202 +1141,37 @@
         const bubble = document.createElement("div");
         bubble.className = "bubble";
 
-        if (msg.media?.length) {
-          bubble.classList.add("hasMedia");
+        if (msg.media.length) {
           const stack = document.createElement("div");
           stack.className = "mediaStack";
-          for (const item of msg.media) stack.append(createMediaElement(item));
+          msg.media.forEach(item => stack.append(createMediaElement(item)));
           bubble.append(stack);
+        }
 
-          if (msg.texto) {
-            const caption = document.createElement("div");
-            caption.className = "mediaCaption";
-            caption.textContent = msg.texto;
-            bubble.append(caption);
-          }
-        } else {
-          bubble.textContent = msg.texto;
+        if (msg.texto) {
+          const text = document.createElement("div");
+          text.textContent = msg.texto;
+          bubble.append(text);
         }
 
         const meta = document.createElement("span");
         meta.className = "meta";
-        meta.textContent = `${msg.usuario} · ${new Date(msg.criado_em).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"})}`;
+        meta.textContent = `${msg.usuario} - ${new Date(msg.criado_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
         bubble.append(meta);
         row.append(bubble);
         e.messages.append(row);
       }
 
       renderedRoomId = sala.id;
-      renderedMessagesKey = key;
-
+      renderedKey = key;
       requestAnimationFrame(() => {
-        if (options.scrollToBottom || wasNearBottom) {
-          e.messages.scrollTop = e.messages.scrollHeight;
-          return;
-        }
-
-        e.messages.scrollTop = Math.max(0, e.messages.scrollHeight - previousBottom);
+        if (nearBottom || force) e.messages.scrollTop = e.messages.scrollHeight;
       });
     }
 
-    function formatHistoryDate(value) {
-      const date = new Date(value);
-      if (Number.isNaN(date.getTime())) return String(value || "");
-      return date.toLocaleString([], { dateStyle: "short", timeStyle: "short" });
-    }
-
-    function normalizeLocationHistory(row) {
-      const latitude = Number(row.latitude);
-      const longitude = Number(row.longitude);
-      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
-
-      return {
-        id: row.id,
-        mensagem_id: row.mensagem_id,
-        sala_nome: row.sala_nome || row.nome_sala || "Sala",
-        usuario: row.usuario || "Visitante",
-        latitude,
-        longitude,
-        accuracy: Number(row.accuracy || row.precisao || 0),
-        criado_em: row.criado_em || row.created_at || "",
-        texto: String(row.texto || row.mensagem || "").trim()
-      };
-    }
-
-    function renderLocationHistory(rows) {
-      const items = (rows || []).map(normalizeLocationHistory).filter(Boolean);
-      e.adminHistory.hidden = false;
-      e.adminHistory.replaceChildren();
-
-      if (!items.length) {
-        const empty = document.createElement("div");
-        empty.className = "emptyHistory";
-        empty.textContent = "Nenhuma localizacao salva ainda.";
-        e.adminHistory.append(empty);
-        return;
-      }
-
-      const list = document.createElement("div");
-      list.className = "historyList";
-
-      for (const item of items) {
-        const row = document.createElement("div");
-        row.className = "historyItem";
-
-        const info = document.createElement("div");
-        const title = document.createElement("strong");
-        title.textContent = `${item.usuario} · ${item.sala_nome}`;
-
-        const coords = `${item.latitude.toFixed(5)}, ${item.longitude.toFixed(5)}`;
-        const accuracy = item.accuracy ? ` · ±${item.accuracy}m` : "";
-        const meta = document.createElement("span");
-        meta.className = "historyMeta";
-        meta.textContent = `${formatHistoryDate(item.criado_em)} · ${coords}${accuracy}`;
-
-        info.append(title, meta);
-
-        if (item.texto) {
-          const text = document.createElement("span");
-          text.className = "historyText";
-          text.textContent = item.texto.slice(0, 140);
-          info.append(text);
-        }
-
-        const link = document.createElement("a");
-        link.className = "mapLink";
-        link.href = `https://www.google.com/maps?q=${item.latitude},${item.longitude}`;
-        link.target = "_blank";
-        link.rel = "noopener";
-        link.textContent = "Abrir mapa";
-
-        row.append(info, link);
-        list.append(row);
-      }
-
-      e.adminHistory.append(list);
-    }
-
-    function adminHistoryError(err) {
-      const msg = String(err?.message || err || "");
-      if (/function|schema cache|not found|does not exist|404/i.test(msg)) {
-        return "Historico ainda nao configurado. No Supabase, abra SQL Editor > New Query, cole o SQL de localizacao e clique em Run.";
-      }
-      if (/senha admin incorreta|invalid authorization|28000/i.test(msg)) return "Senha admin incorreta.";
-      return msg || "Erro ao carregar historico.";
-    }
-
-    async function loadLocationHistory(adminPassword) {
-      const result = await supabaseClient.rpc(LOCATION_HISTORY_RPC, {
-        p_admin_senha: adminPassword,
-        p_limite: 200
-      });
-
-      if (result.error) throw result.error;
-      renderLocationHistory(result.data || []);
-    }
-
-    async function insertSala(sala) {
-      const payload = { nome: sala.nome, senha: sala.senha };
-      if (sala.id) payload.id = sala.id;
-      if (salasHasDescricao) payload.descricao = sala.descricao || null;
-      let r = await supabaseClient.from("salas").insert([payload]).select("*").single();
-      if (r.error && missingColumn(r.error, "descricao")) {
-        salasHasDescricao = false;
-        delete payload.descricao;
-        r = await supabaseClient.from("salas").insert([payload]).select("*").single();
-      }
-      if (r.error) throw r.error;
-      return normalizeSala(r.data);
-    }
-
-    async function updateSala(sala, senha) {
-      const payload = { nome: sala.nome };
-      if (senha) payload.senha = senha;
-      if (salasHasDescricao) payload.descricao = sala.descricao || null;
-      let r = await supabaseClient.from("salas").update(payload).eq("id", sala.id);
-      if (r.error && missingColumn(r.error, "descricao")) {
-        salasHasDescricao = false;
-        delete payload.descricao;
-        r = await supabaseClient.from("salas").update(payload).eq("id", sala.id);
-      }
-      if (r.error) throw r.error;
-    }
-
-    async function loadData() {
-      if (loading) return;
-      loading = true;
-
-      try {
-        await cleanupExpiredData();
-
-        const sr = await supabaseClient.from("salas").select("*");
-        if (sr.error) throw sr.error;
-
-        if (!sr.data.length) {
-          await insertSala({ nome: "Geral", descricao: "Conversa principal", senha: "a1234" });
-          return;
-        }
-
-        const mr = await supabaseClient.from("mensagens").select("*");
-        if (mr.error) throw mr.error;
-
-        salas = sr.data.map(normalizeSala);
-        mensagens = (mr.data || [])
-          .map(normalizeMsg)
-          .filter(m => salas.some(s => s.id === m.sala_id))
-          .sort((a, b) => String(a.criado_em).localeCompare(String(b.criado_em)));
-
-        e.status.textContent = "Conectado ao Supabase";
-        renderRooms();
-        if (currentRoomId && roomById(currentRoomId)) renderMessages();
-        if (currentRoomId && !roomById(currentRoomId)) closeChat();
-      } catch (err) {
-        console.error(err);
-        e.status.textContent = "Erro no Supabase";
-        toast(`Erro Supabase: ${err.message || err}`);
-      } finally {
-        loading = false;
-      }
+    function resizeInput() {
+      e.msgInput.style.height = "auto";
+      e.msgInput.style.height = `${Math.min(Math.max(e.msgInput.scrollHeight, 42), 130)}px`;
     }
 
     function openModal(modal) {
@@ -2196,6 +1197,21 @@
       setTimeout(() => e.adminPass.focus(), 30);
     }
 
+    function openRoomModal(id = null) {
+      editingRoomId = id;
+      const sala = roomById(id);
+      e.roomModalTitle.textContent = sala ? "Editar sala" : "Criar sala";
+      e.roomName.value = sala?.nome || "";
+      e.roomDesc.value = sala?.descricao || "";
+      e.roomPass.value = "";
+      e.roomPass.required = !sala;
+      e.roomPass.placeholder = sala ? "Deixe em branco para manter" : "Senha para entrar";
+      e.clearMessages.hidden = !sala;
+      e.roomError.textContent = "";
+      openModal(e.roomModal);
+      setTimeout(() => e.roomName.focus(), 30);
+    }
+
     function selectRoom(id) {
       const sala = roomById(id);
       if (!sala) return;
@@ -2219,7 +1235,7 @@
       e.roomTitle.textContent = sala.nome;
       e.roomAvatar.textContent = initials(sala.nome);
       renderRooms();
-      renderMessages({ force: true, scrollToBottom: true });
+      renderMessages(true);
       resizeInput();
       setTimeout(() => e.msgInput.focus(), 30);
     }
@@ -2227,37 +1243,285 @@
     function closeChat() {
       currentRoomId = null;
       renderedRoomId = null;
-      renderedMessagesKey = "";
+      renderedKey = "";
       e.chat.hidden = true;
       e.empty.hidden = false;
       e.app.classList.remove("open");
       renderRooms();
     }
 
-    function openRoomModal(id = null) {
-      editingRoomId = id;
-      const sala = roomById(id);
-      e.roomModalTitle.textContent = sala ? "Editar sala" : "Criar sala";
-      e.roomName.value = sala?.nome || "";
-      e.roomDesc.value = sala?.descricao || "";
-      e.roomPass.value = "";
-      e.roomPass.required = !sala;
-      e.roomPass.placeholder = sala ? "Deixe em branco para manter" : "Senha para entrar na sala";
-      e.clearMessages.hidden = !sala;
-      e.roomError.textContent = "";
-      openModal(e.roomModal);
-      setTimeout(() => e.roomName.focus(), 30);
+    async function insertSala(sala) {
+      const payload = { nome: sala.nome, senha: sala.senha };
+      if (salasHasDescricao) payload.descricao = sala.descricao || null;
+      let result = await supabaseClient.from("salas").insert([payload]).select("*").single();
+      if (result.error && missingColumn(result.error, "descricao")) {
+        salasHasDescricao = false;
+        delete payload.descricao;
+        result = await supabaseClient.from("salas").insert([payload]).select("*").single();
+      }
+      if (result.error) throw result.error;
+      return normalizeSala(result.data);
     }
 
-    function resizeInput() {
-      e.msgInput.style.height = "auto";
-      const isMobile = window.matchMedia("(max-width: 760px)").matches;
-      const compactHeight = window.matchMedia("(max-height: 620px)").matches;
-      const minHeight = isMobile ? 40 : 40;
-      const maxHeight = isMobile ? (compactHeight ? 78 : 98) : 116;
-      const next = Math.min(e.msgInput.scrollHeight, maxHeight);
-      e.msgInput.style.height = `${Math.max(next, minHeight)}px`;
-      e.msgInput.style.overflowY = e.msgInput.scrollHeight > next ? "auto" : "hidden";
+    async function updateSala(sala, senha) {
+      const payload = { nome: sala.nome };
+      if (senha) payload.senha = senha;
+      if (salasHasDescricao) payload.descricao = sala.descricao || null;
+      let result = await supabaseClient.from("salas").update(payload).eq("id", sala.id);
+      if (result.error && missingColumn(result.error, "descricao")) {
+        salasHasDescricao = false;
+        delete payload.descricao;
+        result = await supabaseClient.from("salas").update(payload).eq("id", sala.id);
+      }
+      if (result.error) throw result.error;
+    }
+
+    async function loadData() {
+      if (loading) return;
+      loading = true;
+      try {
+        const sr = await supabaseClient.from("salas").select("*").order("criado_em", { ascending: true });
+        if (sr.error) throw sr.error;
+
+        if (!sr.data.length) {
+          await insertSala({ nome: "Geral", senha: "a1234", descricao: "Conversa principal" });
+          loading = false;
+          await loadData();
+          return;
+        }
+
+        const mr = await supabaseClient.from("mensagens").select("*").order("criado_em", { ascending: true });
+        if (mr.error) throw mr.error;
+
+        salas = sr.data.map(normalizeSala);
+        const ids = new Set(salas.map(sala => sala.id));
+        mensagens = (mr.data || []).map(normalizeMsg).filter(msg => ids.has(msg.sala_id));
+
+        e.status.textContent = "Conectado ao Supabase";
+        renderRooms();
+        if (currentRoomId && roomById(currentRoomId)) renderMessages();
+        if (currentRoomId && !roomById(currentRoomId)) closeChat();
+      } catch (err) {
+        console.error(err);
+        e.status.textContent = "Erro no Supabase";
+        toast(err.message || "Erro ao carregar dados.");
+      } finally {
+        loading = false;
+      }
+    }
+
+    function getOptionalLocation() {
+      if (!hasGeoConsent() || !navigator.geolocation) return Promise.resolve(null);
+      return new Promise(resolve => {
+        navigator.geolocation.getCurrentPosition(
+          position => resolve({
+            latitude: Number(position.coords.latitude.toFixed(6)),
+            longitude: Number(position.coords.longitude.toFixed(6)),
+            accuracy: Math.round(position.coords.accuracy || 0)
+          }),
+          () => resolve(null),
+          { enableHighAccuracy: false, timeout: 6000, maximumAge: 10 * 60 * 1000 }
+        );
+      });
+    }
+
+    async function saveMessageLocation(messageId, roomId) {
+      if (!messageId) return;
+      const location = await getOptionalLocation();
+      if (!location) return;
+
+      const args = {
+        p_mensagem_id: messageId,
+        p_sala_id: roomId,
+        p_usuario: getUser() || "Visitante",
+        p_latitude: location.latitude,
+        p_longitude: location.longitude,
+        p_accuracy: location.accuracy,
+        p_timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+        p_language: navigator.language || "",
+        p_user_agent: navigator.userAgent || ""
+      };
+
+      let result = await supabaseClient.rpc(LOCATION_SAVE_RPC, args);
+      if (result.error && functionMissing(result.error)) result = await supabaseClient.rpc(LOCATION_SAVE_RPC_OLD, args);
+      if (result.error) console.warn("Localizacao nao salva.", result.error);
+    }
+
+    function storagePathFor(file) {
+      return `${cleanFileName(currentRoomId || "geral")}/${Date.now()}-${randomId()}-${cleanFileName(file.name)}`;
+    }
+
+    async function uploadPendingMedia() {
+      const uploaded = [];
+      for (const item of pendingMedia) {
+        if (item.file.size > MAX_MEDIA_BYTES) throw new Error(`${item.file.name} tem ${formatBytes(item.file.size)}. Limite: ${formatBytes(MAX_MEDIA_BYTES)}.`);
+        const path = storagePathFor(item.file);
+        const result = await supabaseClient.storage.from(MEDIA_BUCKET).upload(path, item.file, {
+          cacheControl: "3600",
+          contentType: item.file.type || "application/octet-stream",
+          upsert: false
+        });
+        if (result.error) throw result.error;
+        const url = supabaseClient.storage.from(MEDIA_BUCKET).getPublicUrl(path).data.publicUrl;
+        uploaded.push({
+          type: item.file.type.startsWith("video/") ? "video" : "image",
+          url,
+          path,
+          name: item.file.name,
+          mime: item.file.type,
+          size: item.file.size
+        });
+      }
+      return uploaded;
+    }
+
+    function renderPendingMedia() {
+      e.attachmentTray.replaceChildren();
+      e.attachmentTray.hidden = pendingMedia.length === 0;
+      for (const item of pendingMedia) {
+        const wrap = document.createElement("span");
+        wrap.className = "pending";
+        const text = document.createElement("span");
+        text.textContent = `${item.file.name} (${formatBytes(item.file.size)})`;
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.textContent = "x";
+        remove.onclick = () => {
+          pendingMedia = pendingMedia.filter(file => file.id !== item.id);
+          renderPendingMedia();
+        };
+        wrap.append(text, remove);
+        e.attachmentTray.append(wrap);
+      }
+    }
+
+    function clearPendingMedia() {
+      pendingMedia = [];
+      e.mediaInput.value = "";
+      renderPendingMedia();
+    }
+
+    function mediaPathsFromRows(rows) {
+      const paths = [];
+      for (const row of rows || []) {
+        const content = parseMessageContent(row.texto || row.text || "");
+        for (const item of content.media) if (item.path) paths.push(item.path);
+      }
+      return [...new Set(paths)];
+    }
+
+    async function removeMediaFromRows(rows) {
+      const paths = mediaPathsFromRows(rows);
+      for (let i = 0; i < paths.length; i += 100) {
+        const chunk = paths.slice(i, i + 100);
+        if (chunk.length) {
+          const result = await supabaseClient.storage.from(MEDIA_BUCKET).remove(chunk);
+          if (result.error) throw result.error;
+        }
+      }
+    }
+
+    function formatHistoryDate(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return String(value || "");
+      return date.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+    }
+
+    function normalizeLocationHistory(row) {
+      const latitude = Number(row.latitude);
+      const longitude = Number(row.longitude);
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+      return {
+        id: row.id,
+        sala_nome: row.sala_nome || "Sala",
+        usuario: row.usuario || "Visitante",
+        latitude,
+        longitude,
+        accuracy: Number(row.accuracy || 0),
+        timezone: String(row.timezone || "").trim(),
+        language: String(row.language || "").trim(),
+        criado_em: row.criado_em || "",
+        texto: String(row.texto || "").trim()
+      };
+    }
+
+    function renderLocationHistory(rows) {
+      const items = (rows || []).map(normalizeLocationHistory).filter(Boolean);
+      e.adminHistory.hidden = false;
+      e.adminHistory.replaceChildren();
+
+      if (!items.length) {
+        const empty = document.createElement("div");
+        empty.className = "emptyHistory";
+        empty.textContent = "Nenhuma localizacao salva ainda. Envie uma mensagem com a permissao de localizacao marcada e aceite a permissao do navegador.";
+        e.adminHistory.append(empty);
+        return;
+      }
+
+      const summary = document.createElement("div");
+      summary.className = "historySummary";
+      summary.textContent = `${items.length} ${items.length === 1 ? "localizacao salva" : "localizacoes salvas"}`;
+
+      const list = document.createElement("div");
+      list.className = "historyList";
+
+      for (const item of items) {
+        const row = document.createElement("div");
+        row.className = "historyItem";
+
+        const info = document.createElement("div");
+        const title = document.createElement("strong");
+        title.textContent = `${item.usuario} - ${item.sala_nome}`;
+        const coords = `${item.latitude.toFixed(6)}, ${item.longitude.toFixed(6)}`;
+        const accuracy = item.accuracy ? ` - +/-${item.accuracy}m` : "";
+        const meta = document.createElement("span");
+        meta.className = "historyMeta";
+        meta.textContent = `${formatHistoryDate(item.criado_em)} - ${coords}${accuracy}`;
+        info.append(title, meta);
+
+        const device = [item.timezone, item.language].filter(Boolean).join(" - ");
+        if (device) {
+          const extra = document.createElement("span");
+          extra.className = "historyMeta";
+          extra.textContent = device;
+          info.append(extra);
+        }
+
+        if (item.texto) {
+          const text = document.createElement("span");
+          text.className = "historyText";
+          text.textContent = item.texto.slice(0, 180);
+          info.append(text);
+        }
+
+        const link = document.createElement("a");
+        link.className = "mapLink";
+        link.href = `https://www.google.com/maps?q=${item.latitude},${item.longitude}`;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.textContent = "Abrir mapa";
+
+        row.append(info, link);
+        list.append(row);
+      }
+
+      e.adminHistory.append(summary, list);
+    }
+
+    function adminHistoryError(err) {
+      const msg = String(err?.message || err || "");
+      if (functionMissing(msg)) return "A funcao de localizacao ainda nao existe no Supabase. Rode o SQL completo de docs/hchat-sql.txt e recarregue a pagina.";
+      if (/senha admin incorreta|invalid authorization|28000/i.test(msg)) return "Senha admin incorreta.";
+      if (/permission|policy|rls|denied|forbidden/i.test(msg)) return "Sem permissao para ler o historico. Rode novamente o SQL completo de docs/hchat-sql.txt.";
+      return msg || "Erro ao carregar historico.";
+    }
+
+    async function loadLocationHistory(password) {
+      const args = { p_admin_senha: password, p_limite: 300 };
+      let result = await supabaseClient.rpc(LOCATION_HISTORY_RPC, args);
+      if (result.error && functionMissing(result.error)) result = await supabaseClient.rpc(LOCATION_HISTORY_RPC_OLD, args);
+      if (result.error) throw result.error;
+      renderLocationHistory(result.data || []);
     }
 
     $("newRoom").onclick = () => openRoomModal();
@@ -2266,20 +1530,15 @@
     $("editRoom").onclick = () => currentRoomId && openRoomModal(currentRoomId);
     $("adminButton").onclick = openAdminModal;
     e.search.oninput = renderRooms;
-    e.locationConsent.onchange = () => {
-      setGeoConsent(e.locationConsent.checked);
-      if (e.locationConsent.checked) primeLocationCapture();
+    e.msgInput.oninput = resizeInput;
+
+    e.modalBg.onclick = (event) => {
+      if (event.target === e.modalBg || event.target.closest("[data-close]")) closeModal();
     };
 
-    e.modalBg.onclick = (ev) => {
-      if (ev.target === e.modalBg || ev.target.closest("[data-close]")) closeModal();
-    };
-
-    document.addEventListener("keydown", ev => {
-      if (ev.key === "Escape") closeModal();
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") closeModal();
     });
-
-    window.addEventListener("resize", resizeInput);
 
     e.logout.onclick = () => {
       localStorage.removeItem(LOGIN_KEY);
@@ -2287,22 +1546,19 @@
       localStorage.removeItem(UNLOCK_KEY);
       setUser("");
       closeChat();
-      toast("Sessão encerrada.");
+      toast("Sessao encerrada.");
     };
 
-    e.unlockForm.onsubmit = (ev) => {
-      ev.preventDefault();
+    e.unlockForm.onsubmit = (event) => {
+      event.preventDefault();
       if (!roomToUnlock) return;
-
       if (e.passInput.value !== roomToUnlock.senha) {
         e.unlockError.textContent = "Senha da sala incorreta.";
         e.passInput.select();
         return;
       }
-
       setUser(e.nameInput.value.trim());
       setGeoConsent(e.locationConsent.checked);
-      if (e.locationConsent.checked) primeLocationCapture();
       localStorage.setItem(LOGIN_KEY, String(Date.now()));
       unlockRoom(roomToUnlock.id);
       const id = roomToUnlock.id;
@@ -2311,35 +1567,18 @@
       selectRoom(id);
     };
 
-    e.adminForm.onsubmit = async (ev) => {
-      ev.preventDefault();
-      const password = e.adminPass.value;
-      if (!password) return;
-
-      e.adminError.textContent = "";
-      e.adminHistory.hidden = true;
-
-      try {
-        await loadLocationHistory(password);
-      } catch (err) {
-        console.error(err);
-        e.adminError.textContent = adminHistoryError(err);
-      }
-    };
-
-    e.roomForm.onsubmit = async (ev) => {
-      ev.preventDefault();
+    e.roomForm.onsubmit = async (event) => {
+      event.preventDefault();
       const nome = e.roomName.value.trim();
       const descricao = e.roomDesc.value.trim();
       const senha = e.roomPass.value;
       if (!nome) return;
-
       e.roomError.textContent = "";
 
       try {
         if (editingRoomId) {
           const sala = roomById(editingRoomId);
-          await updateSala({...sala, nome, descricao}, senha);
+          await updateSala({ ...sala, nome, descricao }, senha);
           if (senha) lockRoom(sala.id);
           closeModal();
           await loadData();
@@ -2353,72 +1592,47 @@
           return;
         }
 
-        const created = await insertSala({nome, descricao, senha});
+        const created = await insertSala({ nome, descricao, senha });
         closeModal();
         await loadData();
         toast("Sala criada.");
+        unlockRoom(created.id);
         selectRoom(created.id);
       } catch (err) {
         console.error(err);
-        e.roomError.textContent = err.message || "Erro ao salvar.";
+        e.roomError.textContent = err.message || "Erro ao salvar sala.";
       }
     };
 
     e.clearMessages.onclick = async () => {
       const sala = roomById(editingRoomId);
-      if (!sala || !confirm(`Limpar somente o historico de conversas da sala "${sala.nome}"? A sala vai continuar existindo.`)) return;
-
+      if (!sala || !confirm(`Limpar somente o historico da sala "${sala.nome}"? A sala vai continuar existindo.`)) return;
       try {
         const rows = await supabaseClient.from("mensagens").select("*").eq("sala_id", sala.id);
         if (rows.error) throw rows.error;
         await removeMediaFromRows(rows.data || []);
-
-        const r = await supabaseClient.from("mensagens").delete().eq("sala_id", sala.id);
-        if (r.error) throw r.error;
+        const result = await supabaseClient.from("mensagens").delete().eq("sala_id", sala.id);
+        if (result.error) throw result.error;
         closeModal();
         await loadData();
         toast("Historico limpo. A sala foi mantida.");
       } catch (err) {
         console.error(err);
-        e.roomError.textContent = err.message || "Erro ao limpar.";
+        e.roomError.textContent = err.message || "Erro ao limpar historico.";
       }
     };
 
-    e.msgForm.onsubmit = async (ev) => {
-      ev.preventDefault();
-      const text = e.msgInput.value.trim();
-      const files = [...pendingMedia];
-      if (!currentRoomId || (!text && !files.length)) return;
-
-      setComposerBusy(true);
-      let uploaded = [];
-
+    e.adminForm.onsubmit = async (event) => {
+      event.preventDefault();
+      const password = e.adminPass.value;
+      if (!password) return;
+      e.adminError.textContent = "";
+      e.adminHistory.hidden = true;
       try {
-        if (files.length) {
-          toast(`Subindo ${files.length} ${files.length === 1 ? "midia" : "midias"}...`);
-          uploaded = await uploadMediaFiles(files);
-        }
-
-        const body = uploaded.length ? buildMediaPayload(text, uploaded) : text;
-        const r = await supabaseClient
-          .from("mensagens")
-          .insert([{sala_id: currentRoomId, usuario: getUser() || "Visitante", texto: body}])
-          .select("id")
-          .single();
-        if (r.error) throw r.error;
-        await saveMessageMeta(r.data?.id, currentRoomId);
-        e.msgInput.value = "";
-        clearPendingMedia();
-        resizeInput();
-        await loadData();
-        e.messages.scrollTop = e.messages.scrollHeight;
-        e.msgInput.focus();
+        await loadLocationHistory(password);
       } catch (err) {
         console.error(err);
-        if (uploaded.length) await removeUploadedMedia(uploaded).catch(() => {});
-        toast(err.message || "Erro ao enviar mensagem.");
-      } finally {
-        setComposerBusy(false);
+        e.adminError.textContent = adminHistoryError(err);
       }
     };
 
@@ -2428,23 +1642,69 @@
     };
 
     e.mediaInput.onchange = () => {
-      addPendingFiles(e.mediaInput.files);
+      const files = Array.from(e.mediaInput.files || []);
+      for (const file of files) {
+        if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+          toast("Apenas imagens e videos sao aceitos.");
+          continue;
+        }
+        pendingMedia.push({ id: randomId(), file });
+      }
+      renderPendingMedia();
       e.mediaInput.value = "";
     };
 
-    e.msgInput.oninput = resizeInput;
-    e.msgInput.onkeydown = (ev) => {
-      if (ev.key === "Enter" && !ev.shiftKey && !ev.isComposing) {
-        ev.preventDefault();
+    e.msgForm.onsubmit = async (event) => {
+      event.preventDefault();
+      const text = e.msgInput.value.trim();
+      if (!currentRoomId || (!text && !pendingMedia.length)) return;
+      e.msgInput.disabled = true;
+      e.sendMessage.disabled = true;
+      e.mediaButton.disabled = true;
+
+      let uploaded = [];
+      try {
+        if (pendingMedia.length) {
+          toast(`Subindo ${pendingMedia.length} ${pendingMedia.length === 1 ? "anexo" : "anexos"}...`);
+          uploaded = await uploadPendingMedia();
+        }
+
+        const body = uploaded.length ? buildMediaPayload(text, uploaded) : text;
+        const result = await supabaseClient
+          .from("mensagens")
+          .insert([{ sala_id: currentRoomId, usuario: getUser() || "Visitante", texto: body }])
+          .select("id")
+          .single();
+
+        if (result.error) throw result.error;
+        e.msgInput.value = "";
+        clearPendingMedia();
+        resizeInput();
+        await saveMessageLocation(result.data?.id, currentRoomId);
+        await loadData();
+        e.messages.scrollTop = e.messages.scrollHeight;
+      } catch (err) {
+        console.error(err);
+        if (uploaded.length) await supabaseClient.storage.from(MEDIA_BUCKET).remove(uploaded.map(item => item.path)).catch(() => {});
+        toast(err.message || "Erro ao enviar mensagem.");
+      } finally {
+        e.msgInput.disabled = false;
+        e.sendMessage.disabled = false;
+        e.mediaButton.disabled = false;
+        e.msgInput.focus();
+      }
+    };
+
+    e.msgInput.onkeydown = (event) => {
+      if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+        event.preventDefault();
         e.msgForm.requestSubmit();
       }
     };
 
-    ensureDefaultGeoConsent();
     setUser(getUser());
-    if (Date.now() - Number(localStorage.getItem(LOGIN_KEY) || 0) > TTL) localStorage.removeItem(UNLOCK_KEY);
+    if (Date.now() - Number(localStorage.getItem(LOGIN_KEY) || 0) > LOGIN_TTL) localStorage.removeItem(UNLOCK_KEY);
     resizeInput();
-    primeLocationCapture();
     loadData();
     setInterval(loadData, POLL_MS);
   </script>
