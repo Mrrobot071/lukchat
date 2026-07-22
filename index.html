@@ -689,7 +689,7 @@
 
     .actions {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 9px;
     }
 
@@ -1120,8 +1120,7 @@
         <label>Senha da sala<input id="roomPass" type="password" minlength="3" maxlength="128"></label>
         <div class="error" id="roomError"></div>
         <div class="actions">
-          <button class="danger" id="clearMessages" type="button">Limpar mensagens</button>
-          <button class="danger solid" id="deleteRoom" type="button">Apagar sala</button>
+          <button class="danger" id="clearMessages" type="button">Limpar historico</button>
           <button class="primary" type="submit">Salvar</button>
         </div>
       </form>
@@ -1207,7 +1206,6 @@
       roomPass: $("roomPass"),
       roomError: $("roomError"),
       clearMessages: $("clearMessages"),
-      deleteRoom: $("deleteRoom"),
       adminModal: $("adminModal"),
       adminForm: $("adminForm"),
       adminPass: $("adminPass"),
@@ -1709,26 +1707,6 @@
       return { rows: [], column: null };
     }
 
-    async function cleanupExpiredRooms(cutoffIso) {
-      const expired = await selectExpiredRows("salas", cutoffIso, "id");
-      if (!expired.column || !expired.rows.length) return 0;
-
-      const messagesResult = await supabaseClient.from("mensagens").select("sala_id");
-      if (messagesResult.error) throw messagesResult.error;
-
-      const roomsWithMessages = new Set((messagesResult.data || []).map(row => row.sala_id || row.room_id));
-      const expiredEmptyIds = expired.rows
-        .map(row => row.id)
-        .filter(id => id && !roomsWithMessages.has(id));
-
-      if (!expiredEmptyIds.length) return 0;
-
-      const deleteResult = await supabaseClient.from("salas").delete().in("id", expiredEmptyIds);
-      if (deleteResult.error) throw deleteResult.error;
-      if (currentRoomId && expiredEmptyIds.includes(currentRoomId)) closeChat();
-      return expiredEmptyIds.length;
-    }
-
     async function cleanupExpiredData(force = false) {
       const now = Date.now();
       if (cleanupRunning || (!force && now - lastCleanupAt < CLEANUP_EVERY_MS)) return;
@@ -1741,7 +1719,6 @@
         const expired = await selectExpiredRows("mensagens", cutoffIso);
         let removedMedia = 0;
         let removedMessages = 0;
-        let removedRooms = 0;
 
         if (expired.column && expired.rows.length) {
           removedMedia = await removeMediaFromRows(expired.rows);
@@ -1750,9 +1727,7 @@
           removedMessages = expired.rows.length;
         }
 
-        removedRooms = await cleanupExpiredRooms(cutoffIso);
-
-        if (removedMessages || removedMedia || removedRooms) {
+        if (removedMessages || removedMedia) {
           toast(`Limpeza 24h: ${removedMessages} mensagens, ${removedMedia} anexos removidos.`);
         }
       } catch (err) {
@@ -2118,7 +2093,7 @@
     function adminHistoryError(err) {
       const msg = String(err?.message || err || "");
       if (/function|schema cache|not found|does not exist|404/i.test(msg)) {
-        return "Historico ainda nao configurado. Rode o SQL atualizado em docs/hchat-sql.txt no Supabase.";
+        return "Historico ainda nao configurado. No Supabase, abra SQL Editor > New Query, cole o SQL de localizacao e clique em Run.";
       }
       if (/senha admin incorreta|invalid authorization|28000/i.test(msg)) return "Senha admin incorreta.";
       return msg || "Erro ao carregar historico.";
@@ -2269,7 +2244,6 @@
       e.roomPass.required = !sala;
       e.roomPass.placeholder = sala ? "Deixe em branco para manter" : "Senha para entrar na sala";
       e.clearMessages.hidden = !sala;
-      e.deleteRoom.hidden = !sala;
       e.roomError.textContent = "";
       openModal(e.roomModal);
       setTimeout(() => e.roomName.focus(), 30);
@@ -2392,7 +2366,7 @@
 
     e.clearMessages.onclick = async () => {
       const sala = roomById(editingRoomId);
-      if (!sala || !confirm("Apagar todas as mensagens desta sala?")) return;
+      if (!sala || !confirm(`Limpar somente o historico de conversas da sala "${sala.nome}"? A sala vai continuar existindo.`)) return;
 
       try {
         const rows = await supabaseClient.from("mensagens").select("*").eq("sala_id", sala.id);
@@ -2403,34 +2377,10 @@
         if (r.error) throw r.error;
         closeModal();
         await loadData();
-        toast("Mensagens apagadas.");
+        toast("Historico limpo. A sala foi mantida.");
       } catch (err) {
         console.error(err);
         e.roomError.textContent = err.message || "Erro ao limpar.";
-      }
-    };
-
-    e.deleteRoom.onclick = async () => {
-      const sala = roomById(editingRoomId);
-      if (!sala || !confirm(`Apagar a sala "${sala.nome}" e todas as mensagens?`)) return;
-
-      try {
-        const rows = await supabaseClient.from("mensagens").select("*").eq("sala_id", sala.id);
-        if (rows.error) throw rows.error;
-        await removeMediaFromRows(rows.data || []);
-
-        let r = await supabaseClient.from("mensagens").delete().eq("sala_id", sala.id);
-        if (r.error) throw r.error;
-        r = await supabaseClient.from("salas").delete().eq("id", sala.id);
-        if (r.error) throw r.error;
-        lockRoom(sala.id);
-        closeModal();
-        if (currentRoomId === sala.id) closeChat();
-        await loadData();
-        toast("Sala apagada.");
-      } catch (err) {
-        console.error(err);
-        e.roomError.textContent = err.message || "Erro ao apagar.";
       }
     };
 
